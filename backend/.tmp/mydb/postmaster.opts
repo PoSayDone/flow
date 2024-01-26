@@ -1,0 +1,1 @@
+/nix/store/hxpwfhslscfak9vh9ksxbzzpbkqlspgh-postgresql-15.5/bin/postgres "-D" ".tmp/mydb" "--unix_socket_directories=/home/posaydone/Documents/flow_db"
