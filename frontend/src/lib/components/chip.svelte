@@ -2,6 +2,7 @@
   import { addIcon } from "$lib/assets/Appicons";
   import Icon from "./icon.svelte";
   let active = false;
+  export let clickable = false;
 
   export let text = "Активный отдых";
   const handleClick = () => {
@@ -9,17 +10,23 @@
   };
 </script>
 
-<button class:active on:click={handleClick}
-  ><span>{text}</span><Icon
-    stroke_width={"1.5"}
-    size={"16"}
-    d={addIcon.d}
-    viewBox={addIcon.viewBox}
-  /></button
->
+{#if clickable}
+  <button class="chip clickable" class:active on:click={handleClick}
+    ><span>{text}</span><Icon
+      stroke_width={"1.5"}
+      size={"16"}
+      d={addIcon.d}
+      viewBox={addIcon.viewBox}
+    /></button
+  >
+{:else}
+  <div class="chip">
+    <span>{text}</span>
+  </div>
+{/if}
 
 <style lang="scss">
-  button {
+  .chip {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,6 +40,13 @@
     cursor: pointer;
     transition: all 0.1s ease-in-out;
 
+    span {
+      text-wrap: nowrap;
+    }
+
+  }
+
+  .chip.clickable {
     span {
       text-wrap: nowrap;
       margin-right: 10px;

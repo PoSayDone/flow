@@ -76,7 +76,7 @@ h1 {
   letter-spacing: -0.36px;
 }
 
-:global(h2) {
+h2 {
   font-family: "PP Pangram Sans Rounded";
   font-size: 18px;
   font-style: normal;
@@ -86,6 +86,7 @@ h1 {
 }
 
 button {
+  border: none;
   font-family: "PP Pangram Sans Rounded";
   font-size: 14px;
   font-style: normal;
@@ -99,7 +100,7 @@ div {
   font-family: "PP Pangram Sans Rounded";
   font-size: 14px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 120%; /* 16.8px */
   letter-spacing: -0.56px;
 }

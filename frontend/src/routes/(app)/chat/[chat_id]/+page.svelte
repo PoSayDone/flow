@@ -27,7 +27,7 @@
     <div class="right-block">
       <img
         class="avatar"
-        src="https://s3-alpha-sig.figma.com/img/023f/fdeb/e47da5ad29942101286011bd4ddc1251?Expires=1706486400&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=ofSpVq3VI5pACaCIjvgk1RFRdcrYGN6S2wsiQW-Nz55aQVZV9dr8MWXtQdVZpbJpeW8cejJ~qnO-9vQ7z~MNSLYsFdRmLQb~PMW927-GvgENXPCi29c~hfWIAfxKpFx9Bv1Bz--bRXPZUq1fZslBQxlzMNdPr23MixvVzlSAz1cVZVF~2z8lU9udRyUeaMtgTZJiKCCu~YAWNTM5PdRZyKr-jA3z3rBu7i~AUfY0j1uhI~0Pr1n8OK6F4Zyl00MeCv3RFG~FEUI608RDI3L-wUrCmCasjAc~BKJuvuDTfuNkWG7DyHKPCumTGwZ7ylPQ~fYGoCTUvjwDvGTjisD5Sw__"
+        src="https://media.istockphoto.com/id/1250295851/ru/%D1%84%D0%BE%D1%82%D0%BE/%D1%87%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D0%BA-%D1%81%D0%B5%D0%BB%D1%84%D0%B8-%D0%B2-%D0%BC%D0%B0%D1%88%D0%B8%D0%BD%D0%B5.jpg?s=612x612&w=0&k=20&c=t0Ic3-sIawn_mzT8BJ9LcWTYY7ty-kFv-eCRW2eb5F8="
         alt=""
       />
     </div>
@@ -57,7 +57,7 @@
     <div class="message to">Привет!</div>
   </div>
   <div class="message-input">
-    <input type="text" />
+    <textarea placeholder="Напишите сообщение..." />
     <button class="send" type="submit">
       <Icon
         viewBox={sendIcon.viewBox}
@@ -179,8 +179,21 @@
     min-height: 55px;
     align-items: center;
     margin: 10px 20px;
-    input {
+    textarea {
+      color: #000;
+      font-family: "PP Pangram Sans Rounded";
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 120%; /* 16.8px */
+      letter-spacing: -0.56px;
+      min-height: 20px;
+      margin: 0 19px;
+      border: none;
       flex: 1;
+    }
+    textarea::placeholder {
+      color: var(--Gray-Text, #aaa);
     }
   }
 

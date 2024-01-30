@@ -39,7 +39,7 @@ export const addIcon = {
 };
 
 export const backIcon = {
-  viewBox: "0 0 30 30",
+  viewBox: "0 0 32 30",
   d: ["m18.75 22.5-7.5-7.5 7.5-7.5"],
 }
 
