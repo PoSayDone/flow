@@ -30,7 +30,7 @@
   <div on:click|stopPropagation>
     <slot />
     <!-- svelte-ignore a11y-autofocus -->
-    <Button class="close-button" autofocus on:click={closeAnimation}>Готово</Button>
+    <Button class="close-button" autofocus on:click={closeAnimation}><h2>Готово</h2></Button>
   </div>
 </dialog>
 

@@ -1,5 +1,8 @@
 <script>
+	import Chip from './chip.svelte';
   import { status } from "$lib/stores";
+  import Icon from "$lib/components/icon.svelte";
+  import { backIcon } from "$lib/assets/Appicons";
 </script>
 
 <div class="container">
@@ -14,6 +17,13 @@
       </div>
       <input type="radio" id="active" value="active" bind:group={$status} />
     </label>
+    {#if $status == "active"}
+      <button class="from">Откуда <Icon d={backIcon.d} viewBox={backIcon.viewBox} color="#000000" size="24px"/></button>
+      <button class="to">Куда <Icon d={backIcon.d} viewBox={backIcon.viewBox} color="#000000" size="24px"/></button>
+      <div class="travel-purposes">
+        <Chip clickable={true}></Chip>
+      </div>
+    {/if}
     <label class="radio" class:active={$status == "inactive"}>
       <div class="rows">
         <label class="radio-title" for="inactive">Перерыв</label>
@@ -26,7 +36,7 @@
 
 <style lang="scss">
   h1 {
-    padding-bottom: 30px;
+    margin-bottom: 30px;
   }
 
   .container {
@@ -42,6 +52,42 @@
     flex-direction: column;
     gap: 5px;
     width: 100%;
+  }
+
+  .from {
+    margin-top: 5px;
+  }
+  .to {
+    margin-bottom: 5px;
+  }
+
+  .from, .to {
+    background-color: #f2f1f6;
+    width: 100%;
+    border: none;
+    border-radius: 20px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    :global(svg) {
+      transform: rotate(180deg);
+    }
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    border: 1px solid #D6D6D6;
+    border-radius: 100px;
+    background: none;
+    padding: 9px 18px;
   }
 
   .radio {

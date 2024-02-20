@@ -3,7 +3,6 @@
   import UserCard from "$lib/components/userCard.svelte";
 </script>
 
-
 <div class="cards">
   <UserCard />
   <UserCard />

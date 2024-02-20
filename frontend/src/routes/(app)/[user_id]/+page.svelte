@@ -7,8 +7,8 @@
 
   let overflow: HTMLDivElement;
   let startY: number;
-  let startBottom: string;
-  let overflowStart = -230;
+  let startTop: string;
+  let overflowStart = 330;
 
   function nav_back() {
     if (browser) window.history.back();
@@ -16,30 +16,30 @@
 
   function handleTouchStart(event: TouchEvent) {
     startY = event.touches[0].clientY;
-    startBottom = overflow.style.bottom;
+    startTop = overflow.style.top;
   }
   function handleTouchMove(event: TouchEvent) {
     const deltaY = event.touches[0].clientY - startY;
-    if (!startBottom || startBottom == `${overflowStart}px`) {
-      overflow.style.bottom = `${overflowStart + -deltaY}px`;
+    if (!startTop || startTop == `${overflowStart}px`) {
+      overflow.style.top = `${overflowStart + deltaY}px`;
     } else {
-      overflow.style.bottom = `${-deltaY}px`;
+      overflow.style.top = `${deltaY}px`;
     }
   }
   function handleTouchEnd(event: TouchEvent) {
-    overflow.style.transition = "bottom 0.3s cubic-bezier(.19,.93,1,1)";
+    overflow.style.transition = "top 0.3s cubic-bezier(.19,.93,1,1)";
     if (startY - event.changedTouches[0].clientY > 50) {
-      overflow.style.bottom = "0";
+      overflow.style.top = "84px";
       setTimeout(() => {
         overflow.style.transition = "";
       }, 300);
     } else if (startY - event.changedTouches[0].clientY < -50) {
-      overflow.style.bottom = `${overflowStart}px`;
+      overflow.style.top = `${overflowStart}px`;
       setTimeout(() => {
         overflow.style.transition = "";
       }, 300);
     } else {
-      overflow.style.bottom = startBottom;
+      overflow.style.top = startTop;
     }
   }
 </script>
@@ -49,21 +49,18 @@
     <Icon d={backIcon.d} viewBox={backIcon.viewBox} color={"#2461FF"}/>
   </button>
 </div>
-<div>
-  <img
-    src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg"
-    alt=""
-  />
-</div>
+<div class="profile-picture"></div>
+
 <div
   class="overflow"
-  style="--bottom: {overflowStart}px"
+  style="top: {overflowStart}px"
   bind:this={overflow}
   on:touchstart={handleTouchStart}
   on:touchmove={handleTouchMove}
   on:touchend={handleTouchEnd}
   on:touchcancel={handleTouchEnd}
 >
+  <span class="line"/>
   <div class="heading">
     <h1>Никита,19</h1>
     <h2>Дизайнер</h2>
@@ -73,6 +70,24 @@
     культуры, открывать новые места и встречать интересных людей. Я уже побывал
     во многих странах, но всегда готов к новым приключениям и открытиям
   </p>
+  <hr />
+    <div class="directions">
+        <ul class="from">
+            <span class="direction-title">Откуда</span>
+            <span class="dot"/>
+            <li>Пермь</li>
+            <li>Москва</li>
+        </ul>
+        <ul class="to">
+            <span class="direction-title">Куда</span>
+            <span class="dot"/>
+            <li>Австрия</li>
+            <li>Турция</li>
+            <li>Италия</li>
+            <li>Германия</li>
+            <li>Россия</li>
+        </ul>
+    </div>
   <hr />
   <div class="interests">
     <h2>Интересы</h2>
@@ -86,30 +101,77 @@
   </div>
 </div>
 
-<style>
-  img {
-    width: 100%;
-  }
+<style lang="scss">
+    .profile-picture {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%),
+            url("https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg");
+        background-size: contain;
+        width: 100%;
+        height: 400px;
+    }
+
   .overflow {
     height: 674px;
     background-color: #fff;
     position: fixed;
     bottom: var(--bottom);
-    padding: 20px;
+    padding: 0px 20px 20px 20px;
     border-radius: 40px 40px 0px 0px;
   }
+
+  .line {
+    height: 4px;
+    width: 80px;
+    background-color: #CECECE;
+    border-radius: 100px;
+    display: flex;
+    margin: 10px auto 16px auto;
+  }
+
   .heading {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
+
   .about {
     margin-top: 15px;
   }
+
   hr {
     margin: 20px 0;
     border-radius: 40px;
     border: 1px solid var(--light-mode-white-80, #efeff4);
+  }
+
+  .directions {
+    width: 100%;
+    display:  flex;
+    justify-content: center;
+    gap: 80px;
+    font-weight: 600;
+    li {
+      list-style-type: none;
+    }
+    ul {
+      list-style-type:none;
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+  }
+  
+  .direction-title {
+    color: #AAAAAA;
+  }
+
+  .dot {
+    height: 14px;
+    width: 14px;
+    border: 2px solid #AAAAAA;
+    border-radius: 50%;
+    display: inline-block;
   }
 
   .interests {

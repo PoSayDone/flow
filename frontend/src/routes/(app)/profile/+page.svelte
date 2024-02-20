@@ -1,11 +1,19 @@
 <script lang="ts">
+	import InterestsPopup from './../../../lib/components/interestsPopup.svelte';
+	import Modal from './../../../lib/components/modal.svelte';
   export let interests: string[] = ["IT", "Спорт", "Технологии"];
+
+  let showModal = false;
 </script>
+
+<Modal bind:showModal>
+  <InterestsPopup />
+</Modal>
 
 <div class="header">
   <div class="profile-picture">
     <img
-      src="https://s3-alpha-sig.figma.com/img/023f/fdeb/e47da5ad29942101286011bd4ddc1251?Expires=1706486400&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=ofSpVq3VI5pACaCIjvgk1RFRdcrYGN6S2wsiQW-Nz55aQVZV9dr8MWXtQdVZpbJpeW8cejJ~qnO-9vQ7z~MNSLYsFdRmLQb~PMW927-GvgENXPCi29c~hfWIAfxKpFx9Bv1Bz--bRXPZUq1fZslBQxlzMNdPr23MixvVzlSAz1cVZVF~2z8lU9udRyUeaMtgTZJiKCCu~YAWNTM5PdRZyKr-jA3z3rBu7i~AUfY0j1uhI~0Pr1n8OK6F4Zyl00MeCv3RFG~FEUI608RDI3L-wUrCmCasjAc~BKJuvuDTfuNkWG7DyHKPCumTGwZ7ylPQ~fYGoCTUvjwDvGTjisD5Sw__"
+      src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg"
       alt="profile-picture"
     />
   </div>
@@ -28,7 +36,7 @@
   </div>
   <div class="info-block">
     <label for="interests">Интересы</label>
-    <div class="interests">
+    <div class="interests" on:click={() => (showModal = true)}>
       {#each interests as interest}
         <span class="interest">{interest}</span>
       {/each}

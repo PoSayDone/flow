@@ -25,7 +25,7 @@
   function handleTouchEnd(event: TouchEvent) {
     currentCard.style.transition = "transform 0.3s ease-out";
 
-    if (startX - event.changedTouches[0].clientX > 50) {
+    if (startX - event.changedTouches[0].clientX > 70) {
       // Swipe left
       currentCard.style.transform =
         "rotate(-40deg) translateY(-50%) translateX(-120%)";
@@ -33,7 +33,7 @@
         currentCard.style.transition = "";
         currentCard.style.transform = "";
       }, 300);
-    } else if (startX - event.changedTouches[0].clientX < -50) {
+    } else if (startX - event.changedTouches[0].clientX < -70) {
       // Swipe right
       currentCard.style.transform =
         "rotate(40deg) translateY(-50%) translateX(120%)";
@@ -42,9 +42,12 @@
         currentCard.style.transform = "";
       }, 300);
     } else {
-      // No swipe, reset position
-      currentCard.style.transform = "";
-      currentCard.style.transition = "";
+      currentCard.style.transform =
+        "rotate(0deg) translateY(0%) translateX(0%)";
+      setTimeout(() => {
+        currentCard.style.transition = "";
+        currentCard.style.transform = "";
+      }, 300);
     }
   }
 </script>
@@ -88,8 +91,8 @@
     justify-content: space-between;
     min-height: 100%;
     padding: 22px 40px;
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, #000 100%),
-      url(https://s3-alpha-sig.figma.com/img/023f/fdeb/e47da5ad29942101286011bd4ddc1251?Expires=1706486400&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=ofSpVq3VI5pACaCIjvgk1RFRdcrYGN6S2wsiQW-Nz55aQVZV9dr8MWXtQdVZpbJpeW8cejJ~qnO-9vQ7z~MNSLYsFdRmLQb~PMW927-GvgENXPCi29c~hfWIAfxKpFx9Bv1Bz--bRXPZUq1fZslBQxlzMNdPr23MixvVzlSAz1cVZVF~2z8lU9udRyUeaMtgTZJiKCCu~YAWNTM5PdRZyKr-jA3z3rBu7i~AUfY0j1uhI~0Pr1n8OK6F4Zyl00MeCv3RFG~FEUI608RDI3L-wUrCmCasjAc~BKJuvuDTfuNkWG7DyHKPCumTGwZ7ylPQ~fYGoCTUvjwDvGTjisD5Sw__);
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0) 70%, #000 100%),
+      url(https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
