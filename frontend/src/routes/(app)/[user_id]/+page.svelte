@@ -23,7 +23,7 @@
     if (!startTop || startTop == `${overflowStart}px`) {
       overflow.style.top = `${overflowStart + deltaY}px`;
     } else {
-      overflow.style.top = `${deltaY}px`;
+      overflow.style.top = `${84 + deltaY}px`;
     }
   }
   function handleTouchEnd(event: TouchEvent) {
@@ -105,7 +105,7 @@
     .profile-picture {
         background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%),
             url("https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg");
-        background-size: contain;
+        background-size: cover;
         width: 100%;
         height: 400px;
     }
