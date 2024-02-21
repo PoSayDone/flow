@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Date
 from sqlalchemy.dialects.postgresql import UUID
 import datetime
-from database import Base
+from .database import Base
 
 class Users(Base):
     __tablename__ = 'users'
@@ -29,6 +29,11 @@ class Interests(Base):
     id = Column(Integer, primary_key=True,autoincrement=True)
     interest_name = Column(String, index=True)
 
+class TravelPurposes(Base):
+    __tablename__ = 'travel_purposes'
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    travel_purpose_name = Column(String, index=True)
+
 class Locations(Base):
     __tablename__ = 'locations'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -43,6 +48,11 @@ class UsersInterests(Base):
     __tablename__ = 'user_interests'
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True)
     interest_id = Column(Integer, ForeignKey('interests.id'), primary_key=True)
+
+class UsersTravelPurposes(Base):
+    __tablename__ = 'user_travel_purposes'
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True)
+    travel_purpose_id = Column(Integer, ForeignKey('travel_purposes.id'), primary_key=True)
 
 class UsersLocations(Base):
     __tablename__ = 'user_locations'

@@ -2,9 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-URL_DATABASE = 'postgresql://postgres:12345@localhost:5432/flow_db'
+SQLALCHEMY_DATABASE_URL = "postgresql://username:password@db:5432/nudges"
 
-engine = create_engine(URL_DATABASE)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

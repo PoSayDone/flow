@@ -1,54 +1,21 @@
+from datetime import datetime, timedelta, timezone
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from uuid import UUID
+from passlib.context import CryptContext
 from fastapi import FastAPI, HTTPException, Depends, Path
-from pydantic import BaseModel, EmailStr
 from typing import  Annotated, Optional, List
 from datetime import datetime, date
-from uuid import UUID
-import models
-from database import engine, SessionLocal
+from . import schema, models
+from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 
-class UserBase(BaseModel):
-    id: UUID
-    username: str
-    mail: EmailStr
-    password_hash: str
-    sex: bool
-    birthdate: date
-
-class UserUpdateBase(BaseModel):
-    id: UUID
-    username: Optional[str]
-    mail: Optional[EmailStr]
-    password_hash: Optional[str]
-    sex: Optional[bool]
-    birthdate: Optional[date]
-
-class MatchBase(BaseModel):
-    id: UUID
-    user_id: UUID
-    interested_in_user_id: UUID
-
-class InfoTableBase(BaseModel):
-    name: str
-
-class PivotTableBase(BaseModel):
-    user_id: UUID
-    id: int
-
-class MessageBase(BaseModel):
-    id: UUID
-    content_id: UUID
-    from_id: UUID
-    to_id: UUID
-    created_at: datetime
-    updated_at: datetime
-
-class MessageContentBase:
-    id: UUID
-    message_content: str
+SECRET_KEY = "4bad42439cea6743a225bc13fcaacf0bbf637edbb197d96611f2b40c36ce724c"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def get_db():
     db = SessionLocal()
@@ -58,6 +25,19 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 #SELECT * FROM table_name;
 @app.get("/users/")
@@ -87,7 +67,7 @@ async def delete_user(user_id: UUID, db: db_dependency):
 
 #INSERT INTO TABLE_NAME VALUES (значение1, значение2, значение3,... значение N);
 @app.post("/users/")
-async def add_user(user: UserBase, db: db_dependency):
+async def add_user(user: schema.UserBase, db: db_dependency):
     user = models.Users(
         id=user.id,
         username=user.username,
@@ -108,7 +88,7 @@ async def add_user(user: UserBase, db: db_dependency):
 # SET column1 = value1, column2 = value2, ...
 # WHERE condition;
 @app.put("/users/")
-async def update_user(user: UserUpdateBase, db: db_dependency):
+async def update_user(user: schema.UserUpdateBase, db: db_dependency):
     if not user.id:
         raise HTTPException(status_code=404, detail="User not found")
     db.query(models.Users).\
@@ -119,7 +99,7 @@ async def update_user(user: UserUpdateBase, db: db_dependency):
 
 
 @app.post("/interests/")
-async def add_interest(interest: InfoTableBase, db: db_dependency):
+async def add_interest(interest: schema.InfoTableBase, db: db_dependency):
     interest = models.Interests(
         interest_name = interest.name,
     )
@@ -144,7 +124,7 @@ async def delete_interest(interest_id: int, db: db_dependency):
     return {"ok": True}
 
 @app.post("/roles/")
-async def add_role(role: InfoTableBase, db: db_dependency):
+async def add_role(role: schema.InfoTableBase, db: db_dependency):
     role = models.Roles(
         role_name = role.name,
     )
@@ -169,7 +149,7 @@ async def delete_role(role_id: int, db: db_dependency):
     return {"ok": True}
 
 @app.post("/locations/")
-async def add_location(location: InfoTableBase, db: db_dependency):
+async def add_location(location: schema.InfoTableBase, db: db_dependency):
     location = models.Locations(
         location_name = location.name,
     )
@@ -194,7 +174,7 @@ async def delete_location(location_id: int, db: db_dependency):
     return {"ok": True}
 
 @app.post("/matches/")
-async def add_match(match: MatchBase,db: db_dependency):
+async def add_match(match: schema.MatchBase, db: db_dependency):
     match = models.Matches(
         id = match.id,
         user_id = match.user_id,
@@ -212,7 +192,7 @@ async def get_matches(db: db_dependency):
     return result
 
 @app.post("/users_locations/")
-async def add_user_location(data: PivotTableBase, db: db_dependency):
+async def add_user_location(data: schema.PivotTableBase, db: db_dependency):
     data = models.UsersLocations(
         user_id = data.user_id,
         location_id = data.id
@@ -238,7 +218,7 @@ async def get_users_locations(db: db_dependency):
     return result
 
 @app.post("/users_departures/")
-async def add_user_departure(object: PivotTableBase, db: db_dependency):
+async def add_user_departure(object: schema.PivotTableBase, db: db_dependency):
     object = models.UsersDepartures(
         user_id = object.user_id,
         id = object.id
@@ -264,7 +244,7 @@ async def get_users_departures(db: db_dependency):
     return result
 
 @app.post("/users_interests/")
-async def add_user_interest(object: PivotTableBase, db: db_dependency):
+async def add_user_interest(object: schema.PivotTableBase, db: db_dependency):
     object = models.UsersInterests(
         user_id = object.user_id,
         id = object.id
@@ -290,7 +270,7 @@ async def get_users_interests(db: db_dependency):
     return result
 
 @app.post("/users_roles/")
-async def add_user_role(object: PivotTableBase, db: db_dependency):
+async def add_user_role(object: schema.PivotTableBase, db: db_dependency):
     object = models.UsersRoles(
         user_id = object.user_id,
         id = object.id
