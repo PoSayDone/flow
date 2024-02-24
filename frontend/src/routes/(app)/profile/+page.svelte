@@ -1,9 +1,11 @@
 <script lang="ts">
+import type { PageData } from "./$types";
 	import InterestsPopup from './../../../lib/components/interestsPopup.svelte';
 	import Modal from './../../../lib/components/modal.svelte';
   export let interests: string[] = ["IT", "Спорт", "Технологии"];
 
   let showModal = false;
+  export let data: PageData;
 </script>
 
 <Modal bind:showModal>

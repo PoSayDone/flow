@@ -1,21 +1,36 @@
-from datetime import datetime, timedelta, timezone
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+import logging
+from app import auth
+from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
 from passlib.context import CryptContext
-from fastapi import FastAPI, HTTPException, Depends, Path
-from typing import  Annotated, Optional, List
-from datetime import datetime, date
+from fastapi import FastAPI, HTTPException, Depends
+from typing import  Annotated, List, TypedDict
 from . import schema, models
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.logger import logger
+import logging
 
-app = FastAPI()
+gunicorn_logger = logging.getLogger('gunicorn.error')
+logger.handlers = gunicorn_logger.handlers
+if __name__ != "main":
+    logger.setLevel(gunicorn_logger.level)
+else:
+    logger.setLevel(logging.DEBUG)
+
+app = FastAPI(root_path="/api")
+app.include_router(auth.router)
 models.Base.metadata.create_all(bind=engine)
 
-SECRET_KEY = "4bad42439cea6743a225bc13fcaacf0bbf637edbb197d96611f2b40c36ce724c"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Assuming app is your FastAPI application instance
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Add your frontend URL here
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -25,19 +40,17 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(auth.get_current_user)]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+@app.get("/user/")
+async def get_user_data(user: user_dependency, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = db.get(models.Users, user['id'])
+    return result
 
 #SELECT * FROM table_name;
 @app.get("/users/")
@@ -55,6 +68,7 @@ async def get_user(user_id: UUID, db: db_dependency):
         raise HTTPException(status_code=404, detail="User not found")
     return result
 
+
 #DELETE FROM table_name WHERE condition;
 @app.delete("/users/{user_id}")
 async def delete_user(user_id: UUID, db: db_dependency):
@@ -70,7 +84,7 @@ async def delete_user(user_id: UUID, db: db_dependency):
 async def add_user(user: schema.UserBase, db: db_dependency):
     user = models.Users(
         id=user.id,
-        username=user.username,
+        name=user.name,
         mail=user.mail,
         password_hash=user.password_hash,
         sex=user.sex,

@@ -49,6 +49,7 @@
   }
 
   .status {
+    color: #000;
     margin-right: 14px;
   }
 </style>

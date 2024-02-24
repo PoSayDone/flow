@@ -83,6 +83,7 @@
 
 <style>
   .card {
+    width: 100%;
     position: absolute;
     flex: 1;
     border-radius: 40px;
@@ -176,7 +177,6 @@
     -webkit-box-orient: vertical;
     margin: 0;
     color: #fff;
-    white-space: nowrap;
     font-family: Inter;
     font-size: 14px;
     font-style: normal;

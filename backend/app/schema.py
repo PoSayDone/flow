@@ -1,19 +1,33 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, date
-from typing import  Annotated, Optional, List
+from typing import Optional
 from uuid import UUID
 
 class UserBase(BaseModel):
     id: UUID
-    username: str
+    name: str
     mail: EmailStr
     password_hash: str
     sex: bool
     birthdate: date
 
+class UserAuth(BaseModel):
+    mail: EmailStr
+    password: str
+
+class UserCreateRequest(BaseModel):
+    id: UUID
+    name: str
+    mail: EmailStr
+    password: str
+
+class TokenBase(BaseModel):
+    access_token: str
+    token_type: str
+
 class UserUpdateBase(BaseModel):
     id: UUID
-    username: Optional[str]
+    user: Optional[str]
     mail: Optional[EmailStr]
     password_hash: Optional[str]
     sex: Optional[bool]
@@ -42,7 +56,3 @@ class MessageBase(BaseModel):
 class MessageContentBase(BaseModel):
     id: UUID
     message_content: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
