@@ -7,6 +7,8 @@ class Users(Base):
     __tablename__ = 'users'
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     name = Column(String, index=True)
+    occupation = Column(String, index=True)
+    about = Column(String, index=True)
     mail = Column(String, index=True)
     password_hash = Column(String)
     sex = Column(Boolean)

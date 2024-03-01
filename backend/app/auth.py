@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 gunicorn_logger = logging.getLogger('gunicorn.error')
 
 from app.models import Users
-from app.schema import TokenBase, UserAuth, UserCreateRequest
+from app.schema import TokenBase, UserCreateRequest
 from .database import SessionLocal
 
 SECRET_KEY = "4bad42439cea6743a225bc13fcaacf0bbf637edbb197d96611f2b40c36ce724c"

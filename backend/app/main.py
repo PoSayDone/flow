@@ -60,6 +60,13 @@ async def get_users(db: db_dependency):
         raise HTTPException(status_code=404, detail="No users found")
     return result
 
+@app.get("/find_solemates/{count}/")
+async def get_user_solemates(db: db_dependency):
+    result = db.query(models.Users).all();
+    if not result:
+        raise HTTPException(status_code=404, detail="No solemates found")
+    return result
+
 #SELECT * FROM table_name WHERE condition;
 @app.get("/users/{user_id}")
 async def get_user(user_id: UUID, db: db_dependency):
@@ -67,7 +74,6 @@ async def get_user(user_id: UUID, db: db_dependency):
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     return result
-
 
 #DELETE FROM table_name WHERE condition;
 @app.delete("/users/{user_id}")
@@ -102,12 +108,14 @@ async def add_user(user: schema.UserBase, db: db_dependency):
 # SET column1 = value1, column2 = value2, ...
 # WHERE condition;
 @app.put("/users/")
-async def update_user(user: schema.UserUpdateBase, db: db_dependency):
-    if not user.id:
+async def update_user(user: user_dependency, user_update: schema.UserUpdateBase, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authorized")
+    db_user = db.query(models.Users).filter(models.Users.id == user['id']).first()
+    if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-    db.query(models.Users).\
-    filter(models.Users.id == user.id).\
-    update(dict(user))
+    for field, value in user_update.dict(exclude_unset=True).items():
+        setattr(db_user, field, value)
     db.commit()
     return {"message": "User updated successfully"}
 

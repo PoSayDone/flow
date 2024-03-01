@@ -8,12 +8,10 @@ class UserBase(BaseModel):
     name: str
     mail: EmailStr
     password_hash: str
+    occupation: str
+    about: str
     sex: bool
     birthdate: date
-
-class UserAuth(BaseModel):
-    mail: EmailStr
-    password: str
 
 class UserCreateRequest(BaseModel):
     id: UUID
@@ -26,10 +24,11 @@ class TokenBase(BaseModel):
     token_type: str
 
 class UserUpdateBase(BaseModel):
-    id: UUID
-    user: Optional[str]
+    name: Optional[str]
     mail: Optional[EmailStr]
     password_hash: Optional[str]
+    occupation: Optional[str]
+    about: Optional[str]
     sex: Optional[bool]
     birthdate: Optional[date]
 
