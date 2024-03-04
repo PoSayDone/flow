@@ -3,6 +3,7 @@
 	export let name: string = 'Никита';
 	export let age: string = '18';
 	export let occupation: string = 'Дизайнер';
+	export let href: string = "/123";
 	export let about: string =
 		'\
         Я люблю путешествовать, потому что это позволяет мне познавать другие\
@@ -49,13 +50,14 @@
 	}
 </script>
 
-<div
+<a
 	bind:this={currentCard}
 	class="card"
 	on:touchstart={handleTouchStart}
 	on:touchmove={handleTouchMove}
 	on:touchend={handleTouchEnd}
 	on:touchcancel={handleTouchEnd}
+	href={href}
 >
 	<div class="tags">
 		{#each tags as tag}
@@ -76,11 +78,13 @@
 			</p>
 		</div>
 	</div>
-</div>
+</a>
 
 <style>
 	.card {
+    view-transition-name: profile-image;
 		width: 100%;
+		max-width: 380px;
 		position: absolute;
 		flex: 1;
 		border-radius: 40px;

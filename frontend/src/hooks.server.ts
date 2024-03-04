@@ -1,6 +1,8 @@
-export function handle({event, resolve}) {
-  const access_token = event.cookies.get('access_token')
-  event.locals.is_authenticated = access_token ? true : false;
+import type { Handle } from "@sveltejs/kit";
 
-  return resolve(event)
+export function handle({ event, resolve }): Handle {
+	const jwt = event.cookies.get('access_token');
+	event.locals.user_token = jwt ? jwt : undefined;
+
+	return resolve(event);
 }

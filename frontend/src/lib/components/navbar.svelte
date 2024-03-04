@@ -18,6 +18,7 @@
 
 <style>
   nav {
+    view-transition-name: nav;
     border-radius: 50px 50px 0px 0px;
     background-color: var(--fg-secondary);
     width: 100%;

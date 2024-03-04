@@ -1,16 +1,38 @@
 <script lang="ts">
 	import Chip from '$lib/components/chip.svelte';
 	import type { PageData } from './$types';
-	import InterestsPopup from './../../../lib/components/interestsPopup.svelte';
-	import Modal from './../../../lib/components/modal.svelte';
-	export let interests: string[] = ['IT', 'Спорт', 'Технологии'];
+	import InterestsPopup from '$lib/components/interestsPopup.svelte';
+	import Modal from '$lib/components/modal.svelte';
+	interface InterestsBinding {
+		[key: string]: string;
+	}
 
+	const interests_binding: InterestsBinding = {
+		"1": "it",
+		"2": "cars",
+		"3": "sport",
+		"4": "fashion",
+		"5": "gastronomy",
+		"6": "alcohol",
+		"7": "art",
+		"8": "technologies",
+		"9": "science",
+		"10": "finance",
+		"11": "motorcycles",
+		"12": "beauty",
+		"13": "business"
+	};
+
+	let selectedOptions: string[] = []
+	
 	let showModal = false;
 	export let data: PageData;
+
+	$: console.log(data)
 </script>
 
 <Modal bind:showModal>
-	<InterestsPopup />
+	<InterestsPopup bind:selectedOptions/>
 </Modal>
 
 <div class="header">
@@ -41,11 +63,15 @@
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>
-		<div class="interests" on:click={() => (showModal = true)}>
-			{#each interests as interest}
-				<Chip text={interest} />
-			{/each}
-		</div>
+		<button class="interests" on:click={() => (showModal = true)}>
+			{#if selectedOptions.length == 0}
+				<div>Добавить интересы</div>
+			{:else}
+				{#each selectedOptions as id}
+					<Chip text={interests_binding[id]} />
+				{/each}
+			{/if}
+		</button>
 	</div>
 </div>
 

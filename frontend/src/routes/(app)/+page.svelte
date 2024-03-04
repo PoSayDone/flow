@@ -6,9 +6,7 @@
 </script>
 
 <div class="cards">
-	{#each data.body as user}
-		<UserCard name={user.name} about={user.about} occupation={user.occupation} />
-	{/each}
+		<UserCard name={data.users[0].name} about={data.users[0].about} occupation={data.users[0].occupation} />
 </div>
 <div class="actions">
 	<ActionButton type="dislike" />
@@ -20,10 +18,12 @@
 	.cards {
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 		flex: 1;
 		position: relative;
 	}
 	.actions {
+    view-transition-name: actions;
 		display: flex;
 		width: 100%;
 		justify-content: center;

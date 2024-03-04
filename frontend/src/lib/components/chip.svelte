@@ -3,15 +3,14 @@
 	import Icon from './icon.svelte';
 	export let active = false;
 	export let clickable = false;
+	export let onClick = () => {}
 
 	export let text = 'Активный отдых';
-	const handleClick = () => {
-		active = !active;
-	};
+
 </script>
 
 {#if clickable}
-	<button class="chip clickable" class:active on:click={handleClick}
+	<button class="chip clickable" class:active on:click={onClick}
 		><span>{text}</span><Icon
 			stroke_width={'1.5'}
 			size={'16'}

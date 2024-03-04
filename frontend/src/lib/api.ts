@@ -42,3 +42,11 @@ export function get(path: string, token?: string): Promise<any> {
 export function post(path: string, data: any, token?: string): Promise<any> {
 	return send({ method: `POST`, path, data, token });
 }
+
+export function put(path: string, data: any, token?: string): Promise<any> {
+	return send({ method: `PUT`, path, data, token });
+}
+
+export function del(path: string, data: any, token?: string): Promise<any> {
+	return send({ method: `DELETE`, path, data, token });
+}

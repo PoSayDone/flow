@@ -265,28 +265,32 @@ async def get_users_departures(db: db_dependency):
         raise HTTPException(status_code=404, detail="No departures found")
     return result
 
-@app.post("/users_interests/")
-async def add_user_interest(object: schema.PivotTableBase, db: db_dependency):
+@app.put("/user_interests/{interest_id}")
+async def add_user_interest(user: user_dependency, object: schema.PivotTableBase, db: db_dependency):
     object = models.UsersInterests(
-        user_id = object.user_id,
+        user_id = user['id'],
         id = object.id
     )
     db.add(models)
     db.commit()
     return {"ok": True}
 
-@app.delete("/users_interests/{user_id}/{interest_id}")
-async def delete_user_interest(user_id: UUID, interest_id: int, db: db_dependency):
-    user_interest = db.get(models.UsersInterests, (user_id, interest_id))
+@app.delete("/user_interests/{interest_id}")
+async def delete_user_interest(user: user_dependency, interest_id: int, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    user_interest = db.get(models.UsersInterests, (user['id'], interest_id))
     if not user_interest:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Interest not found")
     db.delete(user_interest)
     db.commit()
     return {"ok": True}
 
-@app.get("/users_interests/")
-async def get_users_interests(db: db_dependency):
-    result = db.query(models.UsersInterests).all()
+@app.get("/user_interests/")
+async def get_user_interests(user: user_dependency, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    result = db.query(models.UsersInterests).filter(models.UsersInterests.user_id == user['id']).all()
     if not result:
         raise HTTPException(status_code=404, detail="No interests found")
     return result

@@ -50,7 +50,10 @@
 		<Icon d={backIcon.d} viewBox={backIcon.viewBox} color={'#2461FF'} />
 	</button>
 </div>
-<div class="profile-picture"></div>
+<div class="backdrop">
+	<div class="profile-picture"></div>
+</div>
+
 
 <div
 	class="overflow"
@@ -103,6 +106,12 @@
 </div>
 
 <style lang="scss">
+	.backdrop {
+		z-index: -1;
+		height: 100%;
+		background-color: #000;
+    view-transition-name: profile-image;
+	}
 	.profile-picture {
 		background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%),
 			url('https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg');
@@ -112,7 +121,8 @@
 	}
 
 	.overflow {
-		height: 674px;
+		view-transition-name: overflow;
+		height: 100%;
 		background-color: #fff;
 		position: fixed;
 		bottom: var(--bottom);
@@ -188,6 +198,7 @@
 	}
 
 	.actions {
+		view-transition-name: actions;
 		margin: 0 20px;
 		margin-top: 10px;
 		position: fixed;
