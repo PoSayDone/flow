@@ -55,3 +55,22 @@ class MessageBase(BaseModel):
 class MessageContentBase(BaseModel):
     id: UUID
     message_content: str
+
+class Profile(BaseModel):
+    id:            UUID
+    name:          Optional[str     ]
+    mail:          Optional[EmailStr]
+    occupation:    Optional[str     ]
+    about:         Optional[str     ]
+    sex:           Optional[bool    ]
+    birthdate:     Optional[date    ]
+    interests:     Optional[list]
+    trip_purposes: Optional[list] = None
+
+class Solemate(BaseModel):
+    id:         UUID
+    name:       Optional[str     ]
+    occupation: Optional[str     ]
+    about:      Optional[str     ]
+    birthdate:     Optional[date    ]
+    trip_purposes:  Optional[list]

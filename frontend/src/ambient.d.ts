@@ -1,3 +1,4 @@
-type Interests = {
+type Binding = {
 	[key: number]: boolean;
-}
+};
+

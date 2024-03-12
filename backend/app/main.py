@@ -1,10 +1,13 @@
 import logging
+import uuid
+
+from sqlalchemy import and_, exists, join
 from app import auth
 from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
 from passlib.context import CryptContext
 from fastapi import FastAPI, HTTPException, Depends
-from typing import  Annotated, List, TypedDict
+from typing import  Annotated, List
 from . import schema, models
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -26,10 +29,10 @@ models.Base.metadata.create_all(bind=engine)
 # Assuming app is your FastAPI application instance
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Add your frontend URL here
+    allow_origins=["http://localhost:5173","http://localhost:8000","http://localhost","http://127.0.0.1", "http://0.0.0.0", "http://192.168.1.129"],  # Add your frontend URL here
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def get_db():
@@ -45,11 +48,40 @@ user_dependency = Annotated[dict, Depends(auth.get_current_user)]
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@app.get("/user/")
-async def get_user_data(user: user_dependency, db: db_dependency):
+@app.get("/profile/")
+async def get_profile(user: user_dependency, db: db_dependency):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    result = db.get(models.Users, user['id'])
+    user_db = db.get(models.Users, user['id'])
+    result = schema.Profile(
+        id = user_db.id,
+        name = user_db.name,
+        mail = user_db.mail,
+        occupation=user_db.occupation,
+        about=user_db.about,
+        sex=user_db.sex,
+        birthdate=user_db.birthdate,
+        interests=list(map(lambda interest: interest.interest_id, db.query(models.UsersInterests).filter(models.UsersInterests.user_id == user_db.id).all())),
+        trip_purposes=list(map(lambda purpose: purpose.purpose_id,db.query(models.UsersTripPurposes).filter(models.UsersTripPurposes.user_id == user_db.id).all()))
+    )
+    return result
+
+@app.get("/profile/{user_id}")
+async def get_profile_w_id(user_id: UUID, db: db_dependency):
+    user_db = db.get(models.Users, user_id)
+    if not user_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = schema.Profile(
+        id = user_db.id,
+        name = user_db.name,
+        mail = user_db.mail,
+        occupation=user_db.occupation,
+        about=user_db.about,
+        sex=user_db.sex,
+        birthdate=user_db.birthdate,
+        interests=list(map(lambda interest: interest.interest_id, db.query(models.UsersInterests).filter(models.UsersInterests.user_id == user_db.id).all())),
+        trip_purposes=list(map(lambda purpose: purpose.purpose_id,db.query(models.UsersTripPurposes).filter(models.UsersTripPurposes.user_id == user_db.id).all()))
+    )
     return result
 
 #SELECT * FROM table_name;
@@ -61,10 +93,45 @@ async def get_users(db: db_dependency):
     return result
 
 @app.get("/find_solemates/{count}/")
-async def get_user_solemates(db: db_dependency):
-    result = db.query(models.Users).all();
-    if not result:
+async def get_user_solemates(count: int, db: db_dependency):
+    users = db.query(models.Users).limit(count).all();
+    if not users:
         raise HTTPException(status_code=404, detail="No solemates found")
+    result = list(map(lambda user: schema.Solemate(
+        id=user.id,
+        name=user.name,
+        occupation=user.occupation,
+        about=user.about,
+        birthdate=user.birthdate,
+        trip_purposes=list(map(lambda purpose: purpose.purpose_id,db.query(models.UsersTripPurposes).filter(models.UsersTripPurposes.user_id == user.id).all()))
+    ), users))
+    return result
+
+@app.get("/solemates/{count}")
+async def get_soulmates(count:int, db: db_dependency, user: user_dependency):
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_db = db.get(models.Users, user['id'])
+    current_user_interests = [interest[0] for interest in db.query(models.UsersInterests.interest_id).filter(models.UsersInterests.user_id == user_db.id).all()]
+    current_user_purposes = [purpose[0] for purpose in db.query(models.UsersTripPurposes.purpose_id).filter(models.UsersTripPurposes.user_id == user_db.id).all()]
+
+    # Находим других пользователей с теми же интересами и целями поездки
+    matching_users = db.query(models.Users).\
+        join(models.UsersInterests, models.Users.id == models.UsersInterests.user_id).\
+        join(models.UsersTripPurposes, models.Users.id == models.UsersTripPurposes.user_id).\
+        filter(and_(models.UsersInterests.interest_id.in_(current_user_interests),
+                    models.UsersTripPurposes.purpose_id.in_(current_user_purposes),
+                    models.Users.id != user_db.id)).limit(count).all()
+
+    result = list(map(lambda user: schema.Solemate(
+        id=user.id,
+        name=user.name,
+        occupation=user.occupation,
+        about=user.about,
+        birthdate=user.birthdate,
+        trip_purposes=list(map(lambda purpose: purpose.purpose_id,db.query(models.UsersTripPurposes).filter(models.UsersTripPurposes.user_id == user.id).all()))
+    ), matching_users))
+
     return result
 
 #SELECT * FROM table_name WHERE condition;
@@ -96,8 +163,6 @@ async def add_user(user: schema.UserBase, db: db_dependency):
         sex=user.sex,
         birthdate=user.birthdate,
     )
-    if (db.query(models.Users).filter(models.Users.username == user.username).all()):
-        raise HTTPException(status_code=409, detail="User with this username already exists")
     if (db.query(models.Users).filter(models.Users.mail == user.mail).all()):
         raise HTTPException(status_code=409, detail="User with this mail already exisits")
     db.add(user)
@@ -107,7 +172,7 @@ async def add_user(user: schema.UserBase, db: db_dependency):
 # UPDATE table_name
 # SET column1 = value1, column2 = value2, ...
 # WHERE condition;
-@app.put("/users/")
+@app.put("/user/")
 async def update_user(user: user_dependency, user_update: schema.UserUpdateBase, db: db_dependency):
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
@@ -119,6 +184,21 @@ async def update_user(user: user_dependency, user_update: schema.UserUpdateBase,
     db.commit()
     return {"message": "User updated successfully"}
 
+@app.post("/trip_purposes/")
+async def add_trip_purpose(purpose: schema.InfoTableBase, db: db_dependency):
+    purpose = models.TripPurposes(
+        purpose_name = purpose.name,
+    )
+    db.add(purpose)
+    db.commit()
+    return {"ok": True}
+
+@app.get("/trip_purposes/")
+async def get_trip_purpose(db: db_dependency):
+    result = db.query(models.TripPurposes).all()
+    if not result:
+        raise HTTPException(status_code=404, detail="No trip purposes found")
+    return result
 
 @app.post("/interests/")
 async def add_interest(interest: schema.InfoTableBase, db: db_dependency):
@@ -195,12 +275,14 @@ async def delete_location(location_id: int, db: db_dependency):
     db.commit()
     return {"ok": True}
 
-@app.post("/matches/")
-async def add_match(match: schema.MatchBase, db: db_dependency):
+@app.put("/match/{interested_in_user_id}")
+async def add_match(interested_in_user_id: UUID, user: user_dependency, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
     match = models.Matches(
-        id = match.id,
-        user_id = match.user_id,
-        interested_in_user_id = match.interested_in_user_id
+        id = uuid.uuid4(),
+        user_id = user['id'],
+        interested_in_user_id = interested_in_user_id
     )
     db.add(match)
     db.commit()
@@ -265,13 +347,63 @@ async def get_users_departures(db: db_dependency):
         raise HTTPException(status_code=404, detail="No departures found")
     return result
 
-@app.put("/user_interests/{interest_id}")
-async def add_user_interest(user: user_dependency, object: schema.PivotTableBase, db: db_dependency):
-    object = models.UsersInterests(
+@app.get("/user_trip_purposes/")
+async def get_user_trip_purposes(user: user_dependency, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    result = db.query(models.UsersTripPurposes).filter(models.UsersTripPurposes.user_id == user['id']).all()
+    if not result:
+        raise HTTPException(status_code=404, detail="No trip purposes found")
+    return result
+
+@app.put("/user_trip_purposes/{purpose_id}")
+async def add_user_trip_purpose(purpose_id: int, user: user_dependency, db: db_dependency):
+    user_trip_purpose = models.UsersTripPurposes(
         user_id = user['id'],
-        id = object.id
+        purpose_id = purpose_id
     )
-    db.add(models)
+    db.add(user_trip_purpose)
+    db.commit()
+    return {"ok": True}
+
+@app.put("/user_trip_purposes/{user_id}/{purpose_id}")
+async def add_user_trip_purpose_by_id(purpose_id: int, user_id: UUID, db: db_dependency):
+    user_trip_purpose = models.UsersTripPurposes(
+        user_id = user_id,
+        purpose_id = purpose_id
+    )
+    db.add(user_trip_purpose)
+    db.commit()
+    return {"ok": True}
+
+@app.delete("/user_trip_purposes/{purpose_id}")
+async def delete_user_trip_purpose(user: user_dependency, purpose_id: int, db: db_dependency):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    user_trip_purpose = db.get(models.UsersTripPurposes, (user['id'], purpose_id))
+    if not user_trip_purpose:
+        raise HTTPException(status_code=404, detail="Purpose not found")
+    db.delete(user_trip_purpose)
+    db.commit()
+    return {"ok": True}
+
+@app.put("/user_interests/{user_id}/{interest_id}")
+async def add_user_interest_by_id(user_id: UUID, interest_id: int, db: db_dependency):
+    user_interest = models.UsersInterests(
+        user_id = user_id,
+        interest_id = interest_id
+    )
+    db.add(user_interest)
+    db.commit()
+    return {"ok": True}
+
+@app.put("/user_interests/{interest_id}")
+async def add_user_interest(interest_id: int, user: user_dependency, db: db_dependency):
+    user_interest = models.UsersInterests(
+        user_id = user['id'],
+        interest_id = interest_id
+    )
+    db.add(user_interest)
     db.commit()
     return {"ok": True}
 

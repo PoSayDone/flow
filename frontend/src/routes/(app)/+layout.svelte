@@ -8,4 +8,3 @@
 	<slot />
 </main>
 <Navbar />
-

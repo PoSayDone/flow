@@ -11,6 +11,7 @@ pkgs.mkShell {
       ps.email_validator
       ps.python-jose
       ps.passlib
+      ps.python-multipart
     ]))
   ];
 }

@@ -1,38 +1,42 @@
 <script lang="ts">
+	import { interests_binding } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
-	import type { PageData } from './$types';
 	import InterestsPopup from '$lib/components/interestsPopup.svelte';
 	import Modal from '$lib/components/modal.svelte';
-	interface InterestsBinding {
-		[key: string]: string;
+	import { enhance, type SubmitFunction } from '$app/forms';
+	import { onDestroy } from 'svelte';
+	import { page } from '$app/stores';
+
+	let showModal = false;
+	let form: HTMLFormElement;
+
+	let selectedInterests: string[] = [];
+	try {
+		if ($page.data.interests === undefined) {
+			throw '';
+		}
+		if ($page.data.interests.length > 0) {
+			selectedInterests = $page.data.interests;
+		}
+	} catch {
+		selectedInterests = [];
 	}
 
-	const interests_binding: InterestsBinding = {
-		"1": "it",
-		"2": "cars",
-		"3": "sport",
-		"4": "fashion",
-		"5": "gastronomy",
-		"6": "alcohol",
-		"7": "art",
-		"8": "technologies",
-		"9": "science",
-		"10": "finance",
-		"11": "motorcycles",
-		"12": "beauty",
-		"13": "business"
+	const submitCreateNote: SubmitFunction = () => {
+		return async ({ update }) => {
+			await update({ reset: false });
+		};
 	};
 
-	let selectedOptions: string[] = []
-	
-	let showModal = false;
-	export let data: PageData;
-
-	$: console.log(data)
+	onDestroy(() => {
+		if (form) {
+			form.requestSubmit();
+		}
+	});
 </script>
 
 <Modal bind:showModal>
-	<InterestsPopup bind:selectedOptions/>
+	<InterestsPopup bind:selectedInterests />
 </Modal>
 
 <div class="header">
@@ -40,40 +44,46 @@
 		<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="profile" />
 	</div>
 </div>
-<div class="information">
+<form bind:this={form} class="information" method="POST" use:enhance={submitCreateNote}>
 	<div class="info-block">
-		<label for="name">Имя</label><input value={data.name} name="name" type="text" />
+		<label for="name">Имя</label>
+		<input value={$page.data.name} name="name" type="text" on:blur={() => form.requestSubmit()} />
 	</div>
 	<div class="info-block">
-		<label for="bdate">День рождения</label><input
-			value={data.birthdate}
-			name="bdate"
+		<label for="birthdate">День рождения</label>
+		<input
+			name="birthdate"
 			type="date"
+			value={$page.data.birthdate}
+			on:blur={() => form.requestSubmit()}
 		/>
 	</div>
 	<div class="info-block">
-		<label for="occupation">Профессия</label><input
-			value={data.occupation}
+		<label for="occupation">Профессия</label>
+		<input
 			name="occupation"
 			type="text"
+			value={$page.data.occupation}
+			on:blur={() => form.requestSubmit()}
 		/>
 	</div>
 	<div class="info-block">
-		<label for="about">О себе</label><input name="about" value={data.about} type="text" />
+		<label for="about">О себе</label>
+		<input name="about" type="text" value={$page.data.about} on:blur={() => form.requestSubmit()} />
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>
-		<button class="interests" on:click={() => (showModal = true)}>
-			{#if selectedOptions.length == 0}
-				<div>Добавить интересы</div>
+		<button type="button" class="interests" on:click={() => (showModal = true)}>
+			{#if selectedInterests.length == 0 || selectedInterests == undefined}
+				<Chip text={'Добавить интересы'} />
 			{:else}
-				{#each selectedOptions as id}
+				{#each selectedInterests as id}
 					<Chip text={interests_binding[id]} />
 				{/each}
 			{/if}
 		</button>
 	</div>
-</div>
+</form>
 
 <style lang="scss">
 	.header {
@@ -149,6 +159,7 @@
 	}
 
 	.interests {
+		background: none;
 		margin-top: 10px;
 		display: flex;
 		flex-wrap: wrap;

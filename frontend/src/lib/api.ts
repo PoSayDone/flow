@@ -22,14 +22,12 @@ async function send({
 		opts.body = JSON.stringify(data);
 	}
 
-	if (token) {
-		opts.headers['Authorization'] = `Bearer ${token}`;
-	}
+	opts.headers['credentials'] = `include`;
 
 	const res = await fetch(`${API_URL}${path}`, opts);
 	if (res.ok || res.status === 422) {
-		const text = await res.text();
-		return text ? JSON.parse(text) : {};
+		const body = await res.json();
+		return body;
 	}
 
 	throw error(res.status);

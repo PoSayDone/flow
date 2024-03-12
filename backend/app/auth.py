@@ -3,11 +3,13 @@ import logging
 from typing import Annotated
 from uuid import UUID
 from jose import jwt, JWTError
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
+
+from app.utils import OAuth2PasswordBearerWithCookie
 
 gunicorn_logger = logging.getLogger('gunicorn.error')
 
@@ -25,7 +27,7 @@ router = APIRouter(
 )
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl='auth/token')
 
 def get_db():
     db = SessionLocal()
@@ -48,12 +50,15 @@ async def create_user(db: db_dependency, user_create_request: UserCreateRequest)
     db.commit()
 
 @router.post("/token", response_model=TokenBase)
-async def login_for_access_token(db: db_dependency, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(response: Response, db: db_dependency, form_data: OAuth2PasswordRequestForm = Depends()):
     authenticated_user = authneticate_user(form_data.username, form_data.password, db)
     if not authenticated_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user")
-    token = create_access_token(authenticated_user.mail, authenticated_user.id, timedelta(minutes=30))
-    return {'access_token': token, 'token_type': 'bearer'}
+    access_token = create_access_token(authenticated_user.mail, authenticated_user.id, timedelta(minutes=30))
+    response.set_cookie(
+        key="access_token", value=f"Bearer {access_token}", httponly=True
+    )
+    return {'access_token': access_token, 'token_type': 'bearer'}
 
 def authneticate_user(mail: EmailStr, password: str, db: db_dependency):
     user = db.query(Users).filter(Users.mail == mail).first()
@@ -69,7 +74,7 @@ def create_access_token(mail: EmailStr, user_id: UUID, expires_date: timedelta):
     encode.update({'exp': expires})
     return jwt.encode(encode, key=SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         mail: str = str(payload.get('sub'))

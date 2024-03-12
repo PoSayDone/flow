@@ -1,8 +1,6 @@
-import type { Handle } from "@sveltejs/kit";
+import type { HandleFetch } from '@sveltejs/kit';
 
-export function handle({ event, resolve }): Handle {
-	const jwt = event.cookies.get('access_token');
-	event.locals.user_token = jwt ? jwt : undefined;
-
-	return resolve(event);
-}
+export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
+	request.headers.set('cookie', `access_token=${event.cookies.get('access_token')}`);
+	return fetch(request);
+};

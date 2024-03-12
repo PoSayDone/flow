@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:21-alpine AS builder
 WORKDIR /usr/src/app
 COPY package.json .
 RUN yarn --frozen-lockfile

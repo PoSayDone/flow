@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { interests_binding, trip_purposes_binding } from '$lib/utils';
 	import { backIcon } from '$lib/assets/Appicons';
+	import { getAge } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
 	import Icon from '$lib/components/icon.svelte';
 	import { browser } from '$app/environment';
+	import type { PageData } from './$types';
 
 	let overflow: HTMLDivElement;
 	let startY: number;
 	let startTop: string;
 	let overflowStart = 330;
+
+	export let data: PageData;
 
 	function nav_back() {
 		if (browser) window.history.back();
@@ -50,11 +55,14 @@
 		<Icon d={backIcon.d} viewBox={backIcon.viewBox} color={'#2461FF'} />
 	</button>
 </div>
-<div class="backdrop">
+<div class="backdrop" style:view-transition-name={`profile-image`}>
 	<div class="profile-picture"></div>
 </div>
-
-
+<div class="tags" style:view-transition-name={`trip-purposes`}>
+	{#each data.trip_purposes as id}
+		<div class="tag">{trip_purposes_binding[id]}</div>
+	{/each}
+</div>
 <div
 	class="overflow"
 	style="top: {overflowStart}px"
@@ -66,14 +74,10 @@
 >
 	<span class="line" />
 	<div class="heading">
-		<h1>Никита,19</h1>
-		<h2>Дизайнер</h2>
+		<h1>{data.name}, {getAge(data.birthdate)}</h1>
+		<h2>{data.occupation}</h2>
 	</div>
-	<p class="about">
-		Я люблю путешествовать, потому что это позволяет мне познавать другие культуры, открывать новые
-		места и встречать интересных людей. Я уже побывал во многих странах, но всегда готов к новым
-		приключениям и открытиям
-	</p>
+	<p class="about">{data.about}</p>
 	<hr />
 	<div class="directions">
 		<ul class="from">
@@ -96,23 +100,23 @@
 	<div class="interests">
 		<h2>Интересы</h2>
 		<div class="chips">
-			<Chip text="Дизайн" />
-			<Chip text="Программирование" />
-			<Chip text="Горные лыжи" />
-			<Chip text="Бары" />
-			<Chip text="Архитектура" />
+			{#each data.interests as id}
+				<Chip text={interests_binding[id]} />
+			{/each}
 		</div>
 	</div>
 </div>
 
 <style lang="scss">
 	.backdrop {
-		z-index: -1;
+		position: sticky;
+		z-index: -10;
 		height: 100%;
 		background-color: #000;
-    view-transition-name: profile-image;
 	}
 	.profile-picture {
+		z-index: -100;
+		position: sticky;
 		background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%),
 			url('https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg');
 		background-size: cover;
@@ -120,9 +124,28 @@
 		height: 400px;
 	}
 
+	.tags {
+		position: absolute;
+		display: flex;
+		gap: 5px;
+		left: 50%; /* position the top  edge of the element at the middle of the parent */
+		top: 280px;
+
+		transform: translateX(-50%);
+	}
+
+	.tag {
+		border: 1px solid #fff;
+		color: #fff;
+		border-radius: 100px;
+		padding: 5px 10px;
+	}
+
 	.overflow {
+		z-index: 1000;
 		view-transition-name: overflow;
 		height: 100%;
+		width: 100%;
 		background-color: #fff;
 		position: fixed;
 		bottom: var(--bottom);

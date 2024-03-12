@@ -1,7 +1,8 @@
 import type { PageServerLoad } from './$types';
-import * as api from '$lib/api';
 
-export const load: PageServerLoad = async () => {
-	const body = { users: await api.get('/users') };
+export const load: PageServerLoad = async ({ fetch }) => {
+	const users = await fetch('http://nginx/api/solemates/10');
+	const body = {};
+	body['users'] = await users.json();
 	return body;
 };

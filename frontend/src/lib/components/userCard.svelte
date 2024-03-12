@@ -1,16 +1,23 @@
 <script lang="ts">
-	export let tags: string[] = ['Горы', 'Море', 'Тусовки'];
+	import { trip_purposes_binding } from '$lib/utils';
+	import { getContext } from 'svelte';
+
+	export let index: number = 0;
+	export let id: string = '';
+	export let trip_purposes: string[] = ['Горы', 'Море', 'Тусовки'];
 	export let name: string = 'Никита';
 	export let age: string = '18';
 	export let occupation: string = 'Дизайнер';
-	export let href: string = "/123";
+	let href: string = `/user_${id}`;
+	const users = getContext('users');
+
 	export let about: string =
 		'\
         Я люблю путешествовать, потому что это позволяет мне познавать другие\
         культуры, открывать новые места и встречать интересных людей. Я уже\
         побывал во многих странах, но всегда готов к новым приключениям и\
         открытиям\
-';
+    ';
 
 	let startX: number;
 	let currentCard: HTMLDivElement;
@@ -32,6 +39,10 @@
 			setTimeout(() => {
 				currentCard.style.transition = '';
 				currentCard.style.transform = '';
+				users.update((array) => {
+					array.shift();
+					return array;
+				});
 			}, 300);
 		} else if (startX - event.changedTouches[0].clientX < -70) {
 			// Swipe right
@@ -39,6 +50,11 @@
 			setTimeout(() => {
 				currentCard.style.transition = '';
 				currentCard.style.transform = '';
+				users.update((array) => {
+					const interested_in = array.shift().id;
+					fetch(`http://localhost/api/match/${interested_in}`, { method: 'PUT' });
+					return array;
+				});
 			}, 300);
 		} else {
 			currentCard.style.transform = 'rotate(0deg) translateY(0%) translateX(0%)';
@@ -57,11 +73,12 @@
 	on:touchmove={handleTouchMove}
 	on:touchend={handleTouchEnd}
 	on:touchcancel={handleTouchEnd}
-	href={href}
+	{href}
+	style:view-transition-name={index == 0 ? 'profile-image' : ''}
 >
-	<div class="tags">
-		{#each tags as tag}
-			<div class="tag">{tag}</div>
+	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
+		{#each trip_purposes as id}
+			<div class="tag">{trip_purposes_binding[id]}</div>
 		{/each}
 	</div>
 	<div class="body">
@@ -80,12 +97,13 @@
 	</div>
 </a>
 
-<style>
+<style lang="scss">
 	.card {
-    view-transition-name: profile-image;
+		grid-row-start: 1;
+		grid-column-start: 1;
+		z-index: auto;
 		width: 100%;
 		max-width: 380px;
-		position: absolute;
 		flex: 1;
 		border-radius: 40px;
 		display: flex;
@@ -101,8 +119,10 @@
 	}
 
 	.tags {
+		/* view-transition-name: trip-purposes; */
 		width: 100%;
 		display: inline-flex;
+		flex-wrap: wrap;
 		justify-content: center;
 		align-items: center;
 		gap: 5px;

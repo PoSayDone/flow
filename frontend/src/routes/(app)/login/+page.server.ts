@@ -18,7 +18,6 @@ export const actions = {
 		const body = await response.json();
 
 		const value = body.access_token;
-		cookies.set('access_token', value, { path: '/' });
+		cookies.set('access_token', decodeURIComponent(`Bearer ${value}`), { path: '/' });
 	}
 };
-
