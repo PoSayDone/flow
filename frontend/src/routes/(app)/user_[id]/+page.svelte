@@ -7,10 +7,10 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 
-	let overflow: HTMLDivElement;
+	let popover: HTMLDivElement;
 	let startY: number;
 	let startTop: string;
-	let overflowStart = 330;
+	let popoverStart = 330;
 
 	export let data: PageData;
 
@@ -20,32 +20,32 @@
 
 	function handleTouchStart(event: TouchEvent) {
 		startY = event.touches[0].clientY;
-		startTop = overflow.style.top;
+		startTop = popover.style.top;
 	}
 	function handleTouchMove(event: TouchEvent) {
 		const deltaY = event.touches[0].clientY - startY;
-		if (!startTop || startTop == `${overflowStart}px`) {
-			const value = Math.min(Math.max(overflowStart + deltaY, 84), 330);
-			overflow.style.top = `${value}px`;
+		if (!startTop || startTop == `${popoverStart}px`) {
+			const value = Math.min(Math.max(popoverStart + deltaY, 84), 330);
+			popover.style.top = `${value}px`;
 		} else {
 			const value = Math.min(Math.max(84 + deltaY, 84), 330);
-			overflow.style.top = `${value}px`;
+			popover.style.top = `${value}px`;
 		}
 	}
 	function handleTouchEnd(event: TouchEvent) {
-		overflow.style.transition = 'top 0.3s cubic-bezier(.19,.93,1,1)';
+		popover.style.transition = 'top 0.3s cubic-bezier(.19,.93,1,1)';
 		if (startY - event.changedTouches[0].clientY > 50) {
-			overflow.style.top = '84px';
+			popover.style.top = '84px';
 			setTimeout(() => {
-				overflow.style.transition = '';
+				popover.style.transition = '';
 			}, 300);
 		} else if (startY - event.changedTouches[0].clientY < -50) {
-			overflow.style.top = `${overflowStart}px`;
+			popover.style.top = `${popoverStart}px`;
 			setTimeout(() => {
-				overflow.style.transition = '';
+				popover.style.transition = '';
 			}, 300);
 		} else {
-			overflow.style.top = startTop;
+			popover.style.top = startTop;
 		}
 	}
 </script>
@@ -64,9 +64,9 @@
 	{/each}
 </div>
 <div
-	class="overflow"
-	style="top: {overflowStart}px"
-	bind:this={overflow}
+	class="popover"
+	style="top: {popoverStart}px"
+	bind:this={popover}
 	on:touchstart={handleTouchStart}
 	on:touchmove={handleTouchMove}
 	on:touchend={handleTouchEnd}
@@ -141,9 +141,9 @@
 		padding: 5px 10px;
 	}
 
-	.overflow {
+	.popover {
 		z-index: 1000;
-		view-transition-name: overflow;
+		view-transition-name: popover;
 		height: 100%;
 		width: 100%;
 		background-color: #fff;
@@ -236,5 +236,27 @@
 		width: 55px;
 		height: 55px;
 		border-radius: 100%;
+	}
+
+	@keyframes popover-open {
+		from {
+			transform: translateY(50%);
+			opacity: 0;
+		}
+	}
+
+	@keyframes popover-close {
+		to {
+			transform: translateY(50%);
+			opacity: 0;
+		}
+	}
+
+	:root::view-transition-new(popover) {
+		animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) popover-open;
+	}
+
+	:root::view-transition-old(popover) {
+		animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) popover-close;
 	}
 </style>

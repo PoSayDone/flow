@@ -75,6 +75,7 @@
 	on:touchcancel={handleTouchEnd}
 	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
+	style:z-index={$users.length - index}
 >
 	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
 		{#each trip_purposes as id}
@@ -101,6 +102,7 @@
 	.card {
 		grid-row-start: 1;
 		grid-column-start: 1;
+		align-items: center;
 		z-index: auto;
 		width: 100%;
 		max-width: 380px;
@@ -119,8 +121,7 @@
 	}
 
 	.tags {
-		/* view-transition-name: trip-purposes; */
-		width: 100%;
+		width: fit-content;
 		display: inline-flex;
 		flex-wrap: wrap;
 		justify-content: center;
@@ -148,6 +149,7 @@
 	}
 
 	.body {
+		width: 100%;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;

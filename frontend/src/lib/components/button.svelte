@@ -1,25 +1,40 @@
 <script>
-  let buttonProps = {
-    class: [$$restProps.class],
-  };
+	let buttonProps = {
+		class: [$$restProps.class]
+	};
 </script>
 
 <button on:click on:mouseover on:mouseenter on:mouseleave {...buttonProps}>
-  <slot />
+	<slot />
 </button>
 
 <style>
-  button {
-    padding: 17px 0;
-    width: 100%;
-    border-radius: 20px;
-    border: none;
-    background-color: var(--primary);
-    color: #efeff4;
-    cursor: pointer;
-  }
+	button {
+		padding: 17px 0;
+		width: 100%;
+		border-radius: 20px;
+		border: none;
+		background-color: var(--primary);
+		color: #efeff4;
+		cursor: pointer;
+		font-size: 18px;
+	}
 
-  .close-button {
-    margin-top: 60px;
-  }
+	.close-button {
+		margin-top: 60px;
+	}
+
+	.white {
+		background: #fff;
+		color: var(--primary);
+	}
+	.border {
+		background: none;
+		border: 1px solid #fff;
+		color: #fff;
+	}
+	.opaque {
+		background: none;
+		color: #000;
+	}
 </style>

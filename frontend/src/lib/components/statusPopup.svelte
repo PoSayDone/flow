@@ -5,6 +5,9 @@
 	import { backIcon } from '$lib/assets/Appicons';
 	import { page } from '$app/stores';
 
+	let fromActive: boolean = false;
+	let toActive: boolean = false;
+
 	let selectedOptions: string[] = [];
 	try {
 		if ($page.data.trip_purposes === undefined) {
@@ -53,7 +56,10 @@
 			<input type="radio" id="active" value="active" bind:group={$status} />
 		</label>
 		{#if $status == 'active'}
-			<button class="from"
+			<button
+				class="from"
+				class:activebutton={fromActive}
+				on:click={() => (fromActive = !fromActive)}
 				>Откуда <Icon
 					d={backIcon.d}
 					viewBox={backIcon.viewBox}
@@ -61,31 +67,49 @@
 					size="24px"
 				/></button
 			>
-			<button class="to"
+			{#if fromActive == true}
+				<div class="city-form">
+					<input type="text" />
+					<input type="checkbox" />
+				</div>
+			{/if}
+			<button class="to" on:click={() => (toActive = !toActive)}
 				>Куда <Icon d={backIcon.d} viewBox={backIcon.viewBox} color="#000000" size="24px" /></button
 			>
-			<div class="tags">
-				{#await tripPurposesPromise then fetched_data}
-					{#each fetched_data as trip_purpose}
-						<Chip
-							clickable={true}
-							active={selectedOptions.includes(trip_purpose.id)}
-							onClick={() => toggleOption(trip_purpose.id)}
-							text={trip_purpose.purpose_name}
-						/>
-					{/each}
-				{:catch error}
-					<p style="color: red">{error.message}</p>
-				{/await}
-			</div>
+			{#if toActive == true}
+				<div class="city-form">
+					<input type="text" />
+					<input type="checkbox" />
+				</div>
+			{/if}
+
+			{#if fromActive == false && toActive == false}
+				<div class="tags">
+					{#await tripPurposesPromise then fetched_data}
+						{#each fetched_data as trip_purpose}
+							<Chip
+								clickable={true}
+								active={selectedOptions.includes(trip_purpose.id)}
+								onClick={() => toggleOption(trip_purpose.id)}
+								text={trip_purpose.purpose_name}
+							/>
+						{/each}
+					{:catch error}
+						<p style="color: red">{error.message}</p>
+					{/await}
+				</div>
+			{/if}
 		{/if}
-		<label class="radio" class:active={$status == 'inactive'}>
-			<div class="rows">
-				<label class="radio-title" for="inactive">Перерыв</label>
-				<label class="radio-subtitle" for="inactive">Пока не путешествую</label>
-			</div>
-			<input type="radio" id="inactive" value="inactive" bind:group={$status} />
-		</label>
+
+		{#if fromActive == false && toActive == false}
+			<label class="radio" class:active={$status == 'inactive'}>
+				<div class="rows">
+					<label class="radio-title" for="inactive">Перерыв</label>
+					<label class="radio-subtitle" for="inactive">Пока не путешествую</label>
+				</div>
+				<input type="radio" id="inactive" value="inactive" bind:group={$status} />
+			</label>
+		{/if}
 	</div>
 </div>
 
@@ -132,6 +156,16 @@
 		}
 	}
 
+	.activebutton {
+		:global(svg) {
+			transform: rotate(270deg);
+		}
+	}
+
+	.city-form {
+		height: 30svh;
+	}
+
 	.tags {
 		display: flex;
 		flex-wrap: wrap;
@@ -139,12 +173,12 @@
 		margin-bottom: 20px;
 	}
 
-	.tag {
-		border: 1px solid #d6d6d6;
-		border-radius: 100px;
-		background: none;
-		padding: 9px 18px;
-	}
+	// .tag {
+	// 	border: 1px solid #d6d6d6;
+	// 	border-radius: 100px;
+	// 	background: none;
+	// 	padding: 9px 18px;
+	// }
 
 	.radio {
 		background-color: #f2f1f6;
