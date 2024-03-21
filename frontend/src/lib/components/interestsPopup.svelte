@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Chip from './chip.svelte';
-	export let selectedInterests = [];
+	import { page } from '$app/stores';
+	export let selectedInterests: number[] = [];
 
-	function toggleOption(id: string) {
+	function toggleOption(id: number) {
 		if (selectedInterests.includes(id)) {
 			selectedInterests = selectedInterests.filter((item) => item !== id);
 			fetch(`http://localhost/api/user_interests/${id}`, {
@@ -17,31 +18,20 @@
 			});
 		}
 	}
-
-	async function getInterests() {
-		const res = await fetch('http://localhost/api/interests');
-		const values = await res.json();
-		return values;
-	}
-
-	let interestsPromise = getInterests();
 </script>
 
 <div class="container">
 	<h1>Интересы</h1>
 	<div class="interests">
-		{#await interestsPromise then fetched_data}
-			{#each fetched_data as interest}
-				<Chip
-					clickable={true}
-					active={selectedInterests.includes(interest.id)}
-					onClick={() => toggleOption(interest.id)}
-					text={interest.interest_name}
-				/>
-			{/each}
-		{:catch error}
-			<p style="color: red">{error.message}</p>
-		{/await}
+		{#each $page.data.interests as interest}
+			<Chip
+				clickable={true}
+				active={selectedInterests.includes(interest.id)}
+				id={interest.id}
+				onClick={() => toggleOption(interest.id)}
+				text={interest.interest_name}
+			/>
+		{/each}
 	</div>
 </div>
 
@@ -56,6 +46,7 @@
 		align-items: center;
 		display: flex;
 		flex-direction: column;
+		margin-bottom: 60px;
 	}
 
 	.interests {

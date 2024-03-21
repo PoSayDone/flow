@@ -3,6 +3,7 @@ from datetime import datetime, date
 from typing import Optional
 from uuid import UUID
 
+
 class UserBase(BaseModel):
     id: UUID
     name: str
@@ -13,15 +14,18 @@ class UserBase(BaseModel):
     sex: bool
     birthdate: date
 
+
 class UserCreateRequest(BaseModel):
     id: UUID
     name: str
     mail: EmailStr
     password: str
 
+
 class TokenBase(BaseModel):
     access_token: str
     token_type: str
+
 
 class UserUpdateBase(BaseModel):
     name: Optional[str]
@@ -32,17 +36,21 @@ class UserUpdateBase(BaseModel):
     sex: Optional[bool]
     birthdate: Optional[date]
 
+
 class MatchBase(BaseModel):
     id: UUID
     user_id: UUID
     interested_in_user_id: UUID
 
+
 class InfoTableBase(BaseModel):
     name: str
+
 
 class PivotTableBase(BaseModel):
     user_id: UUID
     id: int
+
 
 class MessageBase(BaseModel):
     id: UUID
@@ -52,25 +60,32 @@ class MessageBase(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+
 class MessageContentBase(BaseModel):
     id: UUID
     message_content: str
 
+
 class Profile(BaseModel):
-    id:            UUID
-    name:          Optional[str     ]
-    mail:          Optional[EmailStr]
-    occupation:    Optional[str     ]
-    about:         Optional[str     ]
-    sex:           Optional[bool    ]
-    birthdate:     Optional[date    ]
-    interests:     Optional[list]
-    trip_purposes: Optional[list] = None
+    id: UUID
+    name: Optional[str]
+    mail: Optional[EmailStr]
+    occupation: Optional[str]
+    about: Optional[str]
+    sex: Optional[bool]
+    birthdate: Optional[date]
+    user_interests: Optional[list]
+    user_trip_purposes: Optional[list] = None
+    interests: Optional[list]
+    trip_purposes: Optional[list]
+    departures: Optional[list]
+    arrivals: Optional[list]
+
 
 class Solemate(BaseModel):
-    id:         UUID
-    name:       Optional[str     ]
-    occupation: Optional[str     ]
-    about:      Optional[str     ]
-    birthdate:     Optional[date    ]
-    trip_purposes:  Optional[list]
+    id: UUID
+    name: Optional[str]
+    occupation: Optional[str]
+    about: Optional[str]
+    birthdate: Optional[date]
+    trip_purposes: Optional[list]

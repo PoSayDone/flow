@@ -10,7 +10,6 @@
 	if ($users == undefined) {
 		users.set(data.users);
 	}
-	$: console.log($users.map((user) => user.name));
 </script>
 
 <div class="cards">

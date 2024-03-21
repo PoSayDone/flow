@@ -1,9 +1,12 @@
-<script>
+<script lang="ts">
 	import Button from './button.svelte';
+	import { applyAction, enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 
-	export let showModal; // boolean
-
-	let dialog; // HTMLDialogElement
+	export let showModal: boolean; // boolean
+	export let action: string;
+	let form: HTMLFormElement;
+	let dialog: HTMLDialogElement; // HTMLDialogElement
 
 	$: if (dialog && showModal) dialog.showModal();
 
@@ -13,6 +16,7 @@
 	};
 
 	function closeDialog() {
+		form.requestSubmit();
 		dialog.close();
 		dialog.classList.remove('close');
 		dialog.removeEventListener('animationend', closeDialog);
@@ -21,12 +25,24 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
 <dialog bind:this={dialog} on:close={() => (showModal = false)} on:click|self={closeAnimation}>
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div on:click|stopPropagation>
-		<slot />
-		<!-- svelte-ignore a11y-autofocus -->
-		<Button class="close-button" autofocus on:click={closeAnimation}><h2>Готово</h2></Button>
-	</div>
+	<form
+		bind:this={form}
+		method="POST"
+		action={`/profile?/${action}`}
+		use:enhance={() => {
+			return async ({ result }) => {
+				await applyAction(result);
+			};
+		}}
+	>
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div on:click|stopPropagation>
+			<slot />
+			<Button type="subimt" class="close-button" autofocus on:click={closeAnimation}>
+				<h2>Готово</h2>
+			</Button>
+		</div>
+	</form>
 </dialog>
 
 <style>

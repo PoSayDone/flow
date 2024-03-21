@@ -1,15 +1,13 @@
 import type { Actions } from './$types';
 
 export const actions = {
-	default: async ({ request, fetch }) => {
+	save_profile: async ({ request, fetch }) => {
 		const data = await request.formData();
 
 		const name = data.get('name');
 		const birthdate = data.get('birthdate');
 		const occupation = data.get('occupation');
 		const about = data.get('about');
-
-		console.log(name, birthdate, occupation, about);
 
 		await fetch('http://nginx/api/user/', {
 			method: 'PUT',
@@ -23,5 +21,19 @@ export const actions = {
 				about: about
 			})
 		});
+	},
+	save_interests: async ({ request }) => {
+		const data = await request.formData();
+		console.log('values:');
+		for (const pair of data.entries()) {
+			console.log(pair[0] + ', ' + pair[1]);
+		}
+	},
+	save_status: async ({ request }) => {
+		const data = await request.formData();
+		console.log('values:');
+		for (const pair of data.entries()) {
+			console.log(pair[0] + ', ' + pair[1]);
+		}
 	}
 } satisfies Actions;

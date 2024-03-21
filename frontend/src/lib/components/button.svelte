@@ -21,7 +21,6 @@
 	}
 
 	.close-button {
-		margin-top: 60px;
 	}
 
 	.white {

@@ -10,22 +10,14 @@
 
 	let selectedOptions: string[] = [];
 	try {
-		if ($page.data.trip_purposes === undefined) {
+		if ($page.data.user_trip_purposes === undefined) {
 			throw '';
 		}
-		if ($page.data.trip_purposes.length > 0) {
-			selectedOptions = $page.data.trip_purposes;
+		if ($page.data.user_trip_purposes.length > 0) {
+			selectedOptions = $page.data.user_trip_purposes;
 		}
 	} catch {
 		selectedOptions = [];
-	}
-
-	let tripPurposesPromise = getTripPurposes();
-
-	async function getTripPurposes() {
-		const res = await fetch('http://localhost/api/trip_purposes');
-		const values = await res.json();
-		return values;
 	}
 
 	function toggleOption(id: string) {
@@ -45,7 +37,7 @@
 	}
 </script>
 
-<div class="container">
+<div class="container" class:container-active={$status == 'active'}>
 	<h1>Выберите статус</h1>
 	<div class="radios" role="radiogroup">
 		<label class="radio" class:active={$status == 'active'}>
@@ -57,6 +49,7 @@
 		</label>
 		{#if $status == 'active'}
 			<button
+				type="button"
 				class="from"
 				class:activebutton={fromActive}
 				on:click={() => (fromActive = !fromActive)}
@@ -69,34 +62,51 @@
 			>
 			{#if fromActive == true}
 				<div class="city-form">
-					<input type="text" />
-					<input type="checkbox" />
+					<input class="search" type="text" />
+					{#each $page.data.departures as departure}
+						<input
+							class="location-checkbox"
+							type="checkbox"
+							name={`departure_${departure.id}`}
+							id={`departure_${departure.id}`}
+						/>
+						<label for={`departure_${departure.id}`}>
+							{departure.location_name}
+						</label>
+					{/each}
 				</div>
 			{/if}
-			<button class="to" on:click={() => (toActive = !toActive)}
+			<button class="to" on:click={() => (toActive = !toActive)} type="button"
 				>Куда <Icon d={backIcon.d} viewBox={backIcon.viewBox} color="#000000" size="24px" /></button
 			>
 			{#if toActive == true}
 				<div class="city-form">
-					<input type="text" />
-					<input type="checkbox" />
+					<input class="search" type="text" />
+					{#each $page.data.arrivals as arrival}
+						<input
+							class="location-checkbox"
+							type="checkbox"
+							name={`arrival_${arrival.id}`}
+							id={`arrival_${arrival.id}`}
+						/>
+						<label for={`arrival_${arrival.id}`}>
+							{arrival.location_name}
+						</label>
+					{/each}
 				</div>
 			{/if}
 
 			{#if fromActive == false && toActive == false}
 				<div class="tags">
-					{#await tripPurposesPromise then fetched_data}
-						{#each fetched_data as trip_purpose}
-							<Chip
-								clickable={true}
-								active={selectedOptions.includes(trip_purpose.id)}
-								onClick={() => toggleOption(trip_purpose.id)}
-								text={trip_purpose.purpose_name}
-							/>
-						{/each}
-					{:catch error}
-						<p style="color: red">{error.message}</p>
-					{/await}
+					{#each $page.data.trip_purposes as trip_purpose}
+						<Chip
+							clickable={true}
+							active={selectedOptions.includes(trip_purpose.id)}
+							id={`trip_purpose_${trip_purpose.id}`}
+							onClick={() => toggleOption(trip_purpose.id)}
+							text={trip_purpose.purpose_name}
+						/>
+					{/each}
 				</div>
 			{/if}
 		{/if}
@@ -124,6 +134,12 @@
 		align-items: center;
 		display: flex;
 		flex-direction: column;
+		margin-bottom: 60px;
+	}
+
+	.container-active {
+		margin-bottom: 8px;
+		height: 75svh;
 	}
 
 	.radios {
@@ -131,6 +147,59 @@
 		flex-direction: column;
 		gap: 5px;
 		width: 100%;
+		height: 100%;
+	}
+
+	.city-form {
+		display: flex;
+		overflow-y: scroll;
+		flex-direction: column;
+		gap: 10px;
+		flex: 1;
+	}
+
+	.location-checkbox {
+		position: absolute;
+		z-index: -1;
+		opacity: 0;
+	}
+
+	.location-checkbox + label {
+		margin: 0 17px;
+		display: inline-flex;
+		align-items: center;
+		user-select: none;
+		gap: 5px;
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.location-checkbox + label::before {
+		content: '';
+		display: inline-block;
+		width: 25px;
+		height: 25px;
+		flex-shrink: 0;
+		flex-grow: 0;
+		border: 1px solid #adb5bd;
+		border-radius: 5px;
+		background-repeat: no-repeat;
+		background-position: center center;
+		background-size: 50% 50%;
+	}
+
+	.location-checkbox:checked + label::before {
+		border-color: #0b76ef;
+		background-color: #0b76ef;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+	}
+
+	.search {
+		height: 45px;
+		display: flex;
+		align-items: center;
+		border: 1px solid #aaaaaa;
+		border-radius: 15px;
 	}
 
 	.from {
@@ -162,23 +231,12 @@
 		}
 	}
 
-	.city-form {
-		height: 30svh;
-	}
-
 	.tags {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 5px;
 		margin-bottom: 20px;
 	}
-
-	// .tag {
-	// 	border: 1px solid #d6d6d6;
-	// 	border-radius: 100px;
-	// 	background: none;
-	// 	padding: 9px 18px;
-	// }
 
 	.radio {
 		background-color: #f2f1f6;

@@ -3,20 +3,21 @@
 	import Chip from '$lib/components/chip.svelte';
 	import InterestsPopup from '$lib/components/interestsPopup.svelte';
 	import Modal from '$lib/components/modal.svelte';
-	import { enhance, type SubmitFunction } from '$app/forms';
+	import { enhance } from '$app/forms';
 	import { onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import type { SubmitFunction } from '@sveltejs/kit';
 
 	let showModal = false;
 	let form: HTMLFormElement;
 
-	let selectedInterests: string[] = [];
+	let selectedInterests: number[] = [];
 	try {
-		if ($page.data.interests === undefined) {
+		if ($page.data.user_interests === undefined) {
 			throw '';
 		}
 		if ($page.data.interests.length > 0) {
-			selectedInterests = $page.data.interests;
+			selectedInterests = $page.data.user_interests;
 		}
 	} catch {
 		selectedInterests = [];
@@ -35,7 +36,7 @@
 	});
 </script>
 
-<Modal bind:showModal>
+<Modal bind:showModal action="save_interests">
 	<InterestsPopup bind:selectedInterests />
 </Modal>
 
@@ -44,7 +45,13 @@
 		<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="profile" />
 	</div>
 </div>
-<form bind:this={form} class="information" method="POST" use:enhance={submitCreateNote}>
+<form
+	bind:this={form}
+	class="information"
+	method="POST"
+	action="?save_profile"
+	use:enhance={submitCreateNote}
+>
 	<div class="info-block">
 		<label for="name">Имя</label>
 		<input value={$page.data.name} name="name" type="text" on:blur={() => form.requestSubmit()} />
@@ -78,7 +85,7 @@
 				<Chip text={'Добавить интересы'} />
 			{:else}
 				{#each selectedInterests as id}
-					<Chip text={interests_binding[id]} />
+					<Chip id={`interest_${id}`} text={interests_binding[id]} />
 				{/each}
 			{/if}
 		</button>
@@ -103,26 +110,6 @@
 		img {
 			height: 100%;
 		}
-	}
-
-	.status {
-		background: #f2f1f6;
-		width: 100%;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		height: 50px;
-		padding: 13px;
-		border-radius: 20px;
-	}
-
-	.status-title {
-		text-align: center;
-		font-family: Inter;
-		font-size: 16px;
-		font-style: normal;
-		font-weight: 400;
-		line-height: 120%; /* 19.2px */
 	}
 
 	.information {

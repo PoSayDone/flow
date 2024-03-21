@@ -26,7 +26,7 @@
 			{/if}
 		</div>
 		<div class="buttons">
-			<Button>Войти</Button>
+			<Button type="submit">Войти</Button>
 			<Button class="opaque">Не помню пароль</Button>
 		</div>
 	</form>

@@ -6,11 +6,9 @@ services:
       context: ./nginx
     ports:
       - 80:80
+      - 5001:5001
     depends_on:
       - backend
-    networks:
-      - my-network
-    hostname: proxy
 
   backend:
     build:
@@ -18,53 +16,37 @@ services:
     volumes:
       - ./backend:/usr/src/app
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-level 'debug'
-    ports:
-      - 8000:8000
+    ports: [8000]
     depends_on:
       - db
     restart: on-failure
     environment:
       - LOG_LEVEL = 'debug'
-    networks:
-      - my-network
-    hostname: api.flow.local
 
   frontend:
     build:
       context: ./frontend
     volumes:
-      - ./frontend:/usr/src/app
-    command: yarn dev --host 0.0.0.0
+      - ./frontend/:/usr/src/app
+      - /usr/src/app/node_modules
+    command: yarn dev --host 0.0.0.0 --port 5000
     restart: on-failure
-    ports:
-      - 5173:5173
+    ports: [5000, 5001]
     depends_on:
       - backend
     environment:
-      - ORIGIN="http://127.0.0.1"
       - CHOKIDAR_USEPOLLING=true
-    networks:
-      - my-network
-    hostname: flow.local
-    external_links:
-      - backend
 
   db:
     image: postgres:15-alpine
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=username
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=nudges
-    expose:
-      - 5432
-    networks:
-      - my-network
 
 volumes:
   postgres_data:
-
-networks:
-   my-network:
-    external: true
