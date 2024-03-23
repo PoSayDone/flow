@@ -1,13 +1,13 @@
 import logging
 import uuid
 
-from sqlalchemy import and_, exists, join
+from sqlalchemy import and_, delete, insert
 from app import auth
 from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
 from passlib.context import CryptContext
 from fastapi import FastAPI, HTTPException, Depends
-from typing import Annotated, List
+from typing import Annotated
 from . import schema, models
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -61,38 +61,55 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 @app.get("/profile/")
 async def get_profile(user: user_dependency, db: db_dependency):
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=401, detail="Not authorized")
     user_db = db.get(models.Users, user["id"])
-    result = schema.Profile(
-        id=user_db.id,
-        name=user_db.name,
-        mail=user_db.mail,
-        occupation=user_db.occupation,
-        about=user_db.about,
-        sex=user_db.sex,
-        birthdate=user_db.birthdate,
-        user_interests=list(
-            map(
-                lambda interest: interest.interest_id,
-                db.query(models.UsersInterests)
-                .filter(models.UsersInterests.user_id == user_db.id)
-                .all(),
-            )
-        ),
-        user_trip_purposes=list(
-            map(
-                lambda purpose: purpose.purpose_id,
-                db.query(models.UsersTripPurposes)
-                .filter(models.UsersTripPurposes.user_id == user_db.id)
-                .all(),
-            )
-        ),
-        interests=db.query(models.Interests).all(),
-        trip_purposes=db.query(models.TripPurposes).all(),
-        departures=db.query(models.Departures).all(),
-        arrivals=db.query(models.Arrivals).all(),
-    )
-    return result
+    if user_db:
+        result = schema.Profile(
+            id=user_db.id,
+            name=user_db.name,
+            mail=user_db.mail,
+            occupation=user_db.occupation,
+            about=user_db.about,
+            sex=user_db.sex,
+            birthdate=user_db.birthdate,
+            user_interests=list(
+                map(
+                    lambda interest: interest.interest_id,
+                    db.query(models.UsersInterests)
+                    .filter(models.UsersInterests.user_id == user_db.id)
+                    .all(),
+                )
+            ),
+            user_trip_purposes=list(
+                map(
+                    lambda purpose: purpose.purpose_id,
+                    db.query(models.UsersTripPurposes)
+                    .filter(models.UsersTripPurposes.user_id == user_db.id)
+                    .all(),
+                )
+            ),
+            interests=db.query(models.Interests).all(),
+            trip_purposes=db.query(models.TripPurposes).all(),
+            departures=db.query(models.Departures).all(),
+            arrivals=db.query(models.Arrivals).all(),
+            user_departures=list(
+                map(
+                    lambda departure: departure.location_id,
+                    db.query(models.UsersDepartures)
+                    .filter(models.UsersDepartures.user_id == user_db.id)
+                    .all(),
+                )
+            ),
+            user_arrivals=list(
+                map(
+                    lambda arrival: arrival.location_id,
+                    db.query(models.UsersArrivals)
+                    .filter(models.UsersArrivals.user_id == user_db.id)
+                    .all(),
+                )
+            ),
+        )
+        return result
 
 
 @app.get("/profile/{user_id}")
@@ -121,6 +138,30 @@ async def get_profile_w_id(user_id: UUID, db: db_dependency):
                 lambda purpose: purpose.purpose_id,
                 db.query(models.UsersTripPurposes)
                 .filter(models.UsersTripPurposes.user_id == user_db.id)
+                .all(),
+            )
+        ),
+        user_interests=list(
+            map(
+                lambda interest: interest.interest_id,
+                db.query(models.UsersInterests)
+                .filter(models.UsersInterests.user_id == user_db.id)
+                .all(),
+            )
+        ),
+        user_departures=list(
+            map(
+                lambda departure: departure.location_id,
+                db.query(models.UsersDepartures)
+                .filter(models.UsersDepartures.user_id == user_db.id)
+                .all(),
+            )
+        ),
+        user_arrivals=list(
+            map(
+                lambda arrival: arrival.location_id,
+                db.query(models.UsersArrivals)
+                .filter(models.UsersArrivals.user_id == user_db.id)
                 .all(),
             )
         ),
@@ -298,6 +339,50 @@ async def delete_interest(interest_id: int, db: db_dependency):
     if not interest:
         raise HTTPException(status_code=404, detail="User not found")
     db.delete(interest)
+    db.commit()
+    return {"ok": True}
+
+
+@app.patch("/user_interests/edit")
+async def edit_interests(
+    user: user_dependency, edit: schema.TagsEdit, db: db_dependency
+):
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authorized")
+    db.execute(
+        delete(models.UsersInterests).where(models.UsersInterests.user_id == user["id"])
+    )
+    db.execute(
+        insert(models.UsersInterests).values(
+            [
+                {"user_id": user["id"], "interest_id": interest_id}
+                for interest_id in edit.tags
+            ]
+        )
+    )
+    db.commit()
+    return {"ok": True}
+
+
+@app.patch("/user_trip_purposes/edit")
+async def edit_trip_purposes(
+    user: user_dependency, edit: schema.TagsEdit, db: db_dependency
+):
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authorized")
+    db.execute(
+        delete(models.UsersTripPurposes).where(
+            models.UsersTripPurposes.user_id == user["id"]
+        )
+    )
+    db.execute(
+        insert(models.UsersTripPurposes).values(
+            [
+                {"user_id": user["id"], "purpose_id": purpose_id}
+                for purpose_id in edit.tags
+            ]
+        )
+    )
     db.commit()
     return {"ok": True}
 
@@ -606,3 +691,47 @@ async def get_user_departures(user: user_dependency, db: db_dependency):
     if not result:
         raise HTTPException(status_code=404, detail="No departures found")
     return result
+
+
+@app.patch("/user_departures/edit")
+async def edit_user_departures(
+    edit: schema.LocationsEdit, user: user_dependency, db: db_dependency
+):
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authorized")
+    db.execute(
+        delete(models.UsersDepartures).where(
+            models.UsersDepartures.user_id == user["id"]
+        )
+    )
+    db.execute(
+        insert(models.UsersDepartures).values(
+            [
+                {"user_id": user["id"], "location_id": location_id}
+                for location_id in edit.locations
+            ]
+        )
+    )
+    db.commit()
+    return {"ok": True}
+
+
+@app.patch("/user_arrivals/edit")
+async def edit_user_arrivals(
+    edit: schema.LocationsEdit, user: user_dependency, db: db_dependency
+):
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authorized")
+    db.execute(
+        delete(models.UsersArrivals).where(models.UsersArrivals.user_id == user["id"])
+    )
+    db.execute(
+        insert(models.UsersArrivals).values(
+            [
+                {"user_id": user["id"], "location_id": location_id}
+                for location_id in edit.locations
+            ]
+        )
+    )
+    db.commit()
+    return {"ok": True}

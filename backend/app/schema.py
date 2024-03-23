@@ -80,6 +80,8 @@ class Profile(BaseModel):
     trip_purposes: Optional[list]
     departures: Optional[list]
     arrivals: Optional[list]
+    user_departures: Optional[list]
+    user_arrivals: Optional[list]
 
 
 class Solemate(BaseModel):
@@ -89,3 +91,11 @@ class Solemate(BaseModel):
     about: Optional[str]
     birthdate: Optional[date]
     trip_purposes: Optional[list]
+
+
+class TagsEdit(BaseModel):
+    tags: list[int]
+
+
+class LocationsEdit(BaseModel):
+    locations: list[int]

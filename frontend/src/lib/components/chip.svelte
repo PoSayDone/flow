@@ -10,7 +10,17 @@
 </script>
 
 {#if clickable}
-	<input class="chip" class:clickable type="checkbox" {id} name={id} bind:checked={active} />
+	<input
+		class="chip"
+		class:clickable
+		type="checkbox"
+		{id}
+		name={id}
+		bind:checked={active}
+		on:click={onClick}
+	/>
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<label for={id}>
 		<span>{text}</span>
 		<Icon stroke_width={'1.5'} size={'16'} d={addIcon.d} viewBox={addIcon.viewBox} />

@@ -1,11 +1,6 @@
 <script>
 	import '../app.css';
 	import { onNavigate } from '$app/navigation';
-	import { setContext } from 'svelte';
-	import { writable } from 'svelte/store';
-
-	const users = writable();
-	setContext('users', users);
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;

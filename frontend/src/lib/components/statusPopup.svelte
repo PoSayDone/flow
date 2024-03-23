@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Chip from './chip.svelte';
-	import { status } from '$lib/stores';
+	import { status, statusProperties } from '$lib/stores';
 	import Icon from '$lib/components/icon.svelte';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { page } from '$app/stores';
@@ -8,36 +8,54 @@
 	let fromActive: boolean = false;
 	let toActive: boolean = false;
 
-	let selectedOptions: string[] = [];
-	try {
-		if ($page.data.user_trip_purposes === undefined) {
-			throw '';
-		}
-		if ($page.data.user_trip_purposes.length > 0) {
-			selectedOptions = $page.data.user_trip_purposes;
-		}
-	} catch {
-		selectedOptions = [];
-	}
+	statusProperties.update((prev) => {
+		prev.tripPurposes = $page.data.user_trip_purposes || [];
+		prev.departures = $page.data.user_departures || [];
+		prev.arrivals = $page.data.user_arrivals || [];
+		return prev;
+	});
 
-	function toggleOption(id: string) {
-		if (selectedOptions.includes(id)) {
-			selectedOptions = selectedOptions.filter((item) => item !== id);
-			fetch(`http://localhost/api/user_trip_purposes/${id}`, {
-				method: 'DELETE',
-				credentials: 'include'
-			});
+	let selectedTripPurposes: number[] = $statusProperties.tripPurposes;
+	let selectedDepartures: number[] = $statusProperties.departures;
+	let selectedArrivals: number[] = $statusProperties.arrivals;
+
+	let disableDepartures: boolean = selectedDepartures.includes(1) || false;
+	let disableArrivals: boolean = selectedArrivals.includes(1) || false;
+
+	$: console.log(selectedArrivals, selectedDepartures, selectedTripPurposes);
+
+	function toggleOption(array: number[], id: number, disableItems: string | null = null) {
+		if (array.includes(id)) {
+			if (disableItems && id == 1) {
+				if (disableItems === 'departures') {
+					disableDepartures = false;
+					array = [];
+				} else {
+					disableArrivals = false;
+					array = [];
+				}
+			} else {
+				array = array.filter((item) => item !== id);
+			}
 		} else {
-			selectedOptions = [...selectedOptions, id];
-			fetch(`http://localhost/api/user_trip_purposes/${id}`, {
-				method: 'PUT',
-				credentials: 'include'
-			});
+			console.log(disableItems, id);
+			if (disableItems && id == 1) {
+				if (disableItems == 'departures') {
+					disableDepartures = true;
+					array = [1];
+				} else {
+					disableArrivals = true;
+					array = [1];
+				}
+			} else {
+				array = [...array, id];
+			}
 		}
+		return array;
 	}
 </script>
 
-<div class="container" class:container-active={$status == 'active'}>
+<div class="container" class:active={$status == 'active'}>
 	<h1>Выберите статус</h1>
 	<div class="radios" role="radiogroup">
 		<label class="radio" class:active={$status == 'active'}>
@@ -47,7 +65,11 @@
 			</div>
 			<input type="radio" id="active" value="active" bind:group={$status} />
 		</label>
-		{#if $status == 'active'}
+		<div
+			class="active-content"
+			class:hidden={$status != 'active'}
+			class:expand={fromActive || toActive}
+		>
 			<button
 				type="button"
 				class="from"
@@ -60,66 +82,67 @@
 					size="24px"
 				/></button
 			>
-			{#if fromActive == true}
-				<div class="city-form">
-					<input class="search" type="text" />
-					{#each $page.data.departures as departure}
-						<input
-							class="location-checkbox"
-							type="checkbox"
-							name={`departure_${departure.id}`}
-							id={`departure_${departure.id}`}
-						/>
-						<label for={`departure_${departure.id}`}>
-							{departure.location_name}
-						</label>
-					{/each}
-				</div>
-			{/if}
+			<div class="location-form" class:shown={fromActive}>
+				<input class="search" type="text" />
+				{#each $page.data.departures as departure}
+					<input
+						class="location-checkbox"
+						type="checkbox"
+						name={`departure_${departure.id}`}
+						id={`departure_${departure.id}`}
+						checked={selectedDepartures.includes(departure.id)}
+						on:click={() =>
+							(selectedDepartures = toggleOption(selectedDepartures, departure.id, 'departures'))}
+						disabled={departure.id != 1 && disableDepartures}
+					/>
+					<label for={`departure_${departure.id}`}>
+						{departure.location_name}
+					</label>
+				{/each}
+			</div>
 			<button class="to" on:click={() => (toActive = !toActive)} type="button"
 				>Куда <Icon d={backIcon.d} viewBox={backIcon.viewBox} color="#000000" size="24px" /></button
 			>
-			{#if toActive == true}
-				<div class="city-form">
-					<input class="search" type="text" />
-					{#each $page.data.arrivals as arrival}
-						<input
-							class="location-checkbox"
-							type="checkbox"
-							name={`arrival_${arrival.id}`}
-							id={`arrival_${arrival.id}`}
-						/>
-						<label for={`arrival_${arrival.id}`}>
-							{arrival.location_name}
-						</label>
-					{/each}
-				</div>
-			{/if}
+			<div class="location-form" class:shown={toActive}>
+				<input class="search" type="text" />
+				{#each $page.data.arrivals as arrival}
+					<input
+						class="location-checkbox"
+						type="checkbox"
+						name={`arrival_${arrival.id}`}
+						id={`arrival_${arrival.id}`}
+						checked={selectedArrivals.includes(arrival.id)}
+						disabled={arrival.id != 1 && disableArrivals}
+						on:click={() =>
+							(selectedArrivals = toggleOption(selectedArrivals, arrival.id, 'arrivals'))}
+					/>
+					<label for={`arrival_${arrival.id}`}>
+						{arrival.location_name}
+					</label>
+				{/each}
+			</div>
 
-			{#if fromActive == false && toActive == false}
-				<div class="tags">
-					{#each $page.data.trip_purposes as trip_purpose}
-						<Chip
-							clickable={true}
-							active={selectedOptions.includes(trip_purpose.id)}
-							id={`trip_purpose_${trip_purpose.id}`}
-							onClick={() => toggleOption(trip_purpose.id)}
-							text={trip_purpose.purpose_name}
-						/>
-					{/each}
-				</div>
-			{/if}
-		{/if}
+			<div class="tags" class:shown={fromActive == false && toActive == false}>
+				{#each $page.data.trip_purposes as trip_purpose}
+					<Chip
+						clickable={true}
+						active={selectedTripPurposes.includes(trip_purpose.id)}
+						id={`trip_purpose_${trip_purpose.id}`}
+						onClick={() =>
+							(selectedTripPurposes = toggleOption(selectedTripPurposes, trip_purpose.id))}
+						text={trip_purpose.purpose_name}
+					/>
+				{/each}
+			</div>
+		</div>
 
-		{#if fromActive == false && toActive == false}
-			<label class="radio" class:active={$status == 'inactive'}>
-				<div class="rows">
-					<label class="radio-title" for="inactive">Перерыв</label>
-					<label class="radio-subtitle" for="inactive">Пока не путешествую</label>
-				</div>
-				<input type="radio" id="inactive" value="inactive" bind:group={$status} />
-			</label>
-		{/if}
+		<label class="radio" class:active={$status == 'inactive'}>
+			<div class="rows">
+				<label class="radio-title" for="inactive">Перерыв</label>
+				<label class="radio-subtitle" for="inactive">Пока не путешествую</label>
+			</div>
+			<input type="radio" id="inactive" value="inactive" bind:group={$status} />
+		</label>
 	</div>
 </div>
 
@@ -135,11 +158,22 @@
 		display: flex;
 		flex-direction: column;
 		margin-bottom: 60px;
+		&.active {
+			margin-bottom: 8px;
+			height: 75svh;
+		}
 	}
 
-	.container-active {
-		margin-bottom: 8px;
-		height: 75svh;
+	.active-content {
+		display: flex;
+		height: min-content;
+		flex-direction: column;
+		gap: 5px;
+
+		&.expand {
+			height: 100%;
+			flex: 1;
+		}
 	}
 
 	.radios {
@@ -150,18 +184,20 @@
 		height: 100%;
 	}
 
-	.city-form {
-		display: flex;
+	.location-form {
+		display: none;
 		overflow-y: scroll;
 		flex-direction: column;
 		gap: 10px;
-		flex: 1;
+
+		&.shown {
+			flex: 1;
+			display: flex;
+		}
 	}
 
 	.location-checkbox {
-		position: absolute;
-		z-index: -1;
-		opacity: 0;
+		display: none;
 	}
 
 	.location-checkbox + label {
@@ -194,8 +230,16 @@
 		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
 	}
 
+	.location-checkbox:disabled + label {
+		color: #999999;
+	}
+	.location-checkbox:disabled + label::before {
+		border-color: #999999;
+		background: none;
+	}
+
 	.search {
-		height: 45px;
+		min-height: 45px;
 		display: flex;
 		align-items: center;
 		border: 1px solid #aaaaaa;
@@ -232,10 +276,13 @@
 	}
 
 	.tags {
-		display: flex;
+		display: none;
 		flex-wrap: wrap;
 		gap: 5px;
 		margin-bottom: 20px;
+		&.shown {
+			display: flex;
+		}
 	}
 
 	.radio {
@@ -312,5 +359,18 @@
 
 	input[type='radio']:checked::before {
 		transform: scale(1);
+	}
+
+	@keyframes slide {
+		from {
+			transform: scaleY(1);
+		}
+		to {
+			transform: scaleY(0);
+		}
+	}
+
+	.hidden {
+		display: none;
 	}
 </style>

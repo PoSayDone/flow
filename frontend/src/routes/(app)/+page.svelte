@@ -2,9 +2,7 @@
 	import ActionButton from '$lib/components/actionButton.svelte';
 	import UserCard from '$lib/components/userCard.svelte';
 	import { getAge } from '$lib/utils';
-	import { getContext } from 'svelte';
-
-	const users = getContext('users');
+	import { users } from '$lib/stores';
 
 	export let data;
 	if ($users == undefined) {

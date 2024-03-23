@@ -22,18 +22,69 @@ export const actions = {
 			})
 		});
 	},
-	save_interests: async ({ request }) => {
+	save_interests: async ({ request, fetch }) => {
 		const data = await request.formData();
-		console.log('values:');
-		for (const pair of data.entries()) {
-			console.log(pair[0] + ', ' + pair[1]);
-		}
+		const interests: number[] = [...data.keys()].map((str) => parseInt(str));
+
+		await fetch('http://nginx/api/user_interests/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				tags: interests
+			})
+		});
 	},
-	save_status: async ({ request }) => {
+	save_status: async ({ request, fetch }) => {
 		const data = await request.formData();
-		console.log('values:');
-		for (const pair of data.entries()) {
-			console.log(pair[0] + ', ' + pair[1]);
+
+		const tripPurposes: number[] = [];
+		const departures: number[] = [];
+		const arrivals: number[] = [];
+
+		for (const item of data.entries()) {
+			console.log(item[0], ' ', item[1]);
 		}
+
+		for (const item of data.keys()) {
+			if (item.includes('trip_purpose')) {
+				tripPurposes.push(parseInt(item.replace('trip_purpose_', '')));
+			} else if (item.includes('departure')) {
+				departures.push(parseInt(item.replace('departure_', '')));
+			} else if (item.includes('arrival')) {
+				arrivals.push(parseInt(item.replace('arrival_', '')));
+			}
+		}
+
+		await fetch('http://nginx/api/user_trip_purposes/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				tags: tripPurposes
+			})
+		});
+
+		await fetch('http://nginx/api/user_departures/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				locations: departures
+			})
+		});
+
+		await fetch('http://nginx/api/user_arrivals/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				locations: arrivals
+			})
+		});
 	}
 } satisfies Actions;

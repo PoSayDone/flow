@@ -7,20 +7,17 @@
 	import { onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import type { SubmitFunction } from '@sveltejs/kit';
+	import { selectedInterests } from '$lib/stores';
 
 	let showModal = false;
 	let form: HTMLFormElement;
 
-	let selectedInterests: number[] = [];
-	try {
-		if ($page.data.user_interests === undefined) {
-			throw '';
+	$: console.log($page.data);
+
+	if ($selectedInterests.length == 0) {
+		if ($page.data.user_interests !== undefined) {
+			selectedInterests.set($page.data.user_interests);
 		}
-		if ($page.data.interests.length > 0) {
-			selectedInterests = $page.data.user_interests;
-		}
-	} catch {
-		selectedInterests = [];
 	}
 
 	const submitCreateNote: SubmitFunction = () => {
@@ -37,7 +34,7 @@
 </script>
 
 <Modal bind:showModal action="save_interests">
-	<InterestsPopup bind:selectedInterests />
+	<InterestsPopup />
 </Modal>
 
 <div class="header">
@@ -49,7 +46,7 @@
 	bind:this={form}
 	class="information"
 	method="POST"
-	action="?save_profile"
+	action="?/save_profile"
 	use:enhance={submitCreateNote}
 >
 	<div class="info-block">
@@ -81,10 +78,10 @@
 	<div class="info-block">
 		<label for="interests">Интересы</label>
 		<button type="button" class="interests" on:click={() => (showModal = true)}>
-			{#if selectedInterests.length == 0 || selectedInterests == undefined}
+			{#if $selectedInterests.length == 0 || $selectedInterests == undefined}
 				<Chip text={'Добавить интересы'} />
 			{:else}
-				{#each selectedInterests as id}
+				{#each $selectedInterests as id}
 					<Chip id={`interest_${id}`} text={interests_binding[id]} />
 				{/each}
 			{/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from './button.svelte';
-	import { applyAction, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { selectedInterests } from '$lib/stores';
 
 	export let showModal: boolean; // boolean
 	export let action: string;
@@ -11,12 +11,12 @@
 	$: if (dialog && showModal) dialog.showModal();
 
 	const closeAnimation = () => {
+		form.requestSubmit();
 		dialog.addEventListener('animationend', closeDialog);
 		dialog.classList.add('close');
 	};
 
 	function closeDialog() {
-		form.requestSubmit();
 		dialog.close();
 		dialog.classList.remove('close');
 		dialog.removeEventListener('animationend', closeDialog);
@@ -29,16 +29,23 @@
 		bind:this={form}
 		method="POST"
 		action={`/profile?/${action}`}
-		use:enhance={() => {
-			return async ({ result }) => {
-				await applyAction(result);
-			};
+		use:enhance={({ formData }) => {
+			if (action == 'save_interests') {
+				const interests = [...formData.keys()].map((str) => parseInt(str));
+				return async () => {
+					selectedInterests.set(interests);
+				};
+			} else {
+				return async ({ update }) => {
+					await update({ reset: false });
+				};
+			}
 		}}
 	>
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div on:click|stopPropagation>
 			<slot />
-			<Button type="subimt" class="close-button" autofocus on:click={closeAnimation}>
+			<Button type="button" class="close-button" autofocus on:click={closeAnimation}>
 				<h2>Готово</h2>
 			</Button>
 		</div>

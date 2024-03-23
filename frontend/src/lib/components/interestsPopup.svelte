@@ -1,21 +1,15 @@
 <script lang="ts">
 	import Chip from './chip.svelte';
 	import { page } from '$app/stores';
-	export let selectedInterests: number[] = [];
+	import { selectedInterests } from '$lib/stores';
+
+	let localSelectedInterests: number[] = $selectedInterests;
 
 	function toggleOption(id: number) {
-		if (selectedInterests.includes(id)) {
-			selectedInterests = selectedInterests.filter((item) => item !== id);
-			fetch(`http://localhost/api/user_interests/${id}`, {
-				method: 'DELETE',
-				credentials: 'include'
-			});
+		if (localSelectedInterests.includes(id)) {
+			localSelectedInterests = localSelectedInterests.filter((item) => item !== id);
 		} else {
-			selectedInterests = [...selectedInterests, id];
-			fetch(`http://localhost/api/user_interests/${id}`, {
-				method: 'PUT',
-				credentials: 'include'
-			});
+			localSelectedInterests = [...localSelectedInterests, id];
 		}
 	}
 </script>
@@ -26,7 +20,7 @@
 		{#each $page.data.interests as interest}
 			<Chip
 				clickable={true}
-				active={selectedInterests.includes(interest.id)}
+				active={localSelectedInterests.includes(interest.id)}
 				id={interest.id}
 				onClick={() => toggleOption(interest.id)}
 				text={interest.interest_name}
