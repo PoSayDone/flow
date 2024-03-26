@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import { onNavigate } from '$app/navigation';
+	// import { setContext } from 'svelte';
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;

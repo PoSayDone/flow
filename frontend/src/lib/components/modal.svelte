@@ -1,17 +1,14 @@
 <script lang="ts">
-	import Button from './button.svelte';
-	import { enhance } from '$app/forms';
-	import { selectedInterests } from '$lib/stores';
+	import { onMount } from 'svelte';
+	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
 
 	export let showModal: boolean; // boolean
-	export let action: string;
-	let form: HTMLFormElement;
 	let dialog: HTMLDialogElement; // HTMLDialogElement
 
 	$: if (dialog && showModal) dialog.showModal();
 
 	const closeAnimation = () => {
-		form.requestSubmit();
+		$submitCurrentDialog();
 		dialog.addEventListener('animationend', closeDialog);
 		dialog.classList.add('close');
 	};
@@ -21,35 +18,26 @@
 		dialog.classList.remove('close');
 		dialog.removeEventListener('animationend', closeDialog);
 	}
+
+	onMount(() => {
+		if (dialog) {
+			closeCurrentDialog.set(closeAnimation);
+		}
+	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
-<dialog bind:this={dialog} on:close={() => (showModal = false)} on:click|self={closeAnimation}>
-	<form
-		bind:this={form}
-		method="POST"
-		action={`/profile?/${action}`}
-		use:enhance={({ formData }) => {
-			if (action == 'save_interests') {
-				const interests = [...formData.keys()].map((str) => parseInt(str));
-				return async () => {
-					selectedInterests.set(interests);
-				};
-			} else {
-				return async ({ update }) => {
-					await update({ reset: false });
-				};
-			}
-		}}
-	>
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div on:click|stopPropagation>
-			<slot />
-			<Button type="button" class="close-button" autofocus on:click={closeAnimation}>
-				<h2>Готово</h2>
-			</Button>
-		</div>
-	</form>
+<dialog
+	bind:this={dialog}
+	on:close={() => {
+		showModal = false;
+	}}
+	on:click|self={closeAnimation}
+>
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div on:click|stopPropagation>
+		<slot />
+	</div>
 </dialog>
 
 <style>

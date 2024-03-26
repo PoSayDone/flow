@@ -3,16 +3,11 @@
 	import Chip from '$lib/components/chip.svelte';
 	import InterestsPopup from '$lib/components/interestsPopup.svelte';
 	import Modal from '$lib/components/modal.svelte';
-	import { enhance } from '$app/forms';
-	import { onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import type { SubmitFunction } from '@sveltejs/kit';
 	import { selectedInterests } from '$lib/stores';
+	import SuperDebug, { superForm } from 'sveltekit-superforms';
 
 	let showModal = false;
-	let form: HTMLFormElement;
-
-	$: console.log($page.data);
 
 	if ($selectedInterests.length == 0) {
 		if ($page.data.user_interests !== undefined) {
@@ -20,20 +15,13 @@
 		}
 	}
 
-	const submitCreateNote: SubmitFunction = () => {
-		return async ({ update }) => {
-			await update({ reset: false });
-		};
-	};
-
-	onDestroy(() => {
-		if (form) {
-			form.requestSubmit();
-		}
+	const { form, enhance, submit } = superForm($page.data.profileForm, {
+		resetForm: false,
+		clearOnSubmit: 'none'
 	});
 </script>
 
-<Modal bind:showModal action="save_interests">
+<Modal bind:showModal>
 	<InterestsPopup />
 </Modal>
 
@@ -42,38 +30,23 @@
 		<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="profile" />
 	</div>
 </div>
-<form
-	bind:this={form}
-	class="information"
-	method="POST"
-	action="?/save_profile"
-	use:enhance={submitCreateNote}
->
+
+<form class="information" method="POST" action="?/update_profile" use:enhance>
 	<div class="info-block">
 		<label for="name">Имя</label>
-		<input value={$page.data.name} name="name" type="text" on:blur={() => form.requestSubmit()} />
+		<input name="name" type="text" bind:value={$form.name} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="birthdate">День рождения</label>
-		<input
-			name="birthdate"
-			type="date"
-			value={$page.data.birthdate}
-			on:blur={() => form.requestSubmit()}
-		/>
+		<input name="birthdate" type="date" bind:value={$form.birthdate} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="occupation">Профессия</label>
-		<input
-			name="occupation"
-			type="text"
-			value={$page.data.occupation}
-			on:blur={() => form.requestSubmit()}
-		/>
+		<input name="occupation" type="text" bind:value={$form.occupation} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="about">О себе</label>
-		<input name="about" type="text" value={$page.data.about} on:blur={() => form.requestSubmit()} />
+		<input name="about" type="text" bind:value={$form.about} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>

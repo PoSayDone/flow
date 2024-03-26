@@ -1,90 +1,42 @@
+import { interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import type { Actions } from './$types';
+import { fail, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions = {
-	save_profile: async ({ request, fetch }) => {
-		const data = await request.formData();
-
-		const name = data.get('name');
-		const birthdate = data.get('birthdate');
-		const occupation = data.get('occupation');
-		const about = data.get('about');
-
+	update_interests: async ({ request, fetch }) => {
+		const interestsForm = await superValidate(request, zod(interestsSchema));
+		if (!interestsForm.valid) return fail(400, { interestsForm });
+		await fetch('http://nginx/api/user/interests/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				tags: interestsForm.data.user_interests
+			})
+		});
+	},
+	update_status: async ({ request, fetch }) => {
+		const statusForm = await superValidate(request, zod(statusSchema));
+		if (!statusForm.valid) return fail(400, { statusForm });
+		await fetch('http://nginx/api/user/status_data/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(statusForm.data)
+		});
+	},
+	update_profile: async ({ request, fetch }) => {
+		const profileForm = await superValidate(request, zod(profileSchema));
+		if (!profileForm.valid) return fail(400, { profileForm });
 		await fetch('http://nginx/api/user/', {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				name: name,
-				birthdate: birthdate,
-				occupation: occupation,
-				about: about
-			})
-		});
-	},
-	save_interests: async ({ request, fetch }) => {
-		const data = await request.formData();
-		const interests: number[] = [...data.keys()].map((str) => parseInt(str));
-
-		await fetch('http://nginx/api/user_interests/edit', {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({
-				tags: interests
-			})
-		});
-	},
-	save_status: async ({ request, fetch }) => {
-		const data = await request.formData();
-
-		const tripPurposes: number[] = [];
-		const departures: number[] = [];
-		const arrivals: number[] = [];
-
-		for (const item of data.entries()) {
-			console.log(item[0], ' ', item[1]);
-		}
-
-		for (const item of data.keys()) {
-			if (item.includes('trip_purpose')) {
-				tripPurposes.push(parseInt(item.replace('trip_purpose_', '')));
-			} else if (item.includes('departure')) {
-				departures.push(parseInt(item.replace('departure_', '')));
-			} else if (item.includes('arrival')) {
-				arrivals.push(parseInt(item.replace('arrival_', '')));
-			}
-		}
-
-		await fetch('http://nginx/api/user_trip_purposes/edit', {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				tags: tripPurposes
-			})
-		});
-
-		await fetch('http://nginx/api/user_departures/edit', {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				locations: departures
-			})
-		});
-
-		await fetch('http://nginx/api/user_arrivals/edit', {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				locations: arrivals
-			})
+			body: JSON.stringify(profileForm.data)
 		});
 	}
 } satisfies Actions;

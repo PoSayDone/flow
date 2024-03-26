@@ -24,10 +24,11 @@ class UserCreateRequest(BaseModel):
 
 class TokenBase(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 
-class UserUpdateBase(BaseModel):
+class UserUpdate(BaseModel):
     name: Optional[str]
     mail: Optional[EmailStr]
     password_hash: Optional[str]
@@ -76,10 +77,6 @@ class Profile(BaseModel):
     birthdate: Optional[date]
     user_interests: Optional[list]
     user_trip_purposes: Optional[list] = None
-    interests: Optional[list]
-    trip_purposes: Optional[list]
-    departures: Optional[list]
-    arrivals: Optional[list]
     user_departures: Optional[list]
     user_arrivals: Optional[list]
 
@@ -91,6 +88,12 @@ class Solemate(BaseModel):
     about: Optional[str]
     birthdate: Optional[date]
     trip_purposes: Optional[list]
+
+
+class StatusDataEdit(BaseModel):
+    user_departures: list[int]
+    user_arrivals: list[int]
+    user_trip_purposes: list[int]
 
 
 class TagsEdit(BaseModel):

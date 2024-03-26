@@ -17,6 +17,13 @@ class Users(Base):
     registration_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
 
 
+class RefreshTokens(Base):
+    __tablename__ = "refresh_tokens"
+    user_id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    refresh_token = Column(String)
+    expires_at = Column(DateTime)
+
+
 class Matches(Base):
     __tablename__ = "matches"
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)

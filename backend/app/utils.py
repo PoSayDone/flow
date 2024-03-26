@@ -24,12 +24,11 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        cookies = request.cookies.get(
-            "access_token"
-        )
+        cookies = request.cookies.get("access_token")
         if cookies:
-            authorization: str = urllib.parse.unquote(cookies)  # changed to accept access token from httpOnly Cookie
-
+            authorization: str = urllib.parse.unquote(
+                cookies
+            )  # changed to accept access token from httpOnly Cookie
             scheme, param = get_authorization_scheme_param(authorization)
             if not authorization or scheme.lower() != "bearer":
                 if self.auto_error:

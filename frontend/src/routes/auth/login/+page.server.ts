@@ -20,9 +20,11 @@ export const actions = {
 		const response = await fetch(`http://nginx/api/auth/token`, requestOptions);
 
 		if (response.status == 200) {
-			const body = await response.json();
-			const value = body.access_token;
-			cookies.set('access_token', decodeURIComponent(`Bearer ${value}`), { path: '/' });
+			const data = await response.json();
+			cookies.set('access_token', decodeURIComponent(`Bearer ${data.access_token}`), { path: '/' });
+			cookies.set('refresh_token', decodeURIComponent(`Bearer ${data.refresh_token}`), {
+				path: '/'
+			});
 			throw redirect(302, '/');
 		} else {
 			return {

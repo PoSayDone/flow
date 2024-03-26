@@ -16,8 +16,8 @@
 	<Icon viewBox={addIcon.viewBox} d={addIcon.d} stroke_width={'1.5'} size={'18'} color={'#000'} />
 </button>
 
-<Modal bind:showModal action="save_status">
-	<StatusPopup />
+<Modal bind:showModal>
+	<StatusPopup on:submit />
 </Modal>
 
 <style lang="scss">

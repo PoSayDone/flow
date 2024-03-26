@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
+
 	export let clickable = false;
 	export let onClick = () => {};
-
-	export let active: boolean = false;
+	export let checked: boolean = false;
 	export let id: string = 'undefined';
 	export let text = 'Активный отдых';
+	export let disabled = false;
 </script>
 
 {#if clickable}
@@ -16,8 +17,10 @@
 		type="checkbox"
 		{id}
 		name={id}
-		bind:checked={active}
+		value={id}
+		bind:checked
 		on:click={onClick}
+		{disabled}
 	/>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -83,7 +86,7 @@
 		}
 	}
 
-	.chip.clickable:checkd + label {
+	input[type='checkbox']:checked + label {
 		background: #d3dfff;
 		color: #2461ff;
 		outline: none;
@@ -95,15 +98,7 @@
 		}
 	}
 
-	input[type='checkbox']:checked + label {
-		background: #d3dfff;
-		color: #2461ff;
-		outline: none;
-		:global(path) {
-			stroke: #2461ff;
-		}
-		:global(svg) {
-			transform: rotate(45deg);
-		}
+	input[type='checkbox']:disabled + label {
+		opacity: 0.4;
 	}
 </style>
