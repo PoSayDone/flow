@@ -7,8 +7,3 @@ type StatusPopupData = {
 	departures: number[];
 	arrivals: number[];
 };
-
-declare module '$lib/assets/*' {
-	var meta;
-	export default meta;
-}

@@ -7,6 +7,7 @@
 }
 
 * {
+	scroll-behavior: smooth;
 	text-rendering: geometricPrecision;
 	margin: 0;
 	padding: 0;
@@ -20,6 +21,10 @@
 	--fg-gray: #aaa;
 	--bg-gray: #d6d6d6;
 	--primary: #2461ff;
+}
+
+a {
+	text-decoration: none;
 }
 
 button {

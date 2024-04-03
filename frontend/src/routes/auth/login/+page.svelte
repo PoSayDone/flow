@@ -1,29 +1,39 @@
-<script>
+<script lang="ts">
 	import Button from '$lib/components/button.svelte';
-	import { applyAction, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
-	export let form;
+	import { superForm } from 'sveltekit-superforms';
+	import type { PageData } from '../$types';
+
+	export let data: PageData;
+
+	const { form, enhance, constraints, errors } = superForm(data.loginForm, {
+		clearOnSubmit: 'errors'
+	});
 </script>
 
 <div class="popover">
 	<h1>Вход</h1>
-	<form
-		method="POST"
-		use:enhance={() => {
-			return async ({ result }) => {
-				await invalidateAll();
-				await applyAction(result);
-			};
-		}}
-	>
+	<form method="POST" use:enhance>
 		<div class="inputs">
-			<input name="mail" required type="email" placeholder="Email" />
-			<input name="password" required type="password" placeholder="Пароль" />
+			<input
+				aria-invalid={$errors._errors ? 'true' : undefined}
+				name="mail"
+				type="email"
+				placeholder="Email"
+				value={$form.mail}
+				{...$constraints.email}
+			/>
+			<input
+				aria-invalid={$errors._errors ? 'true' : undefined}
+				name="password"
+				required
+				type="password"
+				placeholder="Пароль"
+				value={$form.password}
+				{...$constraints.password}
+			/>
 		</div>
 		<div class="errors">
-			{#if form?.message}
-				<p>{form.message}</p>
-			{/if}
+			{#if $errors._errors}<p>{$errors._errors}</p>{/if}
 		</div>
 		<div class="buttons">
 			<Button type="submit">Войти</Button>
@@ -53,6 +63,9 @@
 			font-size: 14px;
 			font-weight: 500;
 			letter-spacing: -0.04em;
+		}
+		input[aria-invalid='true'] {
+			border: 1px solid #e63d43;
 		}
 	}
 
@@ -90,6 +103,10 @@
 		to {
 			transform: translateY(100%);
 		}
+	}
+
+	input.error {
+		border: red thin solid;
 	}
 
 	:root::view-transition-old(popover) {

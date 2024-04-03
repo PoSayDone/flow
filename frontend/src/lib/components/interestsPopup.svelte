@@ -5,6 +5,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { closeCurrentDialog, selectedInterests, submitCurrentDialog } from '$lib/stores';
 	import { onMount } from 'svelte';
+	import { interestsRu } from '$lib/types';
 
 	const { form, enhance, submit } = superForm($page.data.interestsForm, {
 		dataType: 'json',
@@ -41,7 +42,7 @@
 					checked={$form.user_interests.includes(interest.id)}
 					id={interest.id}
 					onClick={() => toggleOption(interest.id)}
-					text={interest.interest_name}
+					text={interestsRu[interest.interest_name]}
 					disabled={$form.user_interests.length >= 5 && !$form.user_interests.includes(interest.id)}
 				/>
 			{/each}

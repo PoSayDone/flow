@@ -1,20 +1,29 @@
 import { redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
+import { loginSchema } from '$lib/schema';
+import { fail, setError, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+
+export const load: PageServerLoad = async () => {
+	const loginForm = await superValidate(zod(loginSchema));
+	return { loginForm };
+};
 
 export const actions = {
 	default: async ({ request, cookies }) => {
-		const data = await request.formData();
+		const loginForm = await superValidate(request, zod(loginSchema));
+		if (!loginForm.valid) return fail(400, { loginForm });
 
-		const formData = new URLSearchParams();
-		formData.append('username', data.get('mail'));
-		formData.append('password', data.get('password'));
+		const urlParams = new URLSearchParams();
+		urlParams.append('username', loginForm.data.mail);
+		urlParams.append('password', loginForm.data.password);
 
 		const requestOptions = {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-			body: formData
+			body: urlParams
 		};
 
 		const response = await fetch(`http://nginx/api/auth/token`, requestOptions);
@@ -27,9 +36,7 @@ export const actions = {
 			});
 			throw redirect(302, '/');
 		} else {
-			return {
-				message: 'invalid email or password'
-			};
+			return setError(loginForm, 'Invalid email or password');
 		}
 	}
 } satisfies Actions;

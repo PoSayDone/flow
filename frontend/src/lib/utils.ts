@@ -15,24 +15,28 @@ export function getAge(dateString: string) {
 
 export const interests_binding: Binding = {
 	'1': 'it',
-	'2': 'cars',
-	'3': 'sport',
+	'2': 'vehicles',
+	'3': 'sports',
 	'4': 'fashion',
-	'5': 'gastronomy',
+	'5': 'culinary',
 	'6': 'alcohol',
 	'7': 'art',
-	'8': 'technologies',
+	'8': 'technology',
 	'9': 'science',
 	'10': 'finance',
-	'11': 'motorcycles',
+	'11': 'motorcycless',
 	'12': 'beauty',
 	'13': 'business'
 };
 
 export const trip_purposes_binding: Binding = {
-	'1': 'outdoor_activities',
-	'2': 'mountains',
-	'3': 'culture',
-	'4': 'sea',
-	'5': 'parties'
+	'1': 'active_recreation',
+	'2': 'culture',
+	'3': 'sights',
+	'4': 'parties',
+	'5': 'extreme_and_sports',
+	'6': 'to_the_mountains',
+	'7': 'gastronomic_tour',
+	'8': 'to_the_sea',
+	'9': 'shopping'
 };

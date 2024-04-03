@@ -7,7 +7,7 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user_token: string | undefined;
+			isAuthenticated: boolean;
 		}
 		// interface PageData {}
 		// interface PageState {}

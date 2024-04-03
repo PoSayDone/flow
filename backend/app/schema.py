@@ -53,18 +53,12 @@ class PivotTableBase(BaseModel):
     id: int
 
 
-class MessageBase(BaseModel):
-    id: UUID
-    content_id: UUID
-    from_id: UUID
-    to_id: UUID
-    created_at: datetime
-    updated_at: datetime
+class CreateConversation(BaseModel):
+    recipient_user_id: UUID
 
 
-class MessageContentBase(BaseModel):
-    id: UUID
-    message_content: str
+class NewMessage(BaseModel):
+    content: str
 
 
 class Profile(BaseModel):
@@ -75,6 +69,7 @@ class Profile(BaseModel):
     about: Optional[str]
     sex: Optional[bool]
     birthdate: Optional[date]
+    user_status: Optional[bool]
     user_interests: Optional[list]
     user_trip_purposes: Optional[list] = None
     user_departures: Optional[list]
@@ -91,6 +86,7 @@ class Solemate(BaseModel):
 
 
 class StatusDataEdit(BaseModel):
+    user_status: bool
     user_departures: list[int]
     user_arrivals: list[int]
     user_trip_purposes: list[int]

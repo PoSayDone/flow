@@ -8,16 +8,7 @@ from app.database import SessionLocal
 
 router = APIRouter(prefix="/role", tags=["roles"])
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
+from app.dependencies import db_dependency
 
 
 @router.post("/")

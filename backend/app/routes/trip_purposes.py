@@ -6,20 +6,9 @@ from sqlalchemy.orm import Session
 from app import models, schema
 from app.database import SessionLocal
 from app.routes import auth
-
+from app.dependencies import db_dependency
 
 router = APIRouter(prefix="/trip_purposes", tags=["trip_purposes"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
 
 
 @router.post("")

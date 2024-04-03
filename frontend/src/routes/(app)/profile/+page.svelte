@@ -5,7 +5,8 @@
 	import Modal from '$lib/components/modal.svelte';
 	import { page } from '$app/stores';
 	import { selectedInterests } from '$lib/stores';
-	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
+	import { interestsRu } from '$lib/types';
 
 	let showModal = false;
 
@@ -55,7 +56,7 @@
 				<Chip text={'Добавить интересы'} />
 			{:else}
 				{#each $selectedInterests as id}
-					<Chip id={`interest_${id}`} text={interests_binding[id]} />
+					<Chip id={`interest_${id}`} text={interestsRu[interests_binding[id]]} />
 				{/each}
 			{/if}
 		</button>

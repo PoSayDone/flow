@@ -5,8 +5,9 @@
 	import { backIcon } from '$lib/assets/Appicons';
 	import { page } from '$app/stores';
 	import Button from './button.svelte';
-	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
+	import { tripPurposesRu } from '$lib/types';
 
 	const { form, enhance, submit } = superForm($page.data.statusForm, {
 		dataType: 'json',
@@ -30,6 +31,7 @@
 		onResult: ({ result }) => {
 			if (result.status == 204) {
 				$closeCurrentDialog();
+				status.set($form.user_status);
 			}
 		}
 	});
@@ -55,27 +57,30 @@
 	});
 </script>
 
-<form method="POST" action="/profile/?/update_status" use:enhance>
-	<div class="container" class:active={$status == 'active'}>
+<form class:active={$form.status} method="POST" action="/profile/?/update_status" use:enhance>
+	<div class="container">
 		<h1>Выберите статус</h1>
 		<div class="radios" role="radiogroup">
-			<label class="radio" class:active={$status == 'active'}>
+			<label class="radio" class:active={$form.user_status}>
 				<div class="rows">
 					<label class="radio-title" for="active">Активный</label>
 					<label class="radio-subtitle" for="active"> Готов отправиться в путешествие </label>
 				</div>
-				<input type="radio" id="active" value="active" bind:group={$status} />
+				<input type="radio" id="active" value={true} bind:group={$form.user_status} />
 			</label>
 			<div
 				class="active-content"
-				class:hidden={$status != 'active'}
+				class:hidden={!$form.user_status}
 				class:expand={fromActive || toActive}
 			>
 				<button
 					type="button"
 					class="from"
 					class:activebutton={fromActive}
-					on:click={() => (fromActive = !fromActive)}
+					on:click={() => {
+						fromActive = !fromActive;
+						toActive = false;
+					}}
 					>Откуда <Icon
 						d={backIcon.d}
 						viewBox={backIcon.viewBox}
@@ -101,7 +106,13 @@
 						</label>
 					{/each}
 				</div>
-				<button class="to" on:click={() => (toActive = !toActive)} type="button"
+				<button
+					class="to"
+					on:click={() => {
+						toActive = !toActive;
+						fromActive = false;
+					}}
+					type="button"
 					>Куда <Icon
 						d={backIcon.d}
 						viewBox={backIcon.viewBox}
@@ -135,7 +146,7 @@
 							checked={$form.user_trip_purposes.includes(trip_purpose.id)}
 							id={`trip_purpose_${trip_purpose.id}`}
 							onClick={() => toggleOption(trip_purpose.id)}
-							text={trip_purpose.purpose_name}
+							text={tripPurposesRu[trip_purpose.purpose_name]}
 							disabled={$form.user_trip_purposes.length >= 3 &&
 								!$form.user_trip_purposes.includes(trip_purpose.id)}
 						/>
@@ -143,12 +154,12 @@
 				</div>
 			</div>
 
-			<label class="radio" class:active={$status == 'inactive'}>
+			<label class="radio" class:active={!$form.user_status}>
 				<div class="rows">
 					<label class="radio-title" for="inactive">Перерыв</label>
 					<label class="radio-subtitle" for="inactive">Пока не путешествую</label>
 				</div>
-				<input type="radio" id="inactive" value="inactive" bind:group={$status} />
+				<input type="radio" id="inactive" value={false} bind:group={$form.user_status} />
 			</label>
 		</div>
 	</div>
@@ -163,17 +174,22 @@
 		margin-bottom: 30px;
 	}
 
+	form {
+		display: flex;
+		flex-direction: column;
+		&.active {
+			height: 75svh;
+		}
+	}
+
 	.container {
+		flex: 1;
 		border-radius: 40px 40px 0 0;
 		background: #fff;
 		align-items: center;
 		display: flex;
 		flex-direction: column;
 		margin-bottom: 60px;
-		&.active {
-			margin-bottom: 8px;
-			height: 75svh;
-		}
 	}
 
 	.active-content {

@@ -8,14 +8,13 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import EmailStr
-from sqlalchemy.orm import Session
 from app import models
-from app.database import SessionLocal
 
 from app.utils import OAuth2PasswordBearerWithCookie
 
 from app.models import Users
 from app.schema import TokenBase, UserCreateRequest
+from app.dependencies import db_dependency
 
 
 SECRET_KEY = "4bad42439cea6743a225bc13fcaacf0bbf637edbb197d96611f2b40c36ce724c"
@@ -28,17 +27,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/token")
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
 
 
 @router.post("/refresh", response_model=TokenBase)
@@ -174,7 +162,9 @@ def create_refresh_token(mail: EmailStr, user_id: UUID, expires_date: timedelta)
     return jwt.encode(encode, key=REFRESH_SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)], db: db_dependency
+) -> models.Users | None:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         mail: str = str(payload.get("sub"))
@@ -184,8 +174,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate user",
             )
-        return {"mail": mail, "id": id.__str__()}
+        user: Users = db.get(models.Users, id)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate user",
+            )
+        return user
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user"
         )
+
+
+user_dependency = Annotated[models.Users, Depends(get_current_user)]

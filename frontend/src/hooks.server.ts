@@ -1,9 +1,21 @@
-import type { HandleFetch } from '@sveltejs/kit';
+import { redirect, type HandleFetch } from '@sveltejs/kit';
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const { cookies } = event;
 	const accessToken = event.cookies.get('access_token');
 	const refreshToken = event.cookies.get('refresh_token');
+
+	if (accessToken && refreshToken) {
+		event.locals.isAuthenticated = true;
+	} else {
+		event.locals.isAuthenticated = false;
+	}
+
+	if (!event.url.pathname.startsWith('/auth')) {
+		if (!event.locals.isAuthenticated) {
+			throw redirect(303, '/auth');
+		}
+	}
 
 	request = new Request(request, {
 		...request,
@@ -43,6 +55,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		if (response.status === 401 && refreshToken && accessToken) {
 			cookies.delete('access_token', { path: '/' });
 			cookies.delete('refresh_token', { path: '/' });
+			event.locals.isAuthenticated = false;
 		}
 	}
 	return response;

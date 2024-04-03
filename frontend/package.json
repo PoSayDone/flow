@@ -37,5 +37,11 @@
 		"vite": "^5.0.3",
 		"vite-plugin-pwa": "^0.19.2"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@sveltejs/adapter-node": "^5.0.1",
+		"pusher-js": "^8.4.0-rc2",
+		"socket.io": "^4.7.5",
+		"socket.io-client": "^4.7.5"
+	}
 }

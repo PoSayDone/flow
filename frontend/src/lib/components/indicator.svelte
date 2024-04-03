@@ -4,14 +4,19 @@
 	import { status } from '$lib/stores';
 	import StatusPopup from './statusPopup.svelte';
 	import Modal from './modal.svelte';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	let showModal = false;
+	onMount(() => {
+		status.set($page.data.user_status);
+	});
 </script>
 
 <button on:click={() => (showModal = true)}>
-	<span class="indicator" class:active={$status === 'active'}></span>
+	<span class="indicator" class:active={$status}></span>
 	<span class="status">
-		{$status === 'active' ? 'Активный' : 'Перерыв'}
+		{$status ? 'Активный' : 'Перерыв'}
 	</span>
 	<Icon viewBox={addIcon.viewBox} d={addIcon.d} stroke_width={'1.5'} size={'18'} color={'#000'} />
 </button>

@@ -1,28 +1,15 @@
-from typing import Annotated
 from uuid import UUID
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, delete, insert
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import and_, delete, insert, or_
 
 from app import models, schema
-from app.database import SessionLocal
-from app.routes import auth
+from app.chat.services import create_conversation_db
+from app.routes.auth import user_dependency
+from app.dependencies import db_dependency
 
 
 router = APIRouter(prefix="/user", tags=["user"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-user_dependency = Annotated[dict, Depends(auth.get_current_user)]
-db_dependency = Annotated[Session, Depends(get_db)]
 
 
 @router.delete("/{user_id}")
@@ -41,7 +28,7 @@ async def update_user(
 ):
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
-    db_user = db.query(models.Users).filter(models.Users.id == user["id"]).first()
+    db_user = db.query(models.Users).filter(models.Users.id == user.id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     for field, value in user_update.dict(exclude_unset=True).items():
@@ -57,13 +44,13 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
     current_user_interests = [
         interest[0]
         for interest in db.query(models.UsersInterests.interest_id)
-        .filter(models.UsersInterests.user_id == user["id"])
+        .filter(models.UsersInterests.user_id == user.id)
         .all()
     ]
     current_user_purposes = [
         purpose[0]
         for purpose in db.query(models.UsersTripPurposes.purpose_id)
-        .filter(models.UsersTripPurposes.user_id == user["id"])
+        .filter(models.UsersTripPurposes.user_id == user.id)
         .all()
     ]
 
@@ -79,7 +66,7 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
             and_(
                 models.UsersInterests.interest_id.in_(current_user_interests),
                 models.UsersTripPurposes.purpose_id.in_(current_user_purposes),
-                models.Users.id != user["id"],
+                models.Users.id != user.id,
             )
         )
         .limit(count)
@@ -121,23 +108,22 @@ async def edit_user_status_data(
 ):
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
+    user.status = edit.user_status
     db.execute(
-        delete(models.UsersDepartures).where(
-            models.UsersDepartures.user_id == user["id"]
-        )
+        delete(models.UsersDepartures).where(models.UsersDepartures.user_id == user.id)
     )
     db.execute(
-        delete(models.UsersArrivals).where(models.UsersArrivals.user_id == user["id"])
+        delete(models.UsersArrivals).where(models.UsersArrivals.user_id == user.id)
     )
     db.execute(
         delete(models.UsersTripPurposes).where(
-            models.UsersTripPurposes.user_id == user["id"]
+            models.UsersTripPurposes.user_id == user.id
         )
     )
     db.execute(
         insert(models.UsersDepartures).values(
             [
-                {"user_id": user["id"], "location_id": location_id}
+                {"user_id": user.id, "location_id": location_id}
                 for location_id in edit.user_departures
             ]
         )
@@ -145,7 +131,7 @@ async def edit_user_status_data(
     db.execute(
         insert(models.UsersArrivals).values(
             [
-                {"user_id": user["id"], "location_id": location_id}
+                {"user_id": user.id, "location_id": location_id}
                 for location_id in edit.user_arrivals
             ]
         )
@@ -153,7 +139,7 @@ async def edit_user_status_data(
     db.execute(
         insert(models.UsersTripPurposes).values(
             [
-                {"user_id": user["id"], "purpose_id": purpose_id}
+                {"user_id": user.id, "purpose_id": purpose_id}
                 for purpose_id in edit.user_trip_purposes
             ]
         )
@@ -169,21 +155,21 @@ async def edit_user_status_data(
 async def get_profile(user: user_dependency, db: db_dependency):
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
-    user_db = db.get(models.Users, user["id"])
-    if user_db:
+    if user:
         result = schema.Profile(
-            id=user_db.id,
-            name=user_db.name,
-            mail=user_db.mail,
-            occupation=user_db.occupation,
-            about=user_db.about,
-            sex=user_db.sex,
-            birthdate=user_db.birthdate,
+            id=user.id,
+            name=user.name,
+            mail=user.mail,
+            occupation=user.occupation,
+            about=user.about,
+            sex=user.sex,
+            birthdate=user.birthdate,
+            user_status=user.status,
             user_interests=list(
                 map(
                     lambda interest: interest.interest_id,
                     db.query(models.UsersInterests)
-                    .filter(models.UsersInterests.user_id == user_db.id)
+                    .filter(models.UsersInterests.user_id == user.id)
                     .all(),
                 )
             ),
@@ -191,7 +177,7 @@ async def get_profile(user: user_dependency, db: db_dependency):
                 map(
                     lambda purpose: purpose.purpose_id,
                     db.query(models.UsersTripPurposes)
-                    .filter(models.UsersTripPurposes.user_id == user_db.id)
+                    .filter(models.UsersTripPurposes.user_id == user.id)
                     .all(),
                 )
             ),
@@ -199,7 +185,7 @@ async def get_profile(user: user_dependency, db: db_dependency):
                 map(
                     lambda departure: departure.location_id,
                     db.query(models.UsersDepartures)
-                    .filter(models.UsersDepartures.user_id == user_db.id)
+                    .filter(models.UsersDepartures.user_id == user.id)
                     .all(),
                 )
             ),
@@ -207,7 +193,7 @@ async def get_profile(user: user_dependency, db: db_dependency):
                 map(
                     lambda arrival: arrival.location_id,
                     db.query(models.UsersArrivals)
-                    .filter(models.UsersArrivals.user_id == user_db.id)
+                    .filter(models.UsersArrivals.user_id == user.id)
                     .all(),
                 )
             ),
@@ -296,17 +282,43 @@ async def delete_user_role(user_id: UUID, role_id: int, db: db_dependency):
 ### matches
 
 
-@router.put("/match/{interested_in_user_id}", tags=["matches"])
-async def add_match(
-    interested_in_user_id: UUID, user: user_dependency, db: db_dependency
-):
+@router.post("/match/{interested_in_user_id}", tags=["matches"])
+async def add_match(liked_user_id: UUID, user: user_dependency, db: db_dependency):
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
-    match = models.Matches(
-        id=uuid.uuid4(), user_id=user["id"], interested_in_user_id=interested_in_user_id
+
+    recepient = db.get(models.Users, liked_user_id)
+
+    if not recepient:
+        raise HTTPException(status_code=404, detail="Recepient not found")
+
+    existing_match = (
+        db.query(models.Matches)
+        .filter(
+            or_(
+                and_(
+                    models.Matches.user_id == user.id,
+                    models.Matches.liked_user_id == recepient.id,
+                ),
+                and_(
+                    models.Matches.user_id == recepient.id,
+                    models.Matches.liked_user_id == user.id,
+                ),
+            )
+        )
+        .first()
     )
-    db.add(match)
+    print(existing_match)
+
+    if existing_match:
+        if existing_match.user_id != user.id:
+            existing_match.mutual = True
+    else:
+        match = models.Matches(user_id=user.id, liked_user_id=liked_user_id)
+        db.add(match)
     db.commit()
+    await create_conversation_db(db, user, recepient)
+
     return {"ok": True}
 
 
@@ -335,7 +347,7 @@ async def get_user_interests(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail="Not authorized")
     result = (
         db.query(models.UsersInterests)
-        .filter(models.UsersInterests.user_id == user["id"])
+        .filter(models.UsersInterests.user_id == user.di)
         .all()
     )
     if not result:
@@ -345,7 +357,7 @@ async def get_user_interests(user: user_dependency, db: db_dependency):
 
 @router.post("/interests/{interest_id}", tags=["interests"])
 async def add_user_interest(interest_id: int, user: user_dependency, db: db_dependency):
-    user_interest = models.UsersInterests(user_id=user["id"], interest_id=interest_id)
+    user_interest = models.UsersInterests(user_id=user.id, interest_id=interest_id)
     db.add(user_interest)
     db.commit()
     return {"ok": True}
@@ -358,12 +370,12 @@ async def edit_user_interests(
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
     db.execute(
-        delete(models.UsersInterests).where(models.UsersInterests.user_id == user["id"])
+        delete(models.UsersInterests).where(models.UsersInterests.user_id == user.id)
     )
     db.execute(
         insert(models.UsersInterests).values(
             [
-                {"user_id": user["id"], "interest_id": interest_id}
+                {"user_id": user.id, "interest_id": interest_id}
                 for interest_id in edit.tags
             ]
         )
@@ -378,7 +390,7 @@ async def delete_user_interest(
 ):
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
-    user_interest = db.get(models.UsersInterests, (user["id"], interest_id))
+    user_interest = db.get(models.UsersInterests, (user.id, interest_id))
     if not user_interest:
         raise HTTPException(status_code=404, detail="Interest not found")
     db.delete(user_interest)
@@ -403,9 +415,7 @@ async def delete_user_interest(
 async def add_user_trip_purpose(
     purpose_id: int, user: user_dependency, db: db_dependency
 ):
-    user_trip_purpose = models.UsersTripPurposes(
-        user_id=user["id"], purpose_id=purpose_id
-    )
+    user_trip_purpose = models.UsersTripPurposes(user_id=user.id, purpose_id=purpose_id)
     db.add(user_trip_purpose)
     db.commit()
     return {"ok": True}
@@ -419,15 +429,12 @@ async def edit_trip_purposes(
         raise HTTPException(status_code=404, detail="Not authorized")
     db.execute(
         delete(models.UsersTripPurposes).where(
-            models.UsersTripPurposes.user_id == user["id"]
+            models.UsersTripPurposes.user_id == user.id
         )
     )
     db.execute(
         insert(models.UsersTripPurposes).values(
-            [
-                {"user_id": user["id"], "purpose_id": purpose_id}
-                for purpose_id in edit.tags
-            ]
+            [{"user_id": user.id, "purpose_id": purpose_id} for purpose_id in edit.tags]
         )
     )
     db.commit()
@@ -440,7 +447,7 @@ async def get_user_trip_purposes(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail="Not authorized")
     result = (
         db.query(models.UsersTripPurposes)
-        .filter(models.UsersTripPurposes.user_id == user["id"])
+        .filter(models.UsersTripPurposes.user_id == user.id)
         .all()
     )
     if not result:
@@ -454,7 +461,7 @@ async def delete_user_trip_purpose(
 ):
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
-    user_trip_purpose = db.get(models.UsersTripPurposes, (user["id"], purpose_id))
+    user_trip_purpose = db.get(models.UsersTripPurposes, (user.id, purpose_id))
     if not user_trip_purpose:
         raise HTTPException(status_code=404, detail="Purpose not found")
     db.delete(user_trip_purpose)
@@ -471,7 +478,7 @@ async def get_user_deapartures(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail="Not authorized")
     result = (
         db.query(models.UsersDepartures)
-        .filter(models.UsersDepartures.user_id == user["id"])
+        .filter(models.UsersDepartures.user_id == user.id)
         .all()
     )
     if not result:
@@ -494,14 +501,12 @@ async def edit_user_departures(
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
     db.execute(
-        delete(models.UsersDepartures).where(
-            models.UsersDepartures.user_id == user["id"]
-        )
+        delete(models.UsersDepartures).where(models.UsersDepartures.user_id == user.id)
     )
     db.execute(
         insert(models.UsersDepartures).values(
             [
-                {"user_id": user["id"], "location_id": location_id}
+                {"user_id": user.id, "location_id": location_id}
                 for location_id in edit.locations
             ]
         )
@@ -529,7 +534,7 @@ async def get_user_arrivals(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail="Not authorized")
     result = (
         db.query(models.UsersArrivals)
-        .filter(models.UsersArrivals.user_id == user["id"])
+        .filter(models.UsersArrivals.user_id == user.id)
         .all()
     )
     if not result:
@@ -552,12 +557,12 @@ async def edit_user_arrivals(
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
     db.execute(
-        delete(models.UsersArrivals).where(models.UsersArrivals.user_id == user["id"])
+        delete(models.UsersArrivals).where(models.UsersArrivals.user_id == user.id)
     )
     db.execute(
         insert(models.UsersArrivals).values(
             [
-                {"user_id": user["id"], "location_id": location_id}
+                {"user_id": user.id, "location_id": location_id}
                 for location_id in edit.locations
             ]
         )
