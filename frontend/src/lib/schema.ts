@@ -26,3 +26,8 @@ export const profileSchema = z.object({
 	occupation: z.string().optional(),
 	about: z.string().optional()
 });
+
+export const likeSchema = z.object({
+	user_id: z.string().uuid(),
+	like: z.boolean()
+});

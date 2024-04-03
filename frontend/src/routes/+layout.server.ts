@@ -13,6 +13,7 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 	const statusForm = await superValidate(await profile, zod(statusSchema));
 	const profileForm = await superValidate(await profile, zod(profileSchema));
 	const interestsForm = await superValidate(await profile, zod(interestsSchema));
+	const likeForm = await superValidate(zod(statusSchema));
 
 	const data = {
 		...(await profile),
@@ -22,7 +23,8 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 		arrivals: await arrivals,
 		statusForm,
 		profileForm,
-		interestsForm
+		interestsForm,
+		likeForm
 	};
 
 	return data;

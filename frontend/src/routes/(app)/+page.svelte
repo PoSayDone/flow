@@ -10,24 +10,26 @@
 	}
 </script>
 
-<div class="cards">
-	{#each $users as user, i}
-		<UserCard
-			id={user.id}
-			name={user.name}
-			about={user.about}
-			occupation={user.occupation}
-			trip_purposes={user.trip_purposes}
-			age={getAge(user.birthdate)}
-			index={i}
-		/>
-	{/each}
-</div>
-<div class="actions">
-	<ActionButton type="dislike" />
-	<ActionButton type="chat" />
-	<ActionButton type="like" />
-</div>
+<form action="">
+	<div class="cards">
+		{#each $users as user, i}
+			<UserCard
+				id={user.id}
+				name={user.name}
+				about={user.about}
+				occupation={user.occupation}
+				trip_purposes={user.trip_purposes}
+				age={getAge(user.birthdate)}
+				index={i}
+			/>
+		{/each}
+	</div>
+	<div class="actions">
+		<ActionButton type="dislike" />
+		<ActionButton type="chat" />
+		<ActionButton type="like" />
+	</div>
+</form>
 
 <style lang="scss">
 	.cards {

@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 
 from app.chat.router import chat_router
+from app.user.router import user_router
 from app.routes import (
     arrivals,
     auth,
@@ -9,7 +10,6 @@ from app.routes import (
     interests,
     roles,
     trip_purposes,
-    user,
 )
 from app import models
 from app.database import engine
@@ -28,7 +28,7 @@ app = FastAPI(root_path="/api")
 
 app.include_router(auth.router)
 app.include_router(chat_router)
-app.include_router(user.router)
+app.include_router(user_router)
 app.include_router(interests.router)
 app.include_router(trip_purposes.router)
 app.include_router(departures.router)

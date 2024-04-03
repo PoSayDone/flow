@@ -25,6 +25,34 @@ conversation_participant = Table(
     Column("conversation_id", ForeignKey("conversations.id"), primary_key=True),
 )
 
+user_interest_table = Table(
+    "user_interest",
+    Base.metadata,
+    Column("user_id", UUID, ForeignKey("users.id")),
+    Column("interest_id", Integer, ForeignKey("interests.id")),
+)
+
+user_trip_purpose_table = Table(
+    "user_trip_purpose",
+    Base.metadata,
+    Column("user_id", UUID, ForeignKey("users.id")),
+    Column("trip_purpose_id", Integer, ForeignKey("trip_purposes.id")),
+)
+
+user_departure_table = Table(
+    "user_departure",
+    Base.metadata,
+    Column("user_id", UUID, ForeignKey("users.id")),
+    Column("departure_id", Integer, ForeignKey("departures.id")),
+)
+
+user_arrival_table = Table(
+    "user_arrival",
+    Base.metadata,
+    Column("user_id", UUID, ForeignKey("users.id")),
+    Column("arrival_id", Integer, ForeignKey("arrivals.id")),
+)
+
 
 class Users(Base):
     __tablename__ = "users"
@@ -39,6 +67,18 @@ class Users(Base):
     registration_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     conversations: Mapped[List["Conversation"]] = relationship(
         secondary=conversation_participant, back_populates="users"
+    )
+    interests: Mapped[List["Interests"]] = relationship(
+        "Interests", secondary=user_interest_table, back_populates="users"
+    )
+    trip_purposes: Mapped[List["TripPurposes"]] = relationship(
+        "TripPurposes", secondary=user_trip_purpose_table, back_populates="users"
+    )
+    departures: Mapped[List["Departures"]] = relationship(
+        "Departures", secondary=user_departure_table, back_populates="users"
+    )
+    arrivals: Mapped[List["Arrivals"]] = relationship(
+        "Arrivals", secondary=user_arrival_table, back_populates="users"
     )
     messages: Mapped[List["Message"]] = relationship(back_populates="sender")
     status = Column(Boolean, default=True)
@@ -69,24 +109,36 @@ class Interests(Base):
     __tablename__ = "interests"
     id = Column(Integer, primary_key=True, autoincrement=True)
     interest_name = Column(String, index=True)
+    users = relationship(
+        "Users", secondary=user_interest_table, back_populates="interests"
+    )
 
 
 class TripPurposes(Base):
     __tablename__ = "trip_purposes"
     id = Column(Integer, primary_key=True, autoincrement=True)
     purpose_name = Column(String, index=True)
+    users = relationship(
+        "Users", secondary=user_interest_table, back_populates="trip_purposes"
+    )
 
 
 class Departures(Base):
     __tablename__ = "departures"
     id = Column(Integer, primary_key=True, autoincrement=True)
     location_name = Column(String, index=True)
+    users = relationship(
+        "Users", secondary=user_departure_table, back_populates="departures"
+    )
 
 
 class Arrivals(Base):
     __tablename__ = "arrivals"
     id = Column(Integer, primary_key=True, autoincrement=True)
     location_name = Column(String, index=True)
+    users = relationship(
+        "Users", secondary=user_arrival_table, back_populates="arrivals"
+    )
 
 
 class UsersRoles(Base):
@@ -95,28 +147,28 @@ class UsersRoles(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True)
 
 
-class UsersInterests(Base):
-    __tablename__ = "users_interests"
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    interest_id = Column(Integer, ForeignKey("interests.id"), primary_key=True)
+# class UsersInterests(Base):
+#     __tablename__ = "users_interests"
+#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
+#     interest_id = Column(Integer, ForeignKey("interests.id"), primary_key=True)
+#
+#
+# class UsersTripPurposes(Base):
+#     __tablename__ = "users_trip_purposes"
+#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
+#     purpose_id = Column(Integer, ForeignKey("trip_purposes.id"), primary_key=True)
 
 
-class UsersTripPurposes(Base):
-    __tablename__ = "users_trip_purposes"
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    purpose_id = Column(Integer, ForeignKey("trip_purposes.id"), primary_key=True)
-
-
-class UsersDepartures(Base):
-    __tablename__ = "users_departures"
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    location_id = Column(Integer, ForeignKey("departures.id"), primary_key=True)
-
-
-class UsersArrivals(Base):
-    __tablename__ = "users_arrivals"
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    location_id = Column(Integer, ForeignKey("arrivals.id"), primary_key=True)
+# class UsersDepartures(Base):
+#     __tablename__ = "users_departures"
+#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
+#     location_id = Column(Integer, ForeignKey("departures.id"), primary_key=True)
+#
+#
+# class UsersArrivals(Base):
+#     __tablename__ = "users_arrivals"
+#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
+#     location_id = Column(Integer, ForeignKey("arrivals.id"), primary_key=True)
 
 
 class Conversation(Base):

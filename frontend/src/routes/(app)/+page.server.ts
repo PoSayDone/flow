@@ -1,3 +1,4 @@
+import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
@@ -6,3 +7,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	body['users'] = await users.json();
 	return body;
 };
+
+export const actions = {
+	like_user: async () => {}
+} satisfies Actions;
