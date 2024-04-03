@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { trip_purposes_binding } from '$lib/utils';
-	import { getContext } from 'svelte';
+	import { users } from '$lib/stores';
 
 	export let index: number = 0;
 	export let id: string = '';
@@ -9,7 +9,6 @@
 	export let age: string = '18';
 	export let occupation: string = 'Дизайнер';
 	let href: string = `/user_${id}`;
-	const users = getContext('users');
 
 	export let about: string =
 		'\

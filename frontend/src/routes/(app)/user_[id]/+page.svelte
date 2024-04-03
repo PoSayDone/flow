@@ -59,7 +59,7 @@
 	<div class="profile-picture"></div>
 </div>
 <div class="tags" style:view-transition-name={`trip-purposes`}>
-	{#each data.trip_purposes as id}
+	{#each data.user_trip_purposes as id}
 		<div class="tag">{trip_purposes_binding[id]}</div>
 	{/each}
 </div>
@@ -100,7 +100,7 @@
 	<div class="interests">
 		<h2>Интересы</h2>
 		<div class="chips">
-			{#each data.interests as id}
+			{#each data.user_interests as id}
 				<Chip text={interests_binding[id]} />
 			{/each}
 		</div>

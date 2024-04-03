@@ -1,27 +1,42 @@
+import { interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import type { Actions } from './$types';
+import { fail, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions = {
-	default: async ({ request, fetch }) => {
-		const data = await request.formData();
-
-		const name = data.get('name');
-		const birthdate = data.get('birthdate');
-		const occupation = data.get('occupation');
-		const about = data.get('about');
-
-		console.log(name, birthdate, occupation, about);
-
-		await fetch('http://nginx/api/user/', {
-			method: 'PUT',
+	update_interests: async ({ request, fetch }) => {
+		const interestsForm = await superValidate(request, zod(interestsSchema));
+		if (!interestsForm.valid) return fail(400, { interestsForm });
+		await fetch('http://nginx/api/user/interests/edit', {
+			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				name: name,
-				birthdate: birthdate,
-				occupation: occupation,
-				about: about
+				tags: interestsForm.data.user_interests
 			})
+		});
+	},
+	update_status: async ({ request, fetch }) => {
+		const statusForm = await superValidate(request, zod(statusSchema));
+		if (!statusForm.valid) return fail(400, { statusForm });
+		await fetch('http://nginx/api/user/status_data/edit', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(statusForm.data)
+		});
+	},
+	update_profile: async ({ request, fetch }) => {
+		const profileForm = await superValidate(request, zod(profileSchema));
+		if (!profileForm.valid) return fail(400, { profileForm });
+		await fetch('http://nginx/api/user/', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(profileForm.data)
 		});
 	}
 } satisfies Actions;

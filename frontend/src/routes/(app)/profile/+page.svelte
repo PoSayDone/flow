@@ -3,40 +3,27 @@
 	import Chip from '$lib/components/chip.svelte';
 	import InterestsPopup from '$lib/components/interestsPopup.svelte';
 	import Modal from '$lib/components/modal.svelte';
-	import { enhance, type SubmitFunction } from '$app/forms';
-	import { onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import { selectedInterests } from '$lib/stores';
+	import { superForm } from 'sveltekit-superforms';
+	import { interestsRu } from '$lib/types';
 
 	let showModal = false;
-	let form: HTMLFormElement;
 
-	let selectedInterests: string[] = [];
-	try {
-		if ($page.data.interests === undefined) {
-			throw '';
+	if ($selectedInterests.length == 0) {
+		if ($page.data.user_interests !== undefined) {
+			selectedInterests.set($page.data.user_interests);
 		}
-		if ($page.data.interests.length > 0) {
-			selectedInterests = $page.data.interests;
-		}
-	} catch {
-		selectedInterests = [];
 	}
 
-	const submitCreateNote: SubmitFunction = () => {
-		return async ({ update }) => {
-			await update({ reset: false });
-		};
-	};
-
-	onDestroy(() => {
-		if (form) {
-			form.requestSubmit();
-		}
+	const { form, enhance, submit } = superForm($page.data.profileForm, {
+		resetForm: false,
+		clearOnSubmit: 'none'
 	});
 </script>
 
 <Modal bind:showModal>
-	<InterestsPopup bind:selectedInterests />
+	<InterestsPopup />
 </Modal>
 
 <div class="header">
@@ -44,41 +31,32 @@
 		<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="profile" />
 	</div>
 </div>
-<form bind:this={form} class="information" method="POST" use:enhance={submitCreateNote}>
+
+<form class="information" method="POST" action="?/update_profile" use:enhance>
 	<div class="info-block">
 		<label for="name">Имя</label>
-		<input value={$page.data.name} name="name" type="text" on:blur={() => form.requestSubmit()} />
+		<input name="name" type="text" bind:value={$form.name} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="birthdate">День рождения</label>
-		<input
-			name="birthdate"
-			type="date"
-			value={$page.data.birthdate}
-			on:blur={() => form.requestSubmit()}
-		/>
+		<input name="birthdate" type="date" bind:value={$form.birthdate} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="occupation">Профессия</label>
-		<input
-			name="occupation"
-			type="text"
-			value={$page.data.occupation}
-			on:blur={() => form.requestSubmit()}
-		/>
+		<input name="occupation" type="text" bind:value={$form.occupation} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="about">О себе</label>
-		<input name="about" type="text" value={$page.data.about} on:blur={() => form.requestSubmit()} />
+		<input name="about" type="text" bind:value={$form.about} on:blur={() => submit()} />
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>
 		<button type="button" class="interests" on:click={() => (showModal = true)}>
-			{#if selectedInterests.length == 0 || selectedInterests == undefined}
+			{#if $selectedInterests.length == 0 || $selectedInterests == undefined}
 				<Chip text={'Добавить интересы'} />
 			{:else}
-				{#each selectedInterests as id}
-					<Chip text={interests_binding[id]} />
+				{#each $selectedInterests as id}
+					<Chip id={`interest_${id}`} text={interestsRu[interests_binding[id]]} />
 				{/each}
 			{/if}
 		</button>
@@ -103,26 +81,6 @@
 		img {
 			height: 100%;
 		}
-	}
-
-	.status {
-		background: #f2f1f6;
-		width: 100%;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		height: 50px;
-		padding: 13px;
-		border-radius: 20px;
-	}
-
-	.status-title {
-		text-align: center;
-		font-family: Inter;
-		font-size: 16px;
-		font-style: normal;
-		font-weight: 400;
-		line-height: 120%; /* 19.2px */
 	}
 
 	.information {

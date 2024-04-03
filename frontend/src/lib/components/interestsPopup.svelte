@@ -1,49 +1,58 @@
 <script lang="ts">
 	import Chip from './chip.svelte';
-	export let selectedInterests = [];
+	import { page } from '$app/stores';
+	import Button from './button.svelte';
+	import { superForm } from 'sveltekit-superforms';
+	import { closeCurrentDialog, selectedInterests, submitCurrentDialog } from '$lib/stores';
+	import { onMount } from 'svelte';
+	import { interestsRu } from '$lib/types';
 
-	function toggleOption(id: string) {
-		if (selectedInterests.includes(id)) {
-			selectedInterests = selectedInterests.filter((item) => item !== id);
-			fetch(`http://localhost/api/user_interests/${id}`, {
-				method: 'DELETE',
-				credentials: 'include'
-			});
+	const { form, enhance, submit } = superForm($page.data.interestsForm, {
+		dataType: 'json',
+		resetForm: false,
+		clearOnSubmit: 'none',
+		onResult: ({ result }) => {
+			if (result.status == 204) {
+				selectedInterests.set($form.user_interests);
+				$closeCurrentDialog();
+			}
+		}
+	});
+
+	function toggleOption(id: number) {
+		if ($form.user_interests.includes(id)) {
+			$form.user_interests = $form.user_interests.filter((item: number) => item !== id);
 		} else {
-			selectedInterests = [...selectedInterests, id];
-			fetch(`http://localhost/api/user_interests/${id}`, {
-				method: 'PUT',
-				credentials: 'include'
-			});
+			form.set({ user_interests: [...$form.user_interests, id] });
 		}
 	}
 
-	async function getInterests() {
-		const res = await fetch('http://localhost/api/interests');
-		const values = await res.json();
-		return values;
-	}
-
-	let interestsPromise = getInterests();
+	onMount(() => {
+		submitCurrentDialog.set(submit);
+	});
 </script>
 
-<div class="container">
-	<h1>Интересы</h1>
-	<div class="interests">
-		{#await interestsPromise then fetched_data}
-			{#each fetched_data as interest}
+<form method="POST" action="?/update_interests" use:enhance>
+	<div class="container">
+		<h1>Интересы</h1>
+		<div class="interests">
+			{#each $page.data.interests as interest}
 				<Chip
 					clickable={true}
-					active={selectedInterests.includes(interest.id)}
+					checked={$form.user_interests.includes(interest.id)}
+					id={interest.id}
 					onClick={() => toggleOption(interest.id)}
-					text={interest.interest_name}
+					text={interestsRu[interest.interest_name]}
+					disabled={$form.user_interests.length >= 5 && !$form.user_interests.includes(interest.id)}
 				/>
 			{/each}
-		{:catch error}
-			<p style="color: red">{error.message}</p>
-		{/await}
+		</div>
 	</div>
-</div>
+
+	<Button type="submit" class="close-button" autofocus>
+		<h2>Готово</h2>
+	</Button>
+</form>
 
 <style lang="scss">
 	h1 {
@@ -56,6 +65,7 @@
 		align-items: center;
 		display: flex;
 		flex-direction: column;
+		margin-bottom: 60px;
 	}
 
 	.interests {

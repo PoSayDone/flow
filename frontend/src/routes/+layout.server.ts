@@ -1,43 +1,29 @@
+import { superValidate } from 'sveltekit-superforms';
 import type { LayoutServerLoad } from './$types';
-import { faker } from '@faker-js/faker';
+import { interestsSchema, profileSchema, statusSchema } from '$lib/schema';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async ({ fetch }) => {
-	// const user = {
-	// 	id: faker.string.uuid(),
-	// 	name: faker.person.firstName(),
-	// 	mail: faker.internet.email(),
-	// 	password_hash: faker.internet.password(),
-	// 	occupation: faker.person.jobTitle(),
-	// 	about: faker.person.bio(),
-	// 	sex: faker.datatype.boolean(),
-	// 	birthdate: faker.date.birthdate().toISOString().split('T')[0]
-	// };
+	const profile = (await fetch('http://nginx/api/user/profile')).json();
+	const trip_purposes = (await fetch('http://nginx/api/trip_purposes')).json();
+	const interests = (await fetch('http://nginx/api/interests')).json();
+	const departures = (await fetch('http://nginx/api/departures')).json();
+	const arrivals = (await fetch('http://nginx/api/arrivals')).json();
 
-	// await fetch('http://nginx/api/users/', {
-	// 	method: 'POST',
-	// 	headers: {
-	// 		'Content-Type': 'application/json'
-	// 	},
-	// 	body: JSON.stringify(user)
-	// });
-	//
-	// for (let i = 0; i < faker.number.int({ min: 2, max: 5 }); i++) {
-	// 	await fetch(
-	// 		`http://nginx/api/user_interests/${user.id}/${faker.number.int({ min: 1, max: 13 })}`,
-	// 		{ method: 'PUT' }
-	// 	);
-	// }
-	//
-	// for (let i = 0; i < faker.number.int({ min: 2, max: 5 }); i++) {
-	// 	await fetch(
-	// 		`http://nginx/api/user_trip_purposes/${user.id}/${faker.number.int({ min: 1, max: 5 })}`,
-	// 		{
-	// 			method: 'PUT'
-	// 		}
-	// 	);
-	// }
+	const statusForm = await superValidate(await profile, zod(statusSchema));
+	const profileForm = await superValidate(await profile, zod(profileSchema));
+	const interestsForm = await superValidate(await profile, zod(interestsSchema));
 
-	const response_user = await fetch('http://nginx/api/profile');
-	const body = await response_user.json();
-	return body;
+	const data = {
+		...(await profile),
+		interests: await interests,
+		trip_purposes: await trip_purposes,
+		departures: await departures,
+		arrivals: await arrivals,
+		statusForm,
+		profileForm,
+		interestsForm
+	};
+
+	return data;
 };

@@ -1,13 +1,14 @@
-<script>
-	import Button from './button.svelte';
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
 
-	export let showModal; // boolean
-
-	let dialog; // HTMLDialogElement
+	export let showModal: boolean; // boolean
+	let dialog: HTMLDialogElement; // HTMLDialogElement
 
 	$: if (dialog && showModal) dialog.showModal();
 
 	const closeAnimation = () => {
+		$submitCurrentDialog();
 		dialog.addEventListener('animationend', closeDialog);
 		dialog.classList.add('close');
 	};
@@ -17,15 +18,25 @@
 		dialog.classList.remove('close');
 		dialog.removeEventListener('animationend', closeDialog);
 	}
+
+	onMount(() => {
+		if (dialog) {
+			closeCurrentDialog.set(closeAnimation);
+		}
+	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
-<dialog bind:this={dialog} on:close={() => (showModal = false)} on:click|self={closeAnimation}>
+<dialog
+	bind:this={dialog}
+	on:close={() => {
+		showModal = false;
+	}}
+	on:click|self={closeAnimation}
+>
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click|stopPropagation>
 		<slot />
-		<!-- svelte-ignore a11y-autofocus -->
-		<Button class="close-button" autofocus on:click={closeAnimation}><h2>Готово</h2></Button>
 	</div>
 </dialog>
 

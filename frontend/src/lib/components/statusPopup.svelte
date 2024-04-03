@@ -1,129 +1,207 @@
 <script lang="ts">
 	import Chip from './chip.svelte';
-	import { status } from '$lib/stores';
+	import { closeCurrentDialog, status, submitCurrentDialog } from '$lib/stores';
 	import Icon from '$lib/components/icon.svelte';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { page } from '$app/stores';
+	import Button from './button.svelte';
+	import { superForm } from 'sveltekit-superforms';
+	import { onMount } from 'svelte';
+	import { tripPurposesRu } from '$lib/types';
+
+	const { form, enhance, submit } = superForm($page.data.statusForm, {
+		dataType: 'json',
+		resetForm: false,
+		clearOnSubmit: 'none',
+		onChange: () => {
+			if ($form.user_departures.includes(1)) {
+				form.update((form) => {
+					form.user_departures = [1];
+					return form;
+				});
+			}
+			if ($form.user_arrivals.includes(1)) {
+				form.update((form) => {
+					form.user_arrivals = [1];
+					return form;
+				});
+			}
+		},
+
+		onResult: ({ result }) => {
+			if (result.status == 204) {
+				$closeCurrentDialog();
+				status.set($form.user_status);
+			}
+		}
+	});
 
 	let fromActive: boolean = false;
 	let toActive: boolean = false;
 
-	let selectedOptions: string[] = [];
-	try {
-		if ($page.data.trip_purposes === undefined) {
-			throw '';
-		}
-		if ($page.data.trip_purposes.length > 0) {
-			selectedOptions = $page.data.trip_purposes;
-		}
-	} catch {
-		selectedOptions = [];
-	}
-
-	let tripPurposesPromise = getTripPurposes();
-
-	async function getTripPurposes() {
-		const res = await fetch('http://localhost/api/trip_purposes');
-		const values = await res.json();
-		return values;
-	}
-
-	function toggleOption(id: string) {
-		if (selectedOptions.includes(id)) {
-			selectedOptions = selectedOptions.filter((item) => item !== id);
-			fetch(`http://localhost/api/user_trip_purposes/${id}`, {
-				method: 'DELETE',
-				credentials: 'include'
+	function toggleOption(id: number) {
+		if ($form.user_trip_purposes.includes(id)) {
+			form.update((form) => {
+				form.user_trip_purposes = form.user_trip_purposes.filter((item: number) => item !== id);
+				return form;
 			});
 		} else {
-			selectedOptions = [...selectedOptions, id];
-			fetch(`http://localhost/api/user_trip_purposes/${id}`, {
-				method: 'PUT',
-				credentials: 'include'
+			form.update((form) => {
+				form.user_trip_purposes = [...form.user_trip_purposes, id];
+				return form;
 			});
 		}
 	}
+	onMount(() => {
+		submitCurrentDialog.set(submit);
+	});
 </script>
 
-<div class="container">
-	<h1>Выберите статус</h1>
-	<div class="radios" role="radiogroup">
-		<label class="radio" class:active={$status == 'active'}>
-			<div class="rows">
-				<label class="radio-title" for="active">Активный</label>
-				<label class="radio-subtitle" for="active"> Готов отправиться в путешествие </label>
+<form class:active={$form.status} method="POST" action="/profile/?/update_status" use:enhance>
+	<div class="container">
+		<h1>Выберите статус</h1>
+		<div class="radios" role="radiogroup">
+			<label class="radio" class:active={$form.user_status}>
+				<div class="rows">
+					<label class="radio-title" for="active">Активный</label>
+					<label class="radio-subtitle" for="active"> Готов отправиться в путешествие </label>
+				</div>
+				<input type="radio" id="active" value={true} bind:group={$form.user_status} />
+			</label>
+			<div
+				class="active-content"
+				class:hidden={!$form.user_status}
+				class:expand={fromActive || toActive}
+			>
+				<button
+					type="button"
+					class="from"
+					class:activebutton={fromActive}
+					on:click={() => {
+						fromActive = !fromActive;
+						toActive = false;
+					}}
+					>Откуда <Icon
+						d={backIcon.d}
+						viewBox={backIcon.viewBox}
+						color="#000000"
+						size="24px"
+					/></button
+				>
+				<div class="location-form" class:shown={fromActive}>
+					<input class="search" type="text" />
+					{#each $page.data.departures as departure}
+						<input
+							type="checkbox"
+							class="location-checkbox"
+							bind:group={$form.user_departures}
+							id={`departure_${departure.id}`}
+							value={departure.id}
+							disabled={($form.user_departures.length >= 3 &&
+								!$form.user_departures.includes(departure.id)) ||
+								($form.user_departures.includes(1) && departure.id != 1)}
+						/>
+						<label for={`departure_${departure.id}`}>
+							{departure.location_name}
+						</label>
+					{/each}
+				</div>
+				<button
+					class="to"
+					on:click={() => {
+						toActive = !toActive;
+						fromActive = false;
+					}}
+					type="button"
+					>Куда <Icon
+						d={backIcon.d}
+						viewBox={backIcon.viewBox}
+						color="#000000"
+						size="24px"
+					/></button
+				>
+				<div class="location-form" class:shown={toActive}>
+					<input class="search" type="text" />
+					{#each $page.data.arrivals as arrival}
+						<input
+							type="checkbox"
+							class="location-checkbox"
+							bind:group={$form.user_arrivals}
+							id={`arrival_${arrival.id}`}
+							value={arrival.id}
+							disabled={($form.user_arrivals.length >= 3 &&
+								!$form.user_arrivals.includes(arrival.id)) ||
+								($form.user_arrivals.includes(1) && arrival.id != 1)}
+						/>
+						<label for={`arrival_${arrival.id}`}>
+							{arrival.location_name}
+						</label>
+					{/each}
+				</div>
+
+				<div class="tags" class:shown={fromActive == false && toActive == false}>
+					{#each $page.data.trip_purposes as trip_purpose}
+						<Chip
+							clickable={true}
+							checked={$form.user_trip_purposes.includes(trip_purpose.id)}
+							id={`trip_purpose_${trip_purpose.id}`}
+							onClick={() => toggleOption(trip_purpose.id)}
+							text={tripPurposesRu[trip_purpose.purpose_name]}
+							disabled={$form.user_trip_purposes.length >= 3 &&
+								!$form.user_trip_purposes.includes(trip_purpose.id)}
+						/>
+					{/each}
+				</div>
 			</div>
-			<input type="radio" id="active" value="active" bind:group={$status} />
-		</label>
-		{#if $status == 'active'}
-			<button
-				class="from"
-				class:activebutton={fromActive}
-				on:click={() => (fromActive = !fromActive)}
-				>Откуда <Icon
-					d={backIcon.d}
-					viewBox={backIcon.viewBox}
-					color="#000000"
-					size="24px"
-				/></button
-			>
-			{#if fromActive == true}
-				<div class="city-form">
-					<input type="text" />
-					<input type="checkbox" />
-				</div>
-			{/if}
-			<button class="to" on:click={() => (toActive = !toActive)}
-				>Куда <Icon d={backIcon.d} viewBox={backIcon.viewBox} color="#000000" size="24px" /></button
-			>
-			{#if toActive == true}
-				<div class="city-form">
-					<input type="text" />
-					<input type="checkbox" />
-				</div>
-			{/if}
 
-			{#if fromActive == false && toActive == false}
-				<div class="tags">
-					{#await tripPurposesPromise then fetched_data}
-						{#each fetched_data as trip_purpose}
-							<Chip
-								clickable={true}
-								active={selectedOptions.includes(trip_purpose.id)}
-								onClick={() => toggleOption(trip_purpose.id)}
-								text={trip_purpose.purpose_name}
-							/>
-						{/each}
-					{:catch error}
-						<p style="color: red">{error.message}</p>
-					{/await}
-				</div>
-			{/if}
-		{/if}
-
-		{#if fromActive == false && toActive == false}
-			<label class="radio" class:active={$status == 'inactive'}>
+			<label class="radio" class:active={!$form.user_status}>
 				<div class="rows">
 					<label class="radio-title" for="inactive">Перерыв</label>
 					<label class="radio-subtitle" for="inactive">Пока не путешествую</label>
 				</div>
-				<input type="radio" id="inactive" value="inactive" bind:group={$status} />
+				<input type="radio" id="inactive" value={false} bind:group={$form.user_status} />
 			</label>
-		{/if}
+		</div>
 	</div>
-</div>
+
+	<Button type="submit" class="close-button" autofocus>
+		<h2>Готово</h2>
+	</Button>
+</form>
 
 <style lang="scss">
 	h1 {
 		margin-bottom: 30px;
 	}
 
+	form {
+		display: flex;
+		flex-direction: column;
+		&.active {
+			height: 75svh;
+		}
+	}
+
 	.container {
+		flex: 1;
 		border-radius: 40px 40px 0 0;
 		background: #fff;
 		align-items: center;
 		display: flex;
 		flex-direction: column;
+		margin-bottom: 60px;
+	}
+
+	.active-content {
+		display: flex;
+		height: min-content;
+		flex-direction: column;
+		gap: 5px;
+
+		&.expand {
+			height: 100%;
+			flex: 1;
+		}
 	}
 
 	.radios {
@@ -131,6 +209,70 @@
 		flex-direction: column;
 		gap: 5px;
 		width: 100%;
+		height: 100%;
+	}
+
+	.location-form {
+		display: none;
+		overflow-y: scroll;
+		flex-direction: column;
+		gap: 10px;
+
+		&.shown {
+			flex: 1;
+			display: flex;
+		}
+	}
+
+	.location-checkbox {
+		display: none;
+	}
+
+	.location-checkbox + label {
+		margin: 0 17px;
+		display: inline-flex;
+		align-items: center;
+		user-select: none;
+		gap: 5px;
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.location-checkbox + label::before {
+		content: '';
+		display: inline-block;
+		width: 25px;
+		height: 25px;
+		flex-shrink: 0;
+		flex-grow: 0;
+		border: 1px solid #adb5bd;
+		border-radius: 5px;
+		background-repeat: no-repeat;
+		background-position: center center;
+		background-size: 50% 50%;
+		transition: all 0.1s ease-in-out;
+	}
+
+	.location-checkbox:checked + label::before {
+		border-color: #0b76ef;
+		background-color: #0b76ef;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+	}
+
+	.location-checkbox:disabled + label {
+		color: #999999;
+	}
+	.location-checkbox:disabled + label::before {
+		border-color: #999999;
+		background: none;
+	}
+
+	.search {
+		min-height: 45px;
+		display: flex;
+		align-items: center;
+		border: 1px solid #aaaaaa;
+		border-radius: 15px;
 	}
 
 	.from {
@@ -162,23 +304,15 @@
 		}
 	}
 
-	.city-form {
-		height: 30svh;
-	}
-
 	.tags {
-		display: flex;
+		display: none;
 		flex-wrap: wrap;
 		gap: 5px;
 		margin-bottom: 20px;
+		&.shown {
+			display: flex;
+		}
 	}
-
-	// .tag {
-	// 	border: 1px solid #d6d6d6;
-	// 	border-radius: 100px;
-	// 	background: none;
-	// 	padding: 9px 18px;
-	// }
 
 	.radio {
 		background-color: #f2f1f6;
@@ -254,5 +388,18 @@
 
 	input[type='radio']:checked::before {
 		transform: scale(1);
+	}
+
+	@keyframes slide {
+		from {
+			transform: scaleY(1);
+		}
+		to {
+			transform: scaleY(0);
+		}
+	}
+
+	.hidden {
+		display: none;
 	}
 </style>
