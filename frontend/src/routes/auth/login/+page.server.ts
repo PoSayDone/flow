@@ -26,7 +26,7 @@ export const actions = {
 			body: urlParams
 		};
 
-		const response = await fetch(`http://nginx/api/auth/token`, requestOptions);
+		const response = await fetch(`http://nginx/api/auth/login`, requestOptions);
 
 		if (response.status == 200) {
 			const data = await response.json();

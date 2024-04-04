@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { trip_purposes_binding } from '$lib/utils';
-	import { users } from '$lib/stores';
+	import { soulmates } from '$lib/stores';
+	import { tripPurposesRu } from '$lib/types';
 
 	export let index: number = 0;
 	export let id: string = '';
-	export let trip_purposes: string[] = ['Горы', 'Море', 'Тусовки'];
+	export let trip_purposes: number[] = [1, 2, 3];
 	export let name: string = 'Никита';
 	export let age: string = '18';
 	export let occupation: string = 'Дизайнер';
-	let href: string = `/user_${id}`;
+	$: href = `/user_${id}`;
 
 	export let about: string =
 		'\
@@ -19,7 +20,7 @@
     ';
 
 	let startX: number;
-	let currentCard: HTMLDivElement;
+	let currentCard: HTMLAnchorElement;
 
 	function handleTouchStart(event: TouchEvent) {
 		startX = event.touches[0].clientX;
@@ -38,8 +39,9 @@
 			setTimeout(() => {
 				currentCard.style.transition = '';
 				currentCard.style.transform = '';
-				users.update((array) => {
-					array.shift();
+				soulmates.update((array) => {
+					const not_interested_in_id = array.shift().id;
+					fetch(`http://localhost/api/user/dislike/${not_interested_in_id}`, { method: 'POST' });
 					return array;
 				});
 			}, 300);
@@ -49,9 +51,9 @@
 			setTimeout(() => {
 				currentCard.style.transition = '';
 				currentCard.style.transform = '';
-				users.update((array) => {
-					const interested_in = array.shift().id;
-					fetch(`http://localhost/api/match/${interested_in}`, { method: 'PUT' });
+				soulmates.update((array) => {
+					const interested_in_id = array.shift().id;
+					fetch(`http://localhost/api/user/like/${interested_in_id}`, { method: 'POST' });
 					return array;
 				});
 			}, 300);
@@ -74,12 +76,14 @@
 	on:touchcancel={handleTouchEnd}
 	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
-	style:z-index={$users.length - index}
+	style:z-index={$soulmates.length - index}
 >
 	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
-		{#each trip_purposes as id}
-			<div class="tag">{trip_purposes_binding[id]}</div>
-		{/each}
+		{#if trip_purposes}
+			{#each trip_purposes as id}
+				<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
+			{/each}
+		{/if}
 	</div>
 	<div class="body">
 		<div class="heading">

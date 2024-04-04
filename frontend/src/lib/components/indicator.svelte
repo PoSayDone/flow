@@ -9,7 +9,7 @@
 
 	let showModal = false;
 	onMount(() => {
-		status.set($page.data.user_status);
+		status.set($page.data.user.status);
 	});
 </script>
 

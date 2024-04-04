@@ -1,11 +1,6 @@
-from typing import Annotated
-from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
 from app import models, schema
-from app.database import SessionLocal
-from app.routes import auth
 from app.dependencies import db_dependency
 
 router = APIRouter(prefix="/trip_purposes", tags=["trip_purposes"])

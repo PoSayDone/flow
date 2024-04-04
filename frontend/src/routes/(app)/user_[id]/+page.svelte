@@ -6,6 +6,7 @@
 	import Icon from '$lib/components/icon.svelte';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
+	import { tripPurposesRu } from '$lib/types';
 
 	let popover: HTMLDivElement;
 	let startY: number;
@@ -59,8 +60,8 @@
 	<div class="profile-picture"></div>
 </div>
 <div class="tags" style:view-transition-name={`trip-purposes`}>
-	{#each data.user_trip_purposes as id}
-		<div class="tag">{trip_purposes_binding[id]}</div>
+	{#each data.pageUser.trip_purposes as id}
+		<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
 	{/each}
 </div>
 <div
@@ -74,10 +75,10 @@
 >
 	<span class="line" />
 	<div class="heading">
-		<h1>{data.name}, {getAge(data.birthdate)}</h1>
-		<h2>{data.occupation}</h2>
+		<h1>{data.pageUser.name}, {getAge(data.pageUser.birthdate.toString())}</h1>
+		<h2>{data.pageUser.occupation}</h2>
 	</div>
-	<p class="about">{data.about}</p>
+	<p class="about">{data.pageUser.about}</p>
 	<hr />
 	<div class="directions">
 		<ul class="from">
@@ -100,9 +101,13 @@
 	<div class="interests">
 		<h2>Интересы</h2>
 		<div class="chips">
-			{#each data.user_interests as id}
-				<Chip text={interests_binding[id]} />
-			{/each}
+			{#if data.pageUser.interests.length > 0}
+				{#each data.pageUser.interests as id}
+					<Chip text={interests_binding[id]} />
+				{/each}
+			{:else}
+				<p>Здесь пока ничего нет</p>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -135,10 +140,12 @@
 	}
 
 	.tag {
+		border-radius: 20px;
 		border: 1px solid #fff;
-		color: #fff;
-		border-radius: 100px;
 		padding: 5px 10px;
+
+		color: #fff;
+		text-wrap: nowrap;
 	}
 
 	.popover {
