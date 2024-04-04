@@ -3,12 +3,12 @@ import type { Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from '../$types';
-import type { User } from '$lib/types';
+import type { Message, User } from '$lib/types';
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const messageForm = await superValidate(zod(messageSchema));
 	const conversation_id = params.conversation_id;
-	const { messages, users }: { messages: string[]; users: User[] } = await (
+	const { messages, users }: { messages: Message[]; users: User[] } = await (
 		await fetch(`http://nginx/api/chats/${conversation_id}`, {
 			method: 'GET'
 		})

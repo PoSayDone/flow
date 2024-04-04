@@ -7,15 +7,13 @@
 	import { page } from '$app/stores';
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
-	import type { Message } from '$lib/types';
+	import type { Message, UserWMessages } from '$lib/types';
 	import { getAge } from '$lib/utils';
 
 	export let data: PageData;
 	let messages: Message[] = data.messages || [];
 
-	let otherUser = data.users.filter((u) => u.id != $page.data.id)[0];
-
-	$: console.log(data);
+	let otherUser: UserWMessages = data.users.filter((u) => u.id != $page.data.user.id)[0];
 
 	function nav_back() {
 		if (browser) window.history.back();
@@ -42,7 +40,7 @@
 	};
 
 	onMount(() => {
-		pusherClient.subscribe($page.data.mail);
+		pusherClient.subscribe($page.data.user.mail);
 		pusherClient.bind('message:new', newHandler);
 
 		scrollToBottom(messagesContainer);
@@ -79,14 +77,14 @@
 	</div>
 	<div bind:this={messagesContainer} class="messages">
 		{#each messages as message}
-			<div class={`message ${message.sender_id === $page.data.id ? 'from' : 'to'}`}>
+			<div class={`message ${message.sender_id === otherUser.id ? 'from' : 'to'}`}>
 				{message.body}
 			</div>
 		{/each}
 	</div>
 
 	<form class="message-input" method="POST" action="?/send_message" use:enhance>
-		<textarea placeholder="Напишите сообщение..." bind:value={$form.message} />
+		<textarea placeholder="Напишите сообщение..." bind:value={$form.message} rows="1" />
 		<button class="send" type="submit">
 			<Icon viewBox={sendIcon.viewBox} d={sendIcon.d} size={'27'} stroke_width={'2'} />
 		</button>
@@ -215,6 +213,8 @@
 			margin: 0 19px;
 			border: none;
 			flex: 1;
+			padding: 14px 0;
+			outline: none;
 		}
 		textarea::placeholder {
 			color: var(--Gray-Text, #aaa);

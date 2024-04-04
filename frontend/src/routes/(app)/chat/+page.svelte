@@ -16,57 +16,73 @@
 	};
 
 	onMount(() => {
-		pusherClient.subscribe($page.data.mail);
+		pusherClient.subscribe($page.data.user.mail);
 		pusherClient.bind('conversation:new', newHandler);
 		pusherClient.bind('message:new', updateHandler);
 	});
 
 	onDestroy(() => {
-		pusherClient.unsubscribe($page.data.mail);
+		pusherClient.unsubscribe($page.data.user.mail);
 		pusherClient.unbind('conversation:new', newHandler);
 		pusherClient.unbind('message:new', updateHandler);
 	});
 </script>
 
 <div class="tabs">
-	<a href="">
-		<h1>Отклики</h1>
-	</a>
-	<a href="">
-		<h1>Общие</h1>
-	</a>
+	<h1>Отклики</h1>
+	<!-- <a href=""> -->
+	<!-- 	<h1>Общие</h1> -->
+	<!-- </a> -->
 </div>
 <div class="chats">
-	{#each data.chats as chat}
-		<a href={`/chat/${chat.id}`} class="chat">
-			<div class="avatar">
-				<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="avatar" />
-			</div>
-			<div class="rows">
-				<div class="row">
-					<h5>{chat.users.filter((user) => user.id !== $page.data.id)[0].name}</h5>
+	{#if data.chats.length == 0}
+		<div class="placeholder">
+			Здесь пока ничего нет.<br /> Самое время исправить это!<br /><span>😉</span>
+		</div>
+	{:else}
+		{#each data.chats as chat}
+			<a href={`/chat/${chat.id}`} class="chat">
+				<div class="avatar">
+					<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="avatar" />
 				</div>
-				{#if chat.messages.length > 0}
+				<div class="rows">
 					<div class="row">
-						<h6>{chat.messages[chat.messages.length - 1].body || ''}</h6>
+						<h5>{chat.users.filter((user) => user.id !== $page.data.user.id)[0].name}</h5>
 					</div>
-				{/if}
-			</div>
-		</a>
-	{/each}
+					{#if chat.messages.length > 0}
+						<div class="row">
+							<h6>{chat.messages[chat.messages.length - 1].body || ''}</h6>
+						</div>
+					{/if}
+				</div>
+			</a>
+		{/each}
+	{/if}
 </div>
 
 <style lang="scss">
 	.tabs {
-		display: flex;
 		margin-bottom: 20px;
-		gap: 12px;
-		a {
-			text-decoration: none;
-			color: #000;
+	}
+	.chats {
+		height: 100%;
+	}
+	.placeholder {
+		height: 100%;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		font-weight: 600;
+		gap: 20px;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		font-size: 20px;
+		span {
+			line-height: 1;
+			font-size: 60px;
 		}
 	}
-
 	.chat {
 		display: flex;
 		gap: 12px;

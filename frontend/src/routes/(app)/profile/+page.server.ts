@@ -20,6 +20,7 @@ export const actions = {
 	update_status: async ({ request, fetch }) => {
 		const statusForm = await superValidate(request, zod(statusSchema));
 		if (!statusForm.valid) return fail(400, { statusForm });
+		console.log(statusForm.data);
 		await fetch('http://nginx/api/user/status_data/edit', {
 			method: 'PATCH',
 			headers: {

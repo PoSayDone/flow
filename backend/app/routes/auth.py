@@ -26,7 +26,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 90
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/login")
 
 
 @router.post("/refresh", response_model=TokenBase)
@@ -75,7 +75,7 @@ async def refresh_token_regenerate(
     }
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, user_create_request: UserCreateRequest):
     user_create_model = Users(
         id=user_create_request.id,
@@ -87,7 +87,7 @@ async def create_user(db: db_dependency, user_create_request: UserCreateRequest)
     db.commit()
 
 
-@router.post("/token", response_model=TokenBase)
+@router.post("/login", response_model=TokenBase)
 async def login_for_access_token(
     response: Response,
     db: db_dependency,
@@ -124,7 +124,7 @@ async def login_for_access_token(
     db.commit()
 
     response.set_cookie(
-        key="access_token_zhopa",
+        key="access_token",
         value=f"Bearer {access_token}",
         httponly=True,
         path="/",

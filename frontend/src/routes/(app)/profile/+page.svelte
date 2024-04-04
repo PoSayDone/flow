@@ -11,8 +11,8 @@
 	let showModal = false;
 
 	if ($selectedInterests.length == 0) {
-		if ($page.data.user_interests !== undefined) {
-			selectedInterests.set($page.data.user_interests);
+		if ($page.data.user.interests !== undefined) {
+			selectedInterests.set($page.data.user.interests);
 		}
 	}
 

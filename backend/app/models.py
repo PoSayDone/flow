@@ -12,9 +12,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID, array
 import datetime
 
-from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.schema import UserBase
 from .database import Base
 
 
@@ -28,29 +27,31 @@ conversation_participant = Table(
 user_interest_table = Table(
     "user_interest",
     Base.metadata,
-    Column("user_id", UUID, ForeignKey("users.id")),
-    Column("interest_id", Integer, ForeignKey("interests.id")),
+    Column("user_id", UUID, ForeignKey("users.id"), primary_key=True),
+    Column("interest_id", Integer, ForeignKey("interests.id"), primary_key=True),
 )
 
 user_trip_purpose_table = Table(
     "user_trip_purpose",
     Base.metadata,
-    Column("user_id", UUID, ForeignKey("users.id")),
-    Column("trip_purpose_id", Integer, ForeignKey("trip_purposes.id")),
+    Column("user_id", UUID, ForeignKey("users.id"), primary_key=True),
+    Column(
+        "trip_purpose_id", Integer, ForeignKey("trip_purposes.id"), primary_key=True
+    ),
 )
 
 user_departure_table = Table(
     "user_departure",
     Base.metadata,
-    Column("user_id", UUID, ForeignKey("users.id")),
-    Column("departure_id", Integer, ForeignKey("departures.id")),
+    Column("user_id", UUID, ForeignKey("users.id"), primary_key=True),
+    Column("departure_id", Integer, ForeignKey("departures.id"), primary_key=True),
 )
 
 user_arrival_table = Table(
     "user_arrival",
     Base.metadata,
-    Column("user_id", UUID, ForeignKey("users.id")),
-    Column("arrival_id", Integer, ForeignKey("arrivals.id")),
+    Column("user_id", UUID, ForeignKey("users.id"), primary_key=True),
+    Column("arrival_id", Integer, ForeignKey("arrivals.id"), primary_key=True),
 )
 
 
@@ -119,14 +120,14 @@ class TripPurposes(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     purpose_name = Column(String, index=True)
     users = relationship(
-        "Users", secondary=user_interest_table, back_populates="trip_purposes"
+        "Users", secondary=user_trip_purpose_table, back_populates="trip_purposes"
     )
 
 
 class Departures(Base):
     __tablename__ = "departures"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    location_name = Column(String, index=True)
+    departure_name = Column(String, index=True)
     users = relationship(
         "Users", secondary=user_departure_table, back_populates="departures"
     )
@@ -135,7 +136,7 @@ class Departures(Base):
 class Arrivals(Base):
     __tablename__ = "arrivals"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    location_name = Column(String, index=True)
+    arrival_name = Column(String, index=True)
     users = relationship(
         "Users", secondary=user_arrival_table, back_populates="arrivals"
     )

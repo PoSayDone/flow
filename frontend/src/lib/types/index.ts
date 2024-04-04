@@ -1,15 +1,56 @@
-export type User = {
+export type Soulmate = {
 	id: string;
 	name: string;
 	occupation: string;
 	about: string;
+	birthdate: Date;
+	trip_purposes: number[];
+};
+
+export type User = {
+	id: string;
+	status: boolean;
+	name: string;
+	occupation: string;
+	about: string;
 	mail: string;
-	password_hash: string;
 	sex: boolean;
 	birthdate: Date;
 	registration_date: Date;
+};
+
+export type UserWMessages = {
 	conversations: Conversation[];
 	messages: Message[];
+} & User;
+
+export type UserWStatus = {
+	interests: number[];
+	trip_purposes: number[];
+	departures: number[];
+	arrivals: number[];
+} & User;
+
+export type UserFullType = UserWMessages & UserWStatus;
+
+export type Interest = {
+	id: number;
+	interest_name: string;
+};
+
+export type TripPurpose = {
+	id: number;
+	purpose_name: string;
+};
+
+export type Departure = {
+	id: number;
+	departure_name: string;
+};
+
+export type Arrival = {
+	id: number;
+	arrival_name: string;
 };
 
 export type Message = {
