@@ -2,7 +2,7 @@ import { redirect, type HandleFetch } from '@sveltejs/kit';
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const { cookies } = event;
-	const accessToken = event.cookies.get('access_token');
+	const accessToken = event.cookies.get('access_token')?.toString();
 	const refreshToken = event.cookies.get('refresh_token');
 
 	if (accessToken && refreshToken) {
@@ -17,14 +17,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		}
 	}
 
-	request = new Request(request, {
-		...request,
-		headers: {
-			...request.headers,
-			cookie: `access_token=${accessToken}`
-		}
-	});
-
+	request.headers.set('cookie', `access_token=${accessToken}`);
 	let response = await fetch(request);
 
 	if (response.status == 401 && refreshToken) {
@@ -58,5 +51,6 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			event.locals.isAuthenticated = false;
 		}
 	}
+
 	return response;
 };

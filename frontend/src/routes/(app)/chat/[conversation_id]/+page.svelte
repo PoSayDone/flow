@@ -77,7 +77,7 @@
 	</div>
 	<div bind:this={messagesContainer} class="messages">
 		{#each messages as message}
-			<div class={`message ${message.sender_id === otherUser.id ? 'from' : 'to'}`}>
+			<div class={`message ${message.sender_id === otherUser.id ? 'to' : 'from'}`}>
 				{message.body}
 			</div>
 		{/each}
