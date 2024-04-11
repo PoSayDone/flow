@@ -7,6 +7,7 @@
 }
 
 * {
+	font-family: 'PP Pangram Sans Rounded';
 	scroll-behavior: smooth;
 	text-rendering: geometricPrecision;
 	margin: 0;
@@ -29,6 +30,9 @@ a {
 
 button {
 	margin: 0;
+	padding: 0;
+	background: none;
+	border: none;
 }
 
 @font-face {
@@ -73,6 +77,7 @@ body {
 	min-height: 100%;
 	width: 100%;
 	display: flex;
+	flex-direction: column;
 }
 
 .content {

@@ -19,6 +19,8 @@
 				about={user.about}
 				occupation={user.occupation}
 				trip_purposes={user.trip_purposes}
+				sex={user.sex}
+				image_name={user.user_image}
 				age={getAge(user.birthdate.toString()).toString()}
 				index={i}
 			/>

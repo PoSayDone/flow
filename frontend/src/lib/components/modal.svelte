@@ -3,9 +3,13 @@
 	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
 
 	export let showModal: boolean; // boolean
+	export let centered: boolean = false;
 	let dialog: HTMLDialogElement; // HTMLDialogElement
 
-	$: if (dialog && showModal) dialog.showModal();
+	$: if (dialog && showModal) {
+		dialog.showModal();
+		closeCurrentDialog.set(closeAnimation);
+	}
 
 	const closeAnimation = () => {
 		$submitCurrentDialog();
@@ -18,16 +22,11 @@
 		dialog.classList.remove('close');
 		dialog.removeEventListener('animationend', closeDialog);
 	}
-
-	onMount(() => {
-		if (dialog) {
-			closeCurrentDialog.set(closeAnimation);
-		}
-	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
 <dialog
+	class:centered
 	bind:this={dialog}
 	on:close={() => {
 		showModal = false;
@@ -51,8 +50,21 @@
 		padding: 30px 20px;
 	}
 
+	dialog.centered {
+		padding: 0;
+		border-radius: 0;
+		margin: auto;
+		min-width: 0;
+		max-width: 80%;
+		background: none;
+	}
+
 	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.3);
+		background: rgba(0, 0, 0, 0.5);
+	}
+
+	dialog.centered::backdrop {
+		background: rgba(0, 0, 0, 0.7);
 	}
 
 	dialog[open] {

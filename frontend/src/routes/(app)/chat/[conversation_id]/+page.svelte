@@ -7,13 +7,14 @@
 	import { page } from '$app/stores';
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
-	import type { Message, UserWMessages } from '$lib/types';
+	import type { Message, User } from '$lib/types';
 	import { getAge } from '$lib/utils';
+	import Avatar from '$lib/components/avatar.svelte';
 
 	export let data: PageData;
 	let messages: Message[] = data.messages || [];
 
-	let otherUser: UserWMessages = data.users.filter((u) => u.id != $page.data.user.id)[0];
+	let otherUser: User = data.users.filter((u) => u.id != $page.data.user.id)[0];
 
 	function nav_back() {
 		if (browser) window.history.back();
@@ -68,11 +69,9 @@
 			<span class="name">{otherUser.name}, {getAge(otherUser.birthdate.toString())}</span>
 		</div>
 		<div class="right-block">
-			<img
-				class="avatar"
-				src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg"
-				alt=""
-			/>
+			<a href={`/user_${otherUser.id}`}>
+				<Avatar user={otherUser} />
+			</a>
 		</div>
 	</div>
 	<div bind:this={messagesContainer} class="messages">
@@ -147,13 +146,6 @@
 	.right-block {
 		display: flex;
 		justify-content: end;
-	}
-
-	.avatar {
-		border-radius: 100%;
-		width: 50px;
-		height: 50px;
-		overflow: hidden;
 	}
 
 	.messages {

@@ -13,6 +13,17 @@ export function getAge(dateString: string) {
 	return age;
 }
 
+export const placeholder = (value: boolean | null) => {
+	switch (value) {
+		case true:
+			return 'male_placeholder.png';
+		case false:
+			return 'women_placeholder.png';
+		default:
+			return 'placeholder.png';
+	}
+};
+
 export const interests_binding: Binding = {
 	'1': 'it',
 	'2': 'vehicles',

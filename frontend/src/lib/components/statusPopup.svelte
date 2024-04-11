@@ -6,8 +6,18 @@
 	import { page } from '$app/stores';
 	import Button from './button.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { onMount } from 'svelte';
-	import { tripPurposesRu } from '$lib/types';
+	import { tripPurposesRu, type Arrival, type Departure } from '$lib/types';
+
+	export let showModal;
+
+	let departureSearch = '';
+	let arrivalSearch = '';
+
+	let departures: Departure[] = $page.data.departures;
+	let arrivals: Arrival[] = $page.data.arrivals;
+
+	$: filteredDepartures = departures.filter((d) => d.departure_name.includes(departureSearch));
+	$: filteredArrivals = arrivals.filter((a) => a.arrival_name.includes(arrivalSearch));
 
 	const { form, enhance, submit } = superForm($page.data.statusForm, {
 		dataType: 'json',
@@ -36,8 +46,8 @@
 		}
 	});
 
-	let fromActive: boolean = false;
-	let toActive: boolean = false;
+	let departuresActive: boolean = false;
+	let arrivalActive: boolean = false;
 
 	function toggleOption(id: number) {
 		if ($form.user_trip_purposes.includes(id)) {
@@ -52,12 +62,12 @@
 			});
 		}
 	}
-	onMount(() => {
+	$: if (showModal) {
 		submitCurrentDialog.set(submit);
-	});
+	}
 </script>
 
-<form class:active={$form.status} method="POST" action="/profile/?/update_status" use:enhance>
+<form class:active={$form.user_status} method="POST" action="/profile/?/update_status" use:enhance>
 	<div class="container">
 		<h1>Выберите статус</h1>
 		<div class="radios" role="radiogroup">
@@ -71,15 +81,15 @@
 			<div
 				class="active-content"
 				class:hidden={!$form.user_status}
-				class:expand={fromActive || toActive}
+				class:expand={departuresActive || arrivalActive}
 			>
 				<button
 					type="button"
 					class="from"
-					class:activebutton={fromActive}
+					class:activebutton={departuresActive}
 					on:click={() => {
-						fromActive = !fromActive;
-						toActive = false;
+						departuresActive = !departuresActive;
+						arrivalActive = false;
 					}}
 					>Откуда <Icon
 						d={backIcon.d}
@@ -88,29 +98,31 @@
 						size="24px"
 					/></button
 				>
-				<div class="location-form" class:shown={fromActive}>
-					<input class="search" type="text" />
-					{#each $page.data.departures as departure}
-						<input
-							type="checkbox"
-							class="location-checkbox"
-							bind:group={$form.user_departures}
-							id={`departure_${departure.id}`}
-							value={departure.id}
-							disabled={($form.user_departures.length >= 3 &&
-								!$form.user_departures.includes(departure.id)) ||
-								($form.user_departures.includes(1) && departure.id != 1)}
-						/>
-						<label for={`departure_${departure.id}`}>
-							{departure.location_name}
-						</label>
-					{/each}
+				<div class="location-form" class:shown={departuresActive}>
+					<input class="search" type="text" bind:value={departureSearch} />
+					<div>
+						{#each filteredDepartures as { departure_name, id }}
+							<input
+								type="checkbox"
+								class="location-checkbox"
+								bind:group={$form.user_departures}
+								id={`departure_${id}`}
+								value={id}
+								disabled={($form.user_departures.length >= 3 &&
+									!$form.user_departures.includes(id)) ||
+									($form.user_departures.includes(1) && id != 1)}
+							/>
+							<label for={`departure_${id}`}>
+								{departure_name}
+							</label>
+						{/each}
+					</div>
 				</div>
 				<button
 					class="to"
 					on:click={() => {
-						toActive = !toActive;
-						fromActive = false;
+						arrivalActive = !arrivalActive;
+						departuresActive = false;
 					}}
 					type="button"
 					>Куда <Icon
@@ -120,26 +132,27 @@
 						size="24px"
 					/></button
 				>
-				<div class="location-form" class:shown={toActive}>
-					<input class="search" type="text" />
-					{#each $page.data.arrivals as arrival}
-						<input
-							type="checkbox"
-							class="location-checkbox"
-							bind:group={$form.user_arrivals}
-							id={`arrival_${arrival.id}`}
-							value={arrival.id}
-							disabled={($form.user_arrivals.length >= 3 &&
-								!$form.user_arrivals.includes(arrival.id)) ||
-								($form.user_arrivals.includes(1) && arrival.id != 1)}
-						/>
-						<label for={`arrival_${arrival.id}`}>
-							{arrival.location_name}
-						</label>
-					{/each}
+				<div class="location-form" class:shown={arrivalActive}>
+					<input class="search" type="text" bind:value={arrivalSearch} />
+					<div>
+						{#each filteredArrivals as { arrival_name, id }}
+							<input
+								type="checkbox"
+								class="location-checkbox"
+								bind:group={$form.user_arrivals}
+								id={`arrival_${id}`}
+								value={id}
+								disabled={($form.user_arrivals.length >= 3 && !$form.user_arrivals.includes(id)) ||
+									($form.user_arrivals.includes(1) && id != 1)}
+							/>
+							<label for={`arrival_${id}`}>
+								{arrival_name}
+							</label>
+						{/each}
+					</div>
 				</div>
 
-				<div class="tags" class:shown={fromActive == false && toActive == false}>
+				<div class="tags" class:shown={departuresActive == false && arrivalActive == false}>
 					{#each $page.data.trip_purposes as trip_purpose}
 						<Chip
 							clickable={true}
@@ -178,8 +191,12 @@
 		display: flex;
 		flex-direction: column;
 		&.active {
-			height: 75svh;
+			height: 75svh !important;
 		}
+	}
+
+	input {
+		padding: 10px;
 	}
 
 	.container {
@@ -214,14 +231,19 @@
 
 	.location-form {
 		display: none;
-		overflow-y: scroll;
 		flex-direction: column;
 		gap: 10px;
 
 		&.shown {
-			flex: 1;
 			display: flex;
+			overflow-y: scroll;
+			div {
+				display: flex;
+				gap: 10px;
+				flex-direction: column;
+			}
 		}
+		margin-bottom: 12px;
 	}
 
 	.location-checkbox {

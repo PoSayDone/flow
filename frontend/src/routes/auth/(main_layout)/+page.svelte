@@ -9,7 +9,7 @@
 		спользовательским соглашением
 	</p>
 	<div class="buttons">
-		<Button class="white">Создать аккаунт</Button>
+		<Button class="white" on:click={() => goto('/auth/signin')}>Создать аккаунт</Button>
 		<Button class="border" on:click={() => goto('/auth/login')}>Войти</Button>
 	</div>
 </div>

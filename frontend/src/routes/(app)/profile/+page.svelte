@@ -2,13 +2,23 @@
 	import { interests_binding } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
 	import InterestsPopup from '$lib/components/interestsPopup.svelte';
+	import AvatarPopup from '$lib/components/avatarPopup.svelte';
 	import Modal from '$lib/components/modal.svelte';
 	import { page } from '$app/stores';
 	import { selectedInterests } from '$lib/stores';
 	import { superForm } from 'sveltekit-superforms';
 	import { interestsRu } from '$lib/types';
+	import Indicator from '$lib/components/indicator.svelte';
+	import Icon from '$lib/components/icon.svelte';
+	import { backIcon, editIcon } from '$lib/assets/Appicons';
+	import type { PageData } from './$types';
+	import Avatar from '$lib/components/avatar.svelte';
 
-	let showModal = false;
+	let showStatusModal = false;
+	let showInterestsModal = false;
+	let showAvatarModal = false;
+
+	export let data: PageData;
 
 	if ($selectedInterests.length == 0) {
 		if ($page.data.user.interests !== undefined) {
@@ -22,13 +32,34 @@
 	});
 </script>
 
-<Modal bind:showModal>
-	<InterestsPopup />
+<Modal bind:showModal={showInterestsModal}>
+	<InterestsPopup bind:showModal={showInterestsModal} />
+</Modal>
+
+<Modal centered={true} bind:showModal={showAvatarModal}>
+	<AvatarPopup bind:showModal={showAvatarModal} />
 </Modal>
 
 <div class="header">
-	<div class="profile-picture">
-		<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="profile" />
+	<button class="avatar-container" on:click={() => (showAvatarModal = true)}>
+		<Avatar size="128px" user={data.user} />
+		<div class="avatar-icon">
+			<Icon
+				viewBox={editIcon.viewBox}
+				d={editIcon.d}
+				stroke_width={'1'}
+				size={'14'}
+				color={'#2461FF'}
+			/>
+		</div>
+	</button>
+</div>
+
+<div class="status" on:click={() => (showStatusModal = true)}>
+	Статус
+	<div class="status-data">
+		<Indicator bind:showModal={showStatusModal} />
+		<Icon viewBox={backIcon.viewBox} d={backIcon.d} stroke_width={'2'} size={'20'} color={'#000'} />
 	</div>
 </div>
 
@@ -51,7 +82,7 @@
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>
-		<button type="button" class="interests" on:click={() => (showModal = true)}>
+		<button type="button" class="interests" on:click={() => (showInterestsModal = true)}>
 			{#if $selectedInterests.length == 0 || $selectedInterests == undefined}
 				<Chip text={'Добавить интересы'} />
 			{:else}
@@ -73,13 +104,41 @@
 		gap: 20px;
 	}
 
-	.profile-picture {
-		width: 130px;
-		height: 130px;
-		border-radius: 100%;
-		overflow: hidden;
-		img {
-			height: 100%;
+	.avatar-container {
+		position: relative;
+		.avatar-icon {
+			position: absolute;
+			bottom: 0px;
+			right: 6px;
+			box-shadow: 0px 4px 14px 0px #0000001f;
+			background: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 100%;
+			width: 28px;
+			height: 28px;
+		}
+	}
+
+	.status {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px 13px;
+		background: #f2f1f6;
+		border-radius: 20px;
+		margin-top: 20px;
+	}
+
+	.status-data {
+		align-items: center;
+		display: flex;
+		gap: 6px;
+		:global(svg) {
+			transform: rotate(180deg);
+			background: #fff;
+			border-radius: 100%;
 		}
 	}
 

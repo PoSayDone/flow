@@ -1,39 +1,33 @@
 <script>
-	import Icon from './icon.svelte';
-	import { addIcon } from '$lib/assets/Appicons';
 	import { status } from '$lib/stores';
 	import StatusPopup from './statusPopup.svelte';
 	import Modal from './modal.svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
-	let showModal = false;
+	export let showModal = false;
 	onMount(() => {
 		status.set($page.data.user.status);
 	});
 </script>
 
-<button on:click={() => (showModal = true)}>
+<div class="indicator-container">
 	<span class="indicator" class:active={$status}></span>
 	<span class="status">
 		{$status ? 'Активный' : 'Перерыв'}
 	</span>
-	<Icon viewBox={addIcon.viewBox} d={addIcon.d} stroke_width={'1.5'} size={'18'} color={'#000'} />
-</button>
+</div>
 
 <Modal bind:showModal>
-	<StatusPopup on:submit />
+	<StatusPopup bind:showModal />
 </Modal>
 
 <style lang="scss">
-	button {
+	.indicator-container {
+		background: none;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 100px;
-		border: none;
-		padding: 10px 14px;
-		cursor: pointer;
 	}
 
 	.indicator {

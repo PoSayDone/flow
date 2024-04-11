@@ -4,7 +4,9 @@ export type Soulmate = {
 	occupation: string;
 	about: string;
 	birthdate: Date;
+	sex: boolean;
 	trip_purposes: number[];
+	user_image: string;
 };
 
 export type User = {
@@ -17,6 +19,7 @@ export type User = {
 	sex: boolean;
 	birthdate: Date;
 	registration_date: Date;
+	user_image: string;
 };
 
 export type UserWMessages = {

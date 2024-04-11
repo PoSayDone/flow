@@ -1,15 +1,16 @@
 from uuid import UUID
-from fastapi import APIRouter, HTTPException
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, delete, insert, or_, select
+import uuid
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from sqlalchemy import and_, insert, or_
 
 from app import models, schema
 from app.chat.services import create_conversation_db
-from app.routes.auth import user_dependency
+from app.auth.router import user_dependency
 from app.dependencies import db_dependency
 
 
 user_router = APIRouter(prefix="/user", tags=["user"])
+IMAGEDIR = "profile_pictures/"
 
 
 # @user_router.delete("/{user_id}")
@@ -28,13 +29,30 @@ async def update_user(
 ):
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
-    db_user = db.query(models.Users).filter(models.Users.id == user.id).first()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
     for field, value in user_update.dict(exclude_unset=True).items():
-        setattr(db_user, field, value)
+        setattr(user, field, value)
     db.commit()
     return {"message": "User updated successfully"}
+
+
+@user_router.patch("/image")
+async def update_user_image(
+    user: user_dependency, db: db_dependency, file: UploadFile = File(...)
+):
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authorized")
+    extension = file.filename.split(".")[1]
+    if extension not in ["png", "jpg"]:
+        raise HTTPException(status_code=422, detail="Wrong image format")
+    file.filename = f"{uuid.uuid4()}.{extension}"
+    contents = await file.read()
+    with open(f"images/{file.filename}", "wb") as f:
+        f.write(contents)
+    user.user_image = file.filename
+    db.add(user)
+    db.commit()
+
+    return {"message": "profile_picture updated"}
 
 
 @user_router.get("/soulmates/{count}")

@@ -83,6 +83,7 @@ class Users(Base):
     )
     messages: Mapped[List["Message"]] = relationship(back_populates="sender")
     status = Column(Boolean, default=True)
+    user_image: Mapped[str] = mapped_column(String(1048), nullable=True)
 
 
 class RefreshTokens(Base):
@@ -146,30 +147,6 @@ class UsersRoles(Base):
     __tablename__ = "users_roles"
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
     role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True)
-
-
-# class UsersInterests(Base):
-#     __tablename__ = "users_interests"
-#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-#     interest_id = Column(Integer, ForeignKey("interests.id"), primary_key=True)
-#
-#
-# class UsersTripPurposes(Base):
-#     __tablename__ = "users_trip_purposes"
-#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-#     purpose_id = Column(Integer, ForeignKey("trip_purposes.id"), primary_key=True)
-
-
-# class UsersDepartures(Base):
-#     __tablename__ = "users_departures"
-#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-#     location_id = Column(Integer, ForeignKey("departures.id"), primary_key=True)
-#
-#
-# class UsersArrivals(Base):
-#     __tablename__ = "users_arrivals"
-#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-#     location_id = Column(Integer, ForeignKey("arrivals.id"), primary_key=True)
 
 
 class Conversation(Base):

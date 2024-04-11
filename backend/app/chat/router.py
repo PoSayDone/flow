@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 from app import schema, models
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.routes.auth import get_current_user, user_dependency
+from app.auth.router import get_current_user, user_dependency
 from app.dependencies import db_dependency
 
 

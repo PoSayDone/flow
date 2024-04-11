@@ -1,6 +1,12 @@
 import { superValidate } from 'sveltekit-superforms';
 import type { LayoutServerLoad } from './$types';
-import { interestsSchema, likeSchema, profileSchema, statusSchema } from '$lib/schema';
+import {
+	avatarSchema,
+	interestsSchema,
+	likeSchema,
+	profileSchema,
+	statusSchema
+} from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { Arrival, Departure, Interest, TripPurpose, UserWStatus } from '$lib/types';
 
@@ -21,6 +27,7 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 		zod(statusSchema)
 	);
 	const profileForm = await superValidate(profile, zod(profileSchema));
+	const avatarForm = await superValidate(zod(avatarSchema));
 	const interestsForm = await superValidate(
 		{ user_interests: profile.interests },
 		zod(interestsSchema)
@@ -36,7 +43,8 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 		statusForm,
 		profileForm,
 		interestsForm,
-		likeForm
+		likeForm,
+		avatarForm
 	};
 
 	return data;

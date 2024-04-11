@@ -5,6 +5,7 @@
 	import { pusherClient } from '$lib/pusher';
 	import type { Conversation, Message } from '$lib/types';
 	import { invalidateAll } from '$app/navigation';
+	import Avatar from '$lib/components/avatar.svelte';
 
 	export let data: PageData;
 
@@ -41,10 +42,9 @@
 		</div>
 	{:else}
 		{#each data.chats as chat}
+			{@const otherUser = chat.users.filter((user) => user.id !== $page.data.user.id)[0]}
 			<a href={`/chat/${chat.id}`} class="chat">
-				<div class="avatar">
-					<img src="https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg" alt="avatar" />
-				</div>
+				<Avatar user={otherUser} size="64px" />
 				<div class="rows">
 					<div class="row">
 						<h5>{chat.users.filter((user) => user.id !== $page.data.user.id)[0].name}</h5>
@@ -88,16 +88,6 @@
 		gap: 12px;
 		align-items: center;
 		text-decoration: none;
-	}
-	.avatar {
-		flex-shrink: 0;
-		width: 64px;
-		height: 64px;
-		border-radius: 100%;
-		overflow: hidden;
-		img {
-			height: 100%;
-		}
 	}
 	.rows {
 		display: flex;

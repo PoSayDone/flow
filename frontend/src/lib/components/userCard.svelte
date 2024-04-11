@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { trip_purposes_binding } from '$lib/utils';
+	import { placeholder, trip_purposes_binding } from '$lib/utils';
 	import { soulmates } from '$lib/stores';
 	import { tripPurposesRu } from '$lib/types';
 
@@ -7,8 +7,10 @@
 	export let id: string = '';
 	export let trip_purposes: number[] = [1, 2, 3];
 	export let name: string = 'Никита';
+	export let image_name: string;
 	export let age: string = '18';
 	export let occupation: string = 'Дизайнер';
+	export let sex: boolean | null = null;
 	$: href = `/user_${id}`;
 
 	export let about: string =
@@ -77,6 +79,7 @@
 	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
 	style:z-index={$soulmates.length - index}
+	style="--user-image: url(http://localhost/images/{image_name || placeholder(sex)});"
 >
 	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
 		{#if trip_purposes}
@@ -108,7 +111,6 @@
 		align-items: center;
 		z-index: auto;
 		width: 100%;
-		max-width: 380px;
 		flex: 1;
 		border-radius: 40px;
 		display: flex;
@@ -116,8 +118,8 @@
 		justify-content: space-between;
 		min-height: 100%;
 		padding: 22px 40px;
-		background: linear-gradient(0deg, rgba(0, 0, 0, 0) 70%, #000 100%),
-			url(https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg);
+		background: radial-gradient(rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.6) 100%), var(--user-image),
+			#d6d6d6;
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: cover;
@@ -174,8 +176,6 @@
 
 	.title {
 		color: #fff;
-		text-align: center;
-		font-family: Inter;
 		font-size: 24px;
 		font-style: normal;
 		font-weight: 600;
@@ -185,8 +185,6 @@
 
 	.subtitle {
 		color: #dadada;
-		text-align: center;
-		font-family: 'PP Pangram Sans Rounded';
 		font-size: 18px;
 		font-style: normal;
 		font-weight: 600;
@@ -203,7 +201,6 @@
 		-webkit-box-orient: vertical;
 		margin: 0;
 		color: #fff;
-		font-family: Inter;
 		font-size: 14px;
 		font-style: normal;
 		font-weight: 400;

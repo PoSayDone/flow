@@ -1,4 +1,4 @@
-import { interestsSchema, profileSchema, statusSchema } from '$lib/schema';
+import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import type { Actions } from './$types';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -20,7 +20,6 @@ export const actions = {
 	update_status: async ({ request, fetch }) => {
 		const statusForm = await superValidate(request, zod(statusSchema));
 		if (!statusForm.valid) return fail(400, { statusForm });
-		console.log(statusForm.data);
 		await fetch('http://nginx/api/user/status_data/edit', {
 			method: 'PATCH',
 			headers: {
@@ -38,6 +37,20 @@ export const actions = {
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(profileForm.data)
+		});
+	},
+	update_avatar: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const avatarForm = await superValidate(
+			{ file: formData.get('file') as File },
+			zod(avatarSchema)
+		);
+		if (!avatarForm.valid) {
+			return fail(400, { avatarForm });
+		}
+		await fetch('http://nginx/api/user/image', {
+			method: 'PATCH',
+			body: formData
 		});
 	}
 } satisfies Actions;

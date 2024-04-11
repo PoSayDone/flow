@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { interests_binding, trip_purposes_binding } from '$lib/utils';
 	import { backIcon } from '$lib/assets/Appicons';
-	import { getAge } from '$lib/utils';
+	import { getAge, placeholder } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
 	import Icon from '$lib/components/icon.svelte';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
-	import { tripPurposesRu } from '$lib/types';
+	import { interestsRu, tripPurposesRu } from '$lib/types';
 
 	let popover: HTMLDivElement;
 	let startY: number;
@@ -56,7 +56,12 @@
 		<Icon d={backIcon.d} viewBox={backIcon.viewBox} color={'#2461FF'} />
 	</button>
 </div>
-<div class="backdrop" style:view-transition-name={`profile-image`}>
+<div
+	class="backdrop"
+	style:view-transition-name={`profile-image`}
+	style="--user-image: url(http://localhost/images/{data.pageUser.user_image ||
+		placeholder(data.pageUser.sex)});"
+>
 	<div class="profile-picture"></div>
 </div>
 <div class="tags" style:view-transition-name={`trip-purposes`}>
@@ -103,7 +108,7 @@
 		<div class="chips">
 			{#if data.pageUser.interests.length > 0}
 				{#each data.pageUser.interests as id}
-					<Chip text={interests_binding[id]} />
+					<Chip text={interestsRu[interests_binding[id]]} />
 				{/each}
 			{:else}
 				<p>Здесь пока ничего нет</p>
@@ -118,13 +123,14 @@
 		z-index: -10;
 		height: 100%;
 		background-color: #000;
+		flex: 1;
 	}
 	.profile-picture {
 		z-index: -100;
 		position: sticky;
-		background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%),
-			url('https://i.ibb.co/jLC2xRd/e47da5ad29942101286011bd4ddc1251.jpg');
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%), var(--user-image), #d6d6d6;
 		background-size: cover;
+		background-position: center;
 		width: 100%;
 		height: 400px;
 	}

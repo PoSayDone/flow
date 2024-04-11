@@ -4,8 +4,9 @@
 	import Button from './button.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { closeCurrentDialog, selectedInterests, submitCurrentDialog } from '$lib/stores';
-	import { onMount } from 'svelte';
 	import { interestsRu } from '$lib/types';
+
+	export let showModal;
 
 	const { form, enhance, submit } = superForm($page.data.interestsForm, {
 		dataType: 'json',
@@ -26,10 +27,9 @@
 			form.set({ user_interests: [...$form.user_interests, id] });
 		}
 	}
-
-	onMount(() => {
+	$: if (showModal) {
 		submitCurrentDialog.set(submit);
-	});
+	}
 </script>
 
 <form method="POST" action="?/update_interests" use:enhance>

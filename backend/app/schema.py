@@ -16,9 +16,10 @@ class UserBase(BaseModel):
 
 
 class UserCreateRequest(BaseModel):
-    id: UUID
     name: str
     mail: EmailStr
+    birthdate: date
+    sex: Optional[bool] = None
     password: str
 
 
@@ -101,6 +102,7 @@ class Profile(BaseModel):
     trip_purposes: list[TripPurpose]
     departures: list[Departure]
     arrivals: list[Arrival]
+    user_image: Optional[str]
 
     @field_serializer("interests")
     def serialize_interests(self, interests: Optional[list[Interest]], _info):
@@ -139,9 +141,11 @@ class Soulmate(BaseModel):
     id: UUID
     name: Optional[str]
     occupation: Optional[str]
+    sex: Optional[bool]
     about: Optional[str]
     birthdate: Optional[date]
     trip_purposes: Optional[list]
+    user_image: Optional[str]
 
     @field_serializer("trip_purposes")
     def serialize_trip_purposes(

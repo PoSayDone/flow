@@ -9,6 +9,22 @@ export const loginSchema = z.object({
 	password: z.string()
 });
 
+export const signinSchema1 = z.object({
+	name: z.string().min(1)
+});
+export const signinSchema2 = signinSchema1.extend({
+	mail: z.string().email()
+});
+export const signinSchema3 = signinSchema2.extend({
+	birthdate: z.string()
+});
+export const signinSchema4 = signinSchema3.extend({
+	sex: z.boolean().optional()
+});
+export const signinSchema = signinSchema4.extend({
+	password: z.string()
+});
+
 export const interestsSchema = z.object({
 	user_interests: z.number().array().max(5)
 });
@@ -30,4 +46,11 @@ export const profileSchema = z.object({
 export const likeSchema = z.object({
 	user_id: z.string().uuid(),
 	like: z.boolean()
+});
+
+export const avatarSchema = z.object({
+	file: z
+		.instanceof(File)
+		.refine((f) => f.size < 1_000_000, 'Max 1 Mb upload size.')
+		.optional()
 });

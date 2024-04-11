@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Annotated
 from urllib import parse
 from uuid import UUID
+import uuid
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt, JWTError
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
@@ -23,13 +24,13 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 10
 REFRESH_TOKEN_EXPIRE_DAYS = 90
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/login")
 
 
-@router.post("/refresh", response_model=TokenBase)
+@auth_router.post("/refresh", response_model=TokenBase)
 async def refresh_token_regenerate(
     db: db_dependency,
     refresh_token_cookie: str = Cookie(alias="refresh_token"),
@@ -75,19 +76,33 @@ async def refresh_token_regenerate(
     }
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@auth_router.post("/signin", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, user_create_request: UserCreateRequest):
+
+    exists = (
+        db.query(models.Users)
+        .filter(models.Users.mail == user_create_request.mail)
+        .first()
+    )
+    if exists:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists",
+        )
     user_create_model = Users(
-        id=user_create_request.id,
+        id=uuid.uuid4(),
         name=user_create_request.name,
         mail=user_create_request.mail,
+        birthdate=user_create_request.birthdate,
+        sex=user_create_request.sex,
         password_hash=bcrypt_context.hash(user_create_request.password),
     )
     db.add(user_create_model)
     db.commit()
+    return {"ok"}
 
 
-@router.post("/login", response_model=TokenBase)
+@auth_router.post("/login", response_model=TokenBase)
 async def login_for_access_token(
     response: Response,
     db: db_dependency,
