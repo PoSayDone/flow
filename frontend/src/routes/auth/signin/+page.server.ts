@@ -1,7 +1,7 @@
-import { fail, message, superValidate } from 'sveltekit-superforms';
+import { fail, message, setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
-import { signinSchema } from '$lib/schema';
+import { signinSchema, signinSchema2 } from '$lib/schema';
 import type { Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async () => {
@@ -10,7 +10,18 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions = {
-	default: async ({ fetch, request }) => {
+	check_email: async ({ fetch, request }) => {
+		const emailForm = await superValidate(request, zod(signinSchema2));
+		if (!emailForm.valid) return fail(400, { signinForm: emailForm });
+		const response = await fetch(`http://nginx/api/auth/check_email/${emailForm.data.mail}`, {
+			method: 'GET'
+		});
+		if (response.status == 409) {
+			return setError(emailForm, 'mail', 'Пользователь с такой почтой уже существует');
+		}
+		return { emailForm };
+	},
+	signin: async ({ fetch, request }) => {
 		const signinForm = await superValidate(request, zod(signinSchema));
 		if (!signinForm.valid) return fail(400, { signinForm });
 		const response = await fetch('http://nginx/api/auth/signin', {

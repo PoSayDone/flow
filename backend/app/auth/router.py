@@ -76,6 +76,17 @@ async def refresh_token_regenerate(
     }
 
 
+@auth_router.get("/check_email/{mail}")
+async def check_email(db: db_dependency, mail: str):
+	exists = db.query(models.Users).filter(models.Users.mail == mail).first()
+	if exists:
+		raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists",
+        )
+	return {"ok"}
+
+
 @auth_router.post("/signin", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, user_create_request: UserCreateRequest):
 

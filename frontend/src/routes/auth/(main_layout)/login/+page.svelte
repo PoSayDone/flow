@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/button.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import type { PageData } from '../$types';
+	import type { PageData } from './$types';
 
 	export let data: PageData;
 
@@ -20,7 +20,7 @@
 				type="email"
 				placeholder="Email"
 				value={$form.mail}
-				{...$constraints.email}
+				{...$constraints.mail}
 			/>
 			<input
 				aria-invalid={$errors._errors ? 'true' : undefined}

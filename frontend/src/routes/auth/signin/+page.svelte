@@ -4,7 +4,7 @@
 	import { addIcon, backIcon } from '$lib/assets/Appicons';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/button.svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import { superForm, type FormResult } from 'sveltekit-superforms';
 	import { approveIcon } from '$lib/assets/Appicons';
 	import type { PageData } from './$types';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -16,6 +16,7 @@
 		signinSchema
 	} from '$lib/schema';
 	import { page } from '$app/stores';
+	import type { ActionData } from '../../(app)/chat/[conversation_id]/$types';
 
 	export let data: PageData;
 
@@ -30,7 +31,7 @@
 	function handlePasswordInput(event) {
 		form.update(
 			($form) => {
-				$form.password = event.target.value;
+				$form.password = event.target?.value;
 				return $form;
 			},
 			{ taint: false }
@@ -52,7 +53,14 @@
 
 	const { form, enhance, validateForm, options, errors, message } = superForm(data.signinForm, {
 		dataType: 'json',
-		async onSubmit({ cancel }) {
+		resetForm: false,
+
+		async onSubmit({ cancel, action }) {
+			if (step == 2) {
+				action.search = '?/check_email';
+				return;
+			}
+
 			if (step == steps.length) return;
 			else cancel();
 
@@ -60,20 +68,23 @@
 			if (result.valid) step = step + 1;
 		},
 
-		async onUpdated({ form }) {
-			if (form.valid) step = 1;
-		},
+		// async onUpdated({ form }) {
+		// 	if (form.valid) step = 1;
+		// },
 
 		onResult: ({ result }) => {
-			console.log(result.status);
-			if (result.status == 200) {
-				setTimeout(() => {
-					goto('/auth/login');
-				}, 5000);
+			if (step == 2) {
+				if (result.status == 200) step = step + 1;
 			} else {
-				setTimeout(() => {
-					goto('/auth/');
-				}, 4000);
+				if (result.status == 200) {
+					setTimeout(() => {
+						goto('/auth/login');
+					}, 5000);
+				} else {
+					setTimeout(() => {
+						goto('/auth/');
+					}, 4000);
+				}
 			}
 		}
 	});
@@ -118,7 +129,7 @@
 		<Logo />
 	</div>
 </header>
-<form method="POST" action="/auth/signin" use:enhance class="content">
+<form method="POST" action="/auth/signin?/signin" use:enhance class="content">
 	{#if step === 1}
 		<div class="input-block">
 			<label for="name">Введите ваше имя. С этим именем вас будут видеть другие пользователи</label>
@@ -129,7 +140,8 @@
 		<div class="input-block">
 			<label for="email">Введите ваш email</label>
 			<input placeholder="Ваш email" name="email" type="email" bind:value={$form.mail} />
-			{#if $errors.mail}<span class="invalid">Неправильно указана почта</span>{/if}
+			{#if $errors.mail}<span class="invalid">{$errors.mail || 'Неправильно указана почта'}</span
+				>{/if}
 		</div>
 	{:else if step === 3}
 		<div class="input-block">
