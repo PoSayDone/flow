@@ -1,5 +1,6 @@
 from uuid import UUID
 import uuid
+from app.user.services import calculate_soulmate_score
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from sqlalchemy import and_, insert, or_
 
@@ -57,21 +58,29 @@ async def update_user_image(
 
 @user_router.get("/soulmates/{count}")
 async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    # matching_users = db.query(models.Users).filter(
-    #     and_(
-    #         models.Users.interests.contains(user.interests),
-    #         models.Users.trip_purposes.contains(user.trip_purposes),
-    #         models.Users.departures.contains(user.trip_purposes),
-    #         models.Users.arrivals.contains(user.arrivals),
-    #     )
-    # )
-    matching_users = schema.SoulmatesResponse.model_validate(
-        {"soulmates": db.query(models.Users).all()}
-    )
+	if not user:
+		raise HTTPException(status_code=404, detail="User not found")
 
-    return matching_users
+	# Filter users based on interests, trip purposes, departures, arrivals
+	filtered_users = (
+		db.query(models.Users).filter(models.Users.id != user.id)
+		.all()
+	)
+
+	# Define matching criteria and calculate scores for each user
+	soulmate_scores = {}
+	for scoring_user in filtered_users:
+		score = calculate_soulmate_score(db, user, scoring_user)
+		soulmate_scores[scoring_user] = score
+
+
+	# Sort users by score and return top 'count' soulmates
+	sorted_users = sorted(soulmate_scores.items(), key=lambda x: x[1], reverse=True)
+	top_soulmates = [u for u, _ in sorted_users[:count]]
+
+	return schema.SoulmatesResponse.model_validate(
+		{"soulmates": top_soulmates}
+	)
 
 
 ### status_data

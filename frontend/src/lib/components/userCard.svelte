@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { placeholder, trip_purposes_binding } from '$lib/utils';
-	import { soulmates } from '$lib/stores';
+	import { soulmates, topCard } from '$lib/stores';
 	import { tripPurposesRu } from '$lib/types';
 
 	export let index: number = 0;
@@ -32,40 +32,52 @@
 		const deltaX = event.touches[0].clientX - startX;
 		currentCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX / 10}deg)`;
 	}
-	function handleTouchEnd(event: TouchEvent) {
-		currentCard.style.transition = 'transform 0.3s ease-out';
 
+	function handleTouchEnd(event: TouchEvent) {
 		if (startX - event.changedTouches[0].clientX > 70) {
-			// Swipe left
-			currentCard.style.transform = 'rotate(-40deg) translateY(-50%) translateX(-120%)';
-			setTimeout(() => {
-				currentCard.style.transition = '';
-				currentCard.style.transform = '';
-				soulmates.update((array) => {
-					const not_interested_in_id = array.shift().id;
-					fetch(`http://localhost/api/user/dislike/${not_interested_in_id}`, { method: 'POST' });
-					return array;
-				});
-			}, 300);
+			handleDislike();
 		} else if (startX - event.changedTouches[0].clientX < -70) {
-			// Swipe right
-			currentCard.style.transform = 'rotate(40deg) translateY(-50%) translateX(120%)';
-			setTimeout(() => {
-				currentCard.style.transition = '';
-				currentCard.style.transform = '';
-				soulmates.update((array) => {
-					const interested_in_id = array.shift().id;
-					fetch(`http://localhost/api/user/like/${interested_in_id}`, { method: 'POST' });
-					return array;
-				});
-			}, 300);
+			handleLike();
 		} else {
+			currentCard.style.transition = 'transform 0.3s ease-out';
 			currentCard.style.transform = 'rotate(0deg) translateY(0%) translateX(0%)';
 			setTimeout(() => {
 				currentCard.style.transition = '';
 				currentCard.style.transform = '';
 			}, 300);
 		}
+	}
+
+	$: if (index == 0) {
+		topCard.set({ handleLike, handleDislike });
+	}
+
+	function handleLike() {
+		currentCard.style.transition = 'transform 0.3s ease-out';
+		currentCard.style.transform = 'rotate(40deg) translateY(-50%) translateX(120%)';
+		setTimeout(() => {
+			currentCard.style.transition = '';
+			currentCard.style.transform = '';
+			soulmates.update((array) => {
+				const interested_in_id = array.shift().id;
+				fetch(`http://localhost/api/user/like/${interested_in_id}`, { method: 'POST' });
+				return array;
+			});
+		}, 300);
+	}
+
+	function handleDislike() {
+		currentCard.style.transition = 'transform 0.3s ease-out';
+		currentCard.style.transform = 'rotate(-40deg) translateY(-50%) translateX(-120%)';
+		setTimeout(() => {
+			currentCard.style.transition = '';
+			currentCard.style.transform = '';
+			soulmates.update((array) => {
+				const not_interested_in_id = array.shift().id;
+				fetch(`http://localhost/api/user/dislike/${not_interested_in_id}`, { method: 'POST' });
+				return array;
+			});
+		}, 300);
 	}
 </script>
 

@@ -31,8 +31,6 @@
 
 	const file = fileProxy(form, 'image');
 
-	$: console.log($errors);
-
 	function onChange() {
 		if ($file[0]) {
 			showPreview = true;

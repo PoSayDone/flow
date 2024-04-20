@@ -9,6 +9,11 @@ export type Soulmate = {
 	user_image: string;
 };
 
+export type SoulmateCard = {
+	like: () => unknown;
+	dislike: () => unknown;
+} & Soulmate;
+
 export type User = {
 	id: string;
 	status: boolean;
