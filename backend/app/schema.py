@@ -30,10 +30,10 @@ class TokenBase(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str]
-    occupation: Optional[str]
-    about: Optional[str]
-    birthdate: Optional[date]
+    name: Optional[str]=None
+    occupation: Optional[str]=None
+    about: Optional[str]=None
+    birthdate: Optional[date]=None
 
 
 class MatchBase(BaseModel):
