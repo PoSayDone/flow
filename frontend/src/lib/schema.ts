@@ -16,7 +16,16 @@ export const signinSchema2 = signinSchema1.extend({
 	mail: z.string().email()
 });
 export const signinSchema3 = signinSchema2.extend({
-	birthdate: z.string()
+	birthdate: z.string().refine(
+		(dateStr) => {
+			const userDate = Date.parse(dateStr);
+			const result = userDate < Date.now() && userDate > Date.parse('1900-01-01');
+			return result;
+		},
+		{
+			message: 'Введите правильную дату рождения'
+		}
+	)
 });
 export const signinSchema4 = signinSchema3.extend({
 	sex: z.boolean().optional()

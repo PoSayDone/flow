@@ -22,7 +22,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	let response = await fetch(request);
 
 	if (response.status == 401 && refreshToken) {
-		const refresh_response = await fetch(`${api_url}/auth/refresh/`, {
+		const refresh_response = await fetch(`${api_url}/auth/refresh`, {
 			method: 'POST',
 			headers: {
 				cookie: `refresh_token=${refreshToken}`

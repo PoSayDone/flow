@@ -4,7 +4,7 @@
 	import { addIcon, backIcon } from '$lib/assets/Appicons';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/button.svelte';
-	import { superForm, type FormResult } from 'sveltekit-superforms';
+	import SuperDebug, { superForm, type FormResult } from 'sveltekit-superforms';
 	import { approveIcon } from '$lib/assets/Appicons';
 	import type { PageData } from './$types';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -90,6 +90,7 @@
 	});
 </script>
 
+<SuperDebug data={form} />
 {#if $message}
 	<!-- eslint-disable-next-line svelte/valid-compile -->
 	<div class="status" class:success={$page.status == 200} class:error={$page.status == 409}>
@@ -147,6 +148,7 @@
 		<div class="input-block">
 			<label for="birthdate">Введите вашу дату рождения</label>
 			<input name="birthdate" type="date" bind:value={$form.birthdate} />
+			{#if $errors.birthdate}<span class="invalid">{$errors.birthdate}</span>{/if}
 		</div>
 	{:else if step === 4}
 		<div class="input-block">
