@@ -9,13 +9,14 @@ import {
 } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { Arrival, Departure, Interest, TripPurpose, UserWStatus } from '$lib/types';
+import { api_url } from '$lib/utils';
 
 export const load: LayoutServerLoad = async ({ fetch }) => {
-	const profile: UserWStatus = await (await fetch('http://nginx/api/user/profile')).json();
-	const trip_purposes: TripPurpose[] = await (await fetch('http://nginx/api/trip_purposes')).json();
-	const interests: Interest[] = await (await fetch('http://nginx/api/interests')).json();
-	const departures: Departure[] = await (await fetch('http://nginx/api/departures')).json();
-	const arrivals: Arrival[] = await (await fetch('http://nginx/api/arrivals')).json();
+	const profile: UserWStatus = await (await fetch(`${api_url}/user/profile`)).json();
+	const trip_purposes: TripPurpose[] = await (await fetch(`${api_url}/trip_purposes`)).json();
+	const interests: Interest[] = await (await fetch(`${api_url}/interests`)).json();
+	const departures: Departure[] = await (await fetch(`${api_url}/departures`)).json();
+	const arrivals: Arrival[] = await (await fetch(`${api_url}/arrivals`)).json();
 
 	const statusForm = await superValidate(
 		{

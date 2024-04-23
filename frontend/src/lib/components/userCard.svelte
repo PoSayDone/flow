@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { placeholder, trip_purposes_binding } from '$lib/utils';
+	import { api_url, images_url, placeholder, trip_purposes_binding } from '$lib/utils';
 	import { soulmates, topCard } from '$lib/stores';
 	import { tripPurposesRu } from '$lib/types';
 
@@ -23,7 +23,6 @@
 
 	let startX: number;
 	let currentCard: HTMLAnchorElement;
-	const url = import.meta.env.VITE_SITE_URL;
 
 	function handleTouchStart(event: TouchEvent) {
 		startX = event.touches[0].clientX;
@@ -61,7 +60,7 @@
 			currentCard.style.transform = '';
 			soulmates.update((array) => {
 				const interested_in_id = array.shift().id;
-				fetch(`${url}/api/user/like/${interested_in_id}`, { method: 'POST' });
+				fetch(`${api_url}/user/like/${interested_in_id}`, { method: 'POST' });
 				return array;
 			});
 		}, 300);
@@ -75,7 +74,7 @@
 			currentCard.style.transform = '';
 			soulmates.update((array) => {
 				const not_interested_in_id = array.shift().id;
-				fetch(`${url}/api/user/dislike/${not_interested_in_id}`, { method: 'POST' });
+				fetch(`${api_url}/user/dislike/${not_interested_in_id}`, { method: 'POST' });
 				return array;
 			});
 		}, 300);
@@ -92,7 +91,7 @@
 	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
 	style:z-index={$soulmates.length - index}
-	style="--user-image: url({url}/images/{image_name || placeholder(sex)});"
+	style="--user-image: url({images_url}/{image_name || placeholder(sex)});"
 >
 	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
 		{#if trip_purposes}

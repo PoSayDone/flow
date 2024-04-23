@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { User } from '$lib/types';
-	import { placeholder } from '$lib/utils';
+	import { images_url, placeholder } from '$lib/utils';
 
 	export const getInitials = (name: string) => {
 		let initials = name.split(' ');
@@ -20,7 +20,6 @@
 	export let borderRadius = '50%';
 	export let user: User;
 
-	const url = import.meta.env.VITE_SITE_URL;
 	const background = bgColor;
 </script>
 
@@ -32,10 +31,10 @@
 >
 	{#if user.user_image}
 		<div>
-			<img alt="" class={`innerImage`} src={`${url}/images/${user.user_image}`} />
+			<img alt="" class={`innerImage`} src={`${images_url}/${user.user_image}`} />
 		</div>
 	{:else}
-		<img alt="" class={`innerImage`} src={`${url}/images/${placeholder(user.sex)}`} />
+		<img alt="" class={`innerImage`} src={`${images_url}/${placeholder(user.sex)}`} />
 	{/if}
 </div>
 

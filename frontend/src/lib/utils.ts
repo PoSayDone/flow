@@ -51,3 +51,6 @@ export const trip_purposes_binding: Binding = {
 	'8': 'to_the_sea',
 	'9': 'shopping'
 };
+
+export const api_url = import.meta.env.VITE_API_URL;
+export const images_url = import.meta.env.VITE_IMAGES_URL;

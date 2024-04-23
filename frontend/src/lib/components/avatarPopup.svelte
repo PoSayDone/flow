@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
-	import { placeholder } from '$lib/utils';
+	import { images_url, placeholder } from '$lib/utils';
 	import { trashIcon, editIcon, approveIcon, addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
@@ -11,7 +11,6 @@
 	let fileInput: HTMLInputElement;
 	let showPreview = false;
 	const user = $page.data.user;
-	const url = import.meta.env.VITE_SITE_URL;
 
 	const { form, enhance, submit, errors } = superForm($page.data.avatarForm, {
 		dataType: 'json',
@@ -57,9 +56,9 @@
 			{#if showPreview}
 				<img alt="Preview" bind:this={image} class={`avatar`} />
 			{:else if user}
-				<img alt="Avatar" class={`avatar`} src={`${url}/images/${user.user_image}`} />
+				<img alt="Avatar" class={`avatar`} src={`${images_url}/${user.user_image}`} />
 			{:else}
-				<img alt="Avatar" class={`avatar`} src={`${url}/images/${placeholder(user.sex)}`} />
+				<img alt="Avatar" class={`avatar`} src={`${images_url}/${placeholder(user.sex)}`} />
 			{/if}
 		</div>
 	</div>
