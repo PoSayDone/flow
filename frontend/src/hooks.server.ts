@@ -21,7 +21,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	request.headers.set('cookie', `access_token=${accessToken}`);
 	let response = await fetch(request);
 
-	if (response.status == 401) {
+	if (response.status == 401 && refreshToken) {
 		const refresh_response = await fetch(`${api_url}/auth/refresh/`, {
 			method: 'POST',
 			headers: {
@@ -46,7 +46,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		});
 		response = await fetch(request);
 
-		if (response.status === 401) {
+		if (response.status === 401 && refreshToken && accessToken) {
 			cookies.delete('access_token', { path: '/' });
 			cookies.delete('refresh_token', { path: '/' });
 			event.locals.isAuthenticated = false;
