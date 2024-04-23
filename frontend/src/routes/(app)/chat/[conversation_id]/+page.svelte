@@ -84,9 +84,11 @@
 
 	<form class="message-input" method="POST" action="?/send_message" use:enhance>
 		<textarea placeholder="Напишите сообщение..." bind:value={$form.message} rows="1" />
-		<button class="send" type="submit">
-			<Icon viewBox={sendIcon.viewBox} d={sendIcon.d} size={'27'} stroke_width={'2'} />
-		</button>
+		{#if $form.message.length > 0}
+			<button class="send" type="submit">
+				<Icon viewBox={sendIcon.viewBox} d={sendIcon.d} size={'27'} stroke_width={'2'} />
+			</button>
+		{/if}
 	</form>
 </div>
 

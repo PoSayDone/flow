@@ -59,7 +59,7 @@
 <div
 	class="backdrop"
 	style:view-transition-name={`profile-image`}
-	style="--user-image: url(http://localhost/images/{data.pageUser.user_image ||
+	style="--user-image: url({images_url}/{data.pageUser.user_image ||
 		placeholder(data.pageUser.sex)});"
 >
 	<div class="profile-picture"></div>
@@ -81,9 +81,13 @@
 	<span class="line" />
 	<div class="heading">
 		<h1>{data.pageUser.name}, {getAge(data.pageUser.birthdate.toString())}</h1>
-		<h2>{data.pageUser.occupation}</h2>
+		{#if data.pageUser.occupation}
+			<h2>{data.pageUser.occupation}</h2>
+		{/if}
 	</div>
-	<p class="about">{data.pageUser.about}</p>
+	{#if data.pageUser.about}
+		<p class="about">{data.pageUser.about}</p>
+	{/if}
 	<hr />
 	<div class="directions">
 		<ul class="from">
