@@ -4,7 +4,7 @@ import { redirect, type HandleFetch } from '@sveltejs/kit';
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const { cookies } = event;
 	const accessToken = event.cookies.get('access_token')?.toString();
-	const refreshToken = event.cookies.get('refresh_token');
+	const refreshToken = event.cookies.get('refresh_token')?.toString();
 
 	if (accessToken && refreshToken) {
 		event.locals.isAuthenticated = true;
@@ -24,9 +24,9 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	if (response.status == 401 && refreshToken) {
 		const refresh_response = await fetch(`${api_url}/auth/refresh/`, {
 			method: 'POST',
-			headers: {
-				cookie: `refresh_token=${refreshToken}`
-			}
+			// headers: {
+			// 	cookie: `refresh_token=${refreshToken}`
+			// }
 		});
 
 		const data = await refresh_response.json();
@@ -35,15 +35,8 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			cookies.set('refresh_token', `Bearer ${data.refresh_token}`, { path: '/', httpOnly: true });
 		}
 
-		const accessToken = event.cookies.get('access_token');
-
-		request = new Request(request, {
-			...request,
-			headers: {
-				...request.headers,
-				cookie: `access_token=${accessToken}`
-			}
-		});
+        const accessToken = event.cookies.get('access_token');
+        request.headers.set('cookie', `access_token=${accessToken}`);
 		response = await fetch(request);
 
 		if (response.status === 401 && refreshToken && accessToken) {

@@ -3,8 +3,8 @@
     "name": "flow",
     "start_url": "/",
     "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
     "display": "standalone",
     "scope": "/",
-    "theme_color": "#FFFFFF",
-    "description": "Lofi to lofi beats, while using the scratchpad to list down tasks and thoughts"
+    "description": "Приложение для поиска попутчиков"
 }
