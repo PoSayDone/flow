@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { interests_binding, trip_purposes_binding } from '$lib/utils';
+	import { interests_binding, trip_purposes_binding, images_url } from '$lib/utils';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { getAge, placeholder } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
