@@ -137,8 +137,6 @@
 		gap: 6px;
 		:global(svg) {
 			transform: rotate(180deg);
-			background: #fff;
-			border-radius: 100%;
 		}
 	}
 
