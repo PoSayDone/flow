@@ -17,8 +17,9 @@ export const actions = {
 		const response = await fetch(`${api_url}/auth/check_email/${emailForm.data.mail}`, {
 			method: 'GET'
 		});
+		console.log(response.status);
 		if (response.status == 409) {
-			return setError(emailForm, 'mail', 'Пользователь с такой почтой уже существует');
+			return setError(emailForm, 'mail', 'Пользователь с такой почтой уже зарегистрирован');
 		}
 		return { emailForm };
 	},
@@ -37,11 +38,6 @@ export const actions = {
 				signinForm,
 				'Успешная регистрация, через 5 секунд вы будете перенаправлены на страницу входа'
 			);
-		}
-		if (response.status == 409) {
-			return message(signinForm, 'Пользователь с такой почтой уже зарегистрирован', {
-				status: 409
-			});
 		}
 	}
 } satisfies Actions;

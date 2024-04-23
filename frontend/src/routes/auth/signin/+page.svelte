@@ -4,7 +4,7 @@
 	import { addIcon, backIcon } from '$lib/assets/Appicons';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/button.svelte';
-	import SuperDebug, { superForm, type FormResult } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { approveIcon } from '$lib/assets/Appicons';
 	import type { PageData } from './$types';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -16,9 +16,9 @@
 		signinSchema
 	} from '$lib/schema';
 	import { page } from '$app/stores';
-	import type { ActionData } from '../../(app)/chat/[conversation_id]/$types';
 
 	export let data: PageData;
+	$: showButton = true;
 
 	function nav_back() {
 		if (step > 1) {
@@ -61,8 +61,10 @@
 				return;
 			}
 
-			if (step == steps.length) return;
-			else cancel();
+			if (step == steps.length) {
+				showButton = false;
+				return;
+			} else cancel();
 
 			const result = await validateForm({ update: true });
 			if (result.valid) step = step + 1;
@@ -90,7 +92,6 @@
 	});
 </script>
 
-<SuperDebug data={form} />
 {#if $message}
 	<!-- eslint-disable-next-line svelte/valid-compile -->
 	<div class="status" class:success={$page.status == 200} class:error={$page.status == 409}>
@@ -141,8 +142,11 @@
 		<div class="input-block">
 			<label for="email">Введите ваш email</label>
 			<input placeholder="Ваш email" name="email" type="email" bind:value={$form.mail} />
-			{#if $errors.mail}<span class="invalid">{$errors.mail || 'Неправильно указана почта'}</span
-				>{/if}
+			{#if $errors.mail}
+				<span class="invalid">
+					{$errors.mail || 'Неправильно указана почта'}
+				</span>
+			{/if}
 		</div>
 	{:else if step === 3}
 		<div class="input-block">
@@ -206,7 +210,9 @@
 			{#if $errors.password}<span class="invalid">{$errors.password}</span>{/if}
 		</div>
 	{/if}
-	<Button>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button>
+	{#if showButton}
+		<Button>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button>
+	{/if}
 </form>
 
 <style lang="scss">

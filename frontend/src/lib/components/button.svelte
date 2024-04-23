@@ -1,5 +1,6 @@
 <script>
 	let buttonProps = {
+		disabled: $$restProps.disabled,
 		class: [$$restProps.class]
 	};
 </script>
@@ -20,9 +21,6 @@
 		font-size: 18px;
 	}
 
-	.close-button {
-	}
-
 	.white {
 		background: #fff;
 		color: var(--primary);
@@ -35,5 +33,8 @@
 	.opaque {
 		background: none;
 		color: #000;
+	}
+	[aria-disabled='true'] {
+		opacity: 0.5;
 	}
 </style>
