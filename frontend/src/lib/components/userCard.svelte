@@ -106,12 +106,16 @@
 				<span class="title">{name}</span>
 				<span class="title">{age}</span>
 			</div>
-			<span class="subtitle">{occupation}</span>
+			{#if occupation}
+				<span class="subtitle">{occupation}</span>
+			{/if}
 		</div>
 		<div>
-			<p class="text">
-				{about}
-			</p>
+			{#if about}
+				<p class="text">
+					{about}
+				</p>
+			{/if}
 		</div>
 	</div>
 </a>
