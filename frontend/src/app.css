@@ -63,8 +63,9 @@ button {
 html,
 body {
 	margin: 0;
+	height: 100%;
 	overflow-x: hidden;
-	overflow-y: hidden;
+	overflow-y: scroll;
 }
 
 html {
@@ -92,7 +93,7 @@ main {
 	display: flex;
 	flex-direction: column;
 	margin: 0 20px;
-	margin-bottom: 70px;
+	padding-bottom: 90px;
 }
 
 h1 {
