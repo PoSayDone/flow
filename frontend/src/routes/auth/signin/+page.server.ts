@@ -17,7 +17,6 @@ export const actions = {
 		const response = await fetch(`${api_url}/auth/check_email/${emailForm.data.mail}`, {
 			method: 'GET'
 		});
-		console.log(response.status);
 		if (response.status == 409) {
 			return setError(emailForm, 'mail', 'Пользователь с такой почтой уже зарегистрирован');
 		}

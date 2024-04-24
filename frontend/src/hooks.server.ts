@@ -1,5 +1,6 @@
 import { api_url } from '$lib/utils';
-import { redirect, type HandleFetch } from '@sveltejs/kit';
+import { type HandleFetch } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const { cookies } = event;

@@ -1,0 +1,50 @@
+services:
+    nginx:
+        build:
+            context: ./nginx
+        ports:
+            - 80:80
+        depends_on:
+            - frontend
+            - backend
+        volumes:
+            - ./static/images/:/var/www/images
+
+    backend:
+        build:
+            context: ./backend
+        volumes:
+            - ./backend:/usr/src/app
+            - ./static/images/:/usr/src/app/images
+        command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+        depends_on:
+            - db
+        restart: on-failure
+
+    frontend:
+        build:
+            context: ./frontend/
+            dockerfile: dev.Dockerfile
+        volumes:
+            - ./frontend/:/app
+            - /app/node_modules
+        command: yarn dev --host 0.0.0.0 --port 3000
+        restart: on-failure
+        ports:
+            - 3001:3001
+        depends_on:
+            - backend
+        environment:
+            - NODE_ENV=production
+
+    db:
+        image: postgres:15-alpine
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+        environment:
+            - POSTGRES_USER=username
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=nudges
+
+volumes:
+    postgres_data:
