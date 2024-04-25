@@ -36,14 +36,15 @@
 					return form;
 				});
 			}
-		},
-
-		onResult: ({ result }) => {
-			if (result.status == 204) {
-				$closeCurrentDialog();
-				status.set($form.user_status);
-			}
 		}
+
+		// onResult: ({ result }) => {
+		// 	if (result.status == 204) {
+		// 		$closeCurrentDialog();
+		// 		status.set($form.user_status);
+		// 	}
+		// 	console.log(result);
+		// }
 	});
 
 	let departuresActive: boolean = false;

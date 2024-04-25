@@ -54,3 +54,6 @@ export const trip_purposes_binding: Binding = {
 
 export const api_url = import.meta.env.VITE_API_URL;
 export const images_url = import.meta.env.VITE_IMAGES_URL;
+
+export const accessTokenMaxAge = 0.5 * 60;
+export const refreshTokenMaxAge = 60 * 60 * 24 * 90;

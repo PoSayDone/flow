@@ -31,9 +31,13 @@ export const actions = {
 
 		if (response.status == 200) {
 			const data = await response.json();
-			cookies.set('access_token', decodeURIComponent(`Bearer ${data.access_token}`), { path: '/' });
+			cookies.set('access_token', decodeURIComponent(`Bearer ${data.access_token}`), {
+				path: '/',
+				maxAge: 0.5 * 60
+			});
 			cookies.set('refresh_token', decodeURIComponent(`Bearer ${data.refresh_token}`), {
-				path: '/'
+				path: '/',
+				maxAge: 60 * 60 * 24 * 90
 			});
 			throw redirect(302, '/');
 		} else {

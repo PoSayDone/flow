@@ -41,6 +41,8 @@ services:
         image: postgres:15-alpine
         volumes:
             - postgres_data:/var/lib/postgresql/data/
+        ports:
+            - 5432:5432
         environment:
             - POSTGRES_USER=username
             - POSTGRES_PASSWORD=password
