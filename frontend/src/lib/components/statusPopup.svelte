@@ -36,15 +36,15 @@
 					return form;
 				});
 			}
+		},
+		onResult: ({ result, cancel }) => {
+			if (result.status == 204) {
+				$closeCurrentDialog();
+				status.set($form.user_status);
+			}
+			// Фиксит странный баг с рероутингом на профиль, не убирать
+			cancel();
 		}
-
-		// onResult: ({ result }) => {
-		// 	if (result.status == 204) {
-		// 		$closeCurrentDialog();
-		// 		status.set($form.user_status);
-		// 	}
-		// 	console.log(result);
-		// }
 	});
 
 	let departuresActive: boolean = false;
@@ -192,7 +192,7 @@
 		display: flex;
 		flex-direction: column;
 		&.active {
-			height: 75svh !important;
+			min-height: 75svh;
 		}
 	}
 
@@ -234,6 +234,7 @@
 		display: none;
 		flex-direction: column;
 		gap: 10px;
+		max-height: 250px;
 
 		&.shown {
 			display: flex;

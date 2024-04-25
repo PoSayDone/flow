@@ -3,7 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { loginSchema } from '$lib/schema';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { api_url } from '$lib/utils';
+import { accessTokenMaxAge, api_url, refreshTokenMaxAge } from '$lib/utils';
 
 export const load: PageServerLoad = async () => {
 	const loginForm = await superValidate(zod(loginSchema));
@@ -33,11 +33,11 @@ export const actions = {
 			const data = await response.json();
 			cookies.set('access_token', decodeURIComponent(`Bearer ${data.access_token}`), {
 				path: '/',
-				maxAge: 0.5 * 60
+				maxAge: accessTokenMaxAge
 			});
 			cookies.set('refresh_token', decodeURIComponent(`Bearer ${data.refresh_token}`), {
 				path: '/',
-				maxAge: 60 * 60 * 24 * 90
+				maxAge: refreshTokenMaxAge
 			});
 			throw redirect(302, '/');
 		} else {

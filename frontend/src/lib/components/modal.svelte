@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
 
 	export let showModal: boolean; // boolean

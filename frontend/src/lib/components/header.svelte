@@ -31,6 +31,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin: 25px 20px;
+		padding: 25px 20px;
 	}
 </style>

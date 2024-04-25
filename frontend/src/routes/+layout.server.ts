@@ -33,7 +33,6 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 		{ user_interests: profile.interests },
 		zod(interestsSchema)
 	);
-	const likeForm = await superValidate(zod(likeSchema));
 
 	const data = {
 		user: profile,
@@ -44,7 +43,6 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 		statusForm,
 		profileForm,
 		interestsForm,
-		likeForm,
 		avatarForm
 	};
 

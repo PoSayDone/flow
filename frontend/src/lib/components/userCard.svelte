@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { api_url, images_url, placeholder, trip_purposes_binding } from '$lib/utils';
-	import { soulmates, topCard } from '$lib/stores';
+	import { images_url, placeholder, trip_purposes_binding } from '$lib/utils';
+	import { soulmates } from '$lib/stores';
 	import { tripPurposesRu } from '$lib/types';
 
 	export let index: number = 0;
@@ -11,6 +11,7 @@
 	export let age: string = '18';
 	export let occupation: string = 'Дизайнер';
 	export let sex: boolean | null = null;
+	export let node;
 	$: href = `/user_${id}`;
 
 	export let about: string =
@@ -20,74 +21,15 @@
         побывал во многих странах, но всегда готов к новым приключениям и\
         открытиям\
     ';
-
-	let startX: number;
-	let currentCard: HTMLAnchorElement;
-
-	function handleTouchStart(event: TouchEvent) {
-		startX = event.touches[0].clientX;
-	}
-
-	function handleTouchMove(event: TouchEvent) {
-		const deltaX = event.touches[0].clientX - startX;
-		currentCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX / 10}deg)`;
-	}
-
-	function handleTouchEnd(event: TouchEvent) {
-		if (startX - event.changedTouches[0].clientX > 70) {
-			handleDislike();
-		} else if (startX - event.changedTouches[0].clientX < -70) {
-			handleLike();
-		} else {
-			currentCard.style.transition = 'transform 0.3s ease-out';
-			currentCard.style.transform = 'rotate(0deg) translateY(0%) translateX(0%)';
-			setTimeout(() => {
-				currentCard.style.transition = '';
-				currentCard.style.transform = '';
-			}, 300);
-		}
-	}
-
-	$: if (index == 0) {
-		topCard.set({ handleLike, handleDislike });
-	}
-
-	function handleLike() {
-		currentCard.style.transition = 'transform 0.3s ease-out';
-		currentCard.style.transform = 'rotate(40deg) translateY(-50%) translateX(120%)';
-		setTimeout(() => {
-			currentCard.style.transition = '';
-			currentCard.style.transform = '';
-			soulmates.update((array) => {
-				const interested_in_id = array.shift().id;
-				fetch(`${api_url}/user/like/${interested_in_id}`, { method: 'POST' });
-				return array;
-			});
-		}, 300);
-	}
-
-	function handleDislike() {
-		currentCard.style.transition = 'transform 0.3s ease-out';
-		currentCard.style.transform = 'rotate(-40deg) translateY(-50%) translateX(-120%)';
-		setTimeout(() => {
-			currentCard.style.transition = '';
-			currentCard.style.transform = '';
-			soulmates.update((array) => {
-				const not_interested_in_id = array.shift().id;
-				fetch(`${api_url}/user/dislike/${not_interested_in_id}`, { method: 'POST' });
-				return array;
-			});
-		}, 300);
-	}
 </script>
 
 <a
-	bind:this={currentCard}
+	on:touchstart
+	on:touchmove
+	on:touchend
+	on:touchcancel
 	class="card"
-	on:touchstart={handleTouchStart}
-	on:touchmove={handleTouchMove}
-	on:touchend={handleTouchEnd}
-	on:touchcancel={handleTouchEnd}
+	bind:this={node}
 	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
 	style:z-index={$soulmates.length - index}

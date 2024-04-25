@@ -141,7 +141,7 @@
 	}
 
 	.information {
-		margin-top: 20px;
+		margin: 20px 0;
 		display: flex;
 		flex-direction: column;
 		gap: 15px;

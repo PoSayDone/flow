@@ -53,7 +53,7 @@ export const profileSchema = z.object({
 });
 
 export const likeSchema = z.object({
-	user_id: z.string().uuid(),
+	user_id: z.string(),
 	like: z.boolean()
 });
 

@@ -2,7 +2,7 @@
 	import { dislikeIcon, likeIcon, writeIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 
-	export let type = 'like';
+	export let action = 'like';
 	const types = {
 		chat: writeIcon,
 		like: likeIcon,
@@ -13,10 +13,14 @@
 		like: '22px',
 		dislike: '18px'
 	};
+
+	let buttonProps = {
+		type: $$restProps.type
+	};
 </script>
 
-<button on:click class={type}>
-	<Icon d={types[type].d} viewBox={types[type].viewBox} size={sizes[type]} />
+<button on:click class={action} {...buttonProps}>
+	<Icon d={types[action].d} viewBox={types[action].viewBox} size={sizes[action]} />
 </button>
 
 <style lang="scss">
