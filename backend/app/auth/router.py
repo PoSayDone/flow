@@ -141,6 +141,7 @@ async def login_for_access_token(
     if existing_refresh:
         db.delete(existing_refresh)
 
+
     new_refresh_token = models.RefreshTokens(
         refresh_token=refresh_token,
         user_id=authenticated_user.id,

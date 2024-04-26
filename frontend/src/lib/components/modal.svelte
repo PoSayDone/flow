@@ -26,6 +26,7 @@
 	beforeNavigate(({ cancel, type }) => {
 		console.log(type);
 		if (showModal && type != 'leave') {
+			showModal = false;
 			$closeCurrentDialog();
 			cancel();
 		}
