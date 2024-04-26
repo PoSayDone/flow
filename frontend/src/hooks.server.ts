@@ -67,7 +67,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
 	const response = await fetch(request);
 
-	if (!event.url.pathname.includes('/auth')) {
+	if (!event.url.pathname.includes('/auth') || event.url.pathname.includes('/auth/refresh')) {
 		if (response.status == 401) {
 			event.locals.isAuthenticated = false;
 			cookies.delete('access_token', { path: '/' });
