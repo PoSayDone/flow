@@ -2,15 +2,18 @@
 	import ActionButton from '$lib/components/actionButton.svelte';
 	import UserCard from '$lib/components/userCard.svelte';
 	import { getAge } from '$lib/utils';
-	import { soulmates } from '$lib/stores';
 	import { fade } from 'svelte/transition';
 	import { superForm } from 'sveltekit-superforms';
+	import { invalidateAll } from '$app/navigation';
+	import type { PageData } from './$types';
 
-	export let data;
-	if ($soulmates == undefined) {
-		soulmates.set(data.soulmates);
+	export let data: PageData;
+
+	$: if (data.soulmates.length === 2 && data.shouldRefreshSoulmates) {
+		invalidateAll();
 	}
 
+	$: currentCard = refs[0];
 	let startX: number;
 	let refs: HTMLAnchorElement[] = [];
 
@@ -26,7 +29,6 @@
 			cancel();
 		}
 	});
-	$: currentCard = refs[0];
 
 	const handleTouchStart = (event: TouchEvent) => {
 		startX = event.touches[0].clientX;
@@ -55,41 +57,39 @@
 	function handleLike() {
 		currentCard.style.transition = 'transform 0.3s ease-out';
 		currentCard.style.transform = 'rotate(40deg) translateY(-50%) translateX(120%)';
+		const interested_in = data.soulmates[0];
+		if (interested_in) {
+			$form.like = true;
+			$form.user_id = interested_in.id;
+			submit();
+		}
 		setTimeout(() => {
 			currentCard.style.transition = '';
 			currentCard.style.transform = '';
-			soulmates.update((array) => {
-				const interested_in_id = array.shift()?.id;
-				if (interested_in_id) {
-					$form.like = true;
-					$form.user_id = interested_in_id;
-					submit();
-				}
-				return array;
-			});
+			data.soulmates.shift();
+			data.soulmates = data.soulmates;
 		}, 300);
 	}
 
 	function handleDislike() {
 		currentCard.style.transition = 'transform 0.3s ease-out';
 		currentCard.style.transform = 'rotate(-40deg) translateY(-50%) translateX(-120%)';
+		const not_interested_in = data.soulmates[0];
+		if (not_interested_in) {
+			$form.like = false;
+			$form.user_id = not_interested_in.id;
+			submit();
+		}
 		setTimeout(() => {
 			currentCard.style.transition = '';
 			currentCard.style.transform = '';
-			soulmates.update((array) => {
-				const not_interested_in_id = array.shift()?.id;
-				if (not_interested_in_id) {
-					$form.user_id = not_interested_in_id;
-					$form.like = false;
-					submit();
-				}
-				return array;
-			});
+			data.soulmates.shift();
+			data.soulmates = data.soulmates;
 		}, 300);
 	}
 </script>
 
-{#if $soulmates.length == 0}
+{#if data.soulmates.length == 0}
 	<div class="placeholder" transition:fade>
 		<p class="emoji">🥺</p>
 		<p class="placeholder-text">Для вас пока нет сопутешественников</p>
@@ -102,7 +102,7 @@
 			on:touchend={handleTouchEnd}
 			on:touchmove={handleTouchMove}
 		>
-			{#each $soulmates as user, i}
+			{#each data.soulmates as user, i}
 				<UserCard
 					id={user.id}
 					name={user.name}
@@ -114,6 +114,7 @@
 					age={getAge(user.birthdate.toString()).toString()}
 					index={i}
 					bind:node={refs[i]}
+					bind:soulmates={data.soulmates}
 				/>
 			{/each}
 		</div>

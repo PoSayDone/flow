@@ -234,7 +234,7 @@
 		display: none;
 		flex-direction: column;
 		gap: 10px;
-		max-height: 250px;
+		height: 250px;
 
 		&.shown {
 			display: flex;

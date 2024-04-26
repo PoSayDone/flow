@@ -72,7 +72,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			event.locals.isAuthenticated = false;
 			cookies.delete('access_token', { path: '/' });
 			cookies.delete('refresh_token', { path: '/' });
-			throw redirect(303, '/auth');
+			// throw redirect(303, '/auth');
 		}
 	}
 

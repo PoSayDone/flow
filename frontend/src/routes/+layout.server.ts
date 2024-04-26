@@ -1,12 +1,6 @@
 import { superValidate } from 'sveltekit-superforms';
 import type { LayoutServerLoad } from './$types';
-import {
-	avatarSchema,
-	interestsSchema,
-	likeSchema,
-	profileSchema,
-	statusSchema
-} from '$lib/schema';
+import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { Arrival, Departure, Interest, TripPurpose, UserWStatus } from '$lib/types';
 import { api_url } from '$lib/utils';

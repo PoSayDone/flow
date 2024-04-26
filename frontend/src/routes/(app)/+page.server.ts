@@ -6,13 +6,13 @@ import type { PageServerLoad } from './$types';
 import { likeSchema } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 
-export const load: PageServerLoad = async ({ fetch }) => {
-	const { soulmates }: { soulmates: Soulmate[] } = await (
-		await fetch(`${api_url}/user/soulmates/10`)
-	).json();
+export const load: PageServerLoad = async ({ fetch, parent }) => {
+	const { soulmates }: { soulmates: Soulmate[] } =
+		(await (await fetch(`${api_url}/user/soulmates/3`)).json()) || [];
 	const likeForm = await superValidate(zod(likeSchema));
-	const body = { soulmates, likeForm };
-	return body;
+	const parentData = await parent();
+	const shouldRefreshSoulmates = soulmates.length > 2;
+	return { soulmates, shouldRefreshSoulmates, likeForm, parentData };
 };
 
 export const actions = {

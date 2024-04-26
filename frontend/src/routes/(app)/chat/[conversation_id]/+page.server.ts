@@ -2,7 +2,7 @@ import { messageSchema } from '$lib/schema';
 import type { Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { PageServerLoad } from '../$types';
+import type { PageServerLoad } from './$types';
 import type { Message, User } from '$lib/types';
 import { api_url } from '$lib/utils';
 
@@ -15,8 +15,8 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 		})
 	).json();
 
-	await parent();
-	return { messageForm, conversation_id, messages, users };
+	const parentData = await parent();
+	return { messageForm, conversation_id, messages, users, parentData };
 };
 
 export const actions = {

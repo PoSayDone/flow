@@ -1,8 +1,14 @@
 import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import { api_url } from '$lib/utils';
+import type { PageServerLoad } from '../../auth/(main_layout)/login/$types';
 import type { Actions } from './$types';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+
+export const load: PageServerLoad = async ({ parent }) => {
+	const parentData = await parent();
+	return { parentData };
+};
 
 export const actions = {
 	update_interests: async ({ request, fetch }) => {
