@@ -74,6 +74,11 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
             models.Matches.user_id == user.id,
             models.Matches.liked_user_id == models.Users.id
         ))
+        .outerjoin(models.Matches, and_(
+            models.Matches.user_id == models.Users.id,
+            models.Matches.liked_user_id == user.id,
+            models.Matches.mutual == True
+        ))
         .filter(models.Users.id != user.id)
         .filter(models.Matches.id == None)  # Check if there is no match for the user
         .all()
