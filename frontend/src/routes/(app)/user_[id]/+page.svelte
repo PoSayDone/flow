@@ -62,12 +62,13 @@
 	style="--user-image: url({images_url}/{data.pageUser.user_image ||
 		placeholder(data.pageUser.sex)});"
 >
-	<div class="profile-picture"></div>
-</div>
-<div class="tags" style:view-transition-name={`trip-purposes`}>
-	{#each data.pageUser.trip_purposes as id}
-		<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
-	{/each}
+	<div class="profile-picture">
+		<div class="tags" style:view-transition-name={`trip-purposes`}>
+			{#each data.pageUser.trip_purposes as id}
+				<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
+			{/each}
+		</div>
+	</div>
 </div>
 <div
 	class="popover"
@@ -131,7 +132,7 @@
 	}
 	.profile-picture {
 		z-index: -100;
-		position: sticky;
+		position: relative;
 		background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, #000 100%), var(--user-image), #d6d6d6;
 		background-size: cover;
 		background-position: center;
@@ -144,9 +145,11 @@
 		display: flex;
 		gap: 5px;
 		left: 50%; /* position the top  edge of the element at the middle of the parent */
-		top: 280px;
-
+		bottom: 85px;
 		transform: translateX(-50%);
+		flex-wrap: wrap;
+		width: 85%;
+		justify-content: center;
 	}
 
 	.tag {

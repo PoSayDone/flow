@@ -54,7 +54,7 @@
 
 	const { form, enhance } = superForm(data.messageForm, {
 		dataType: 'json',
-		resetForm: false
+		resetForm: true
 	});
 </script>
 

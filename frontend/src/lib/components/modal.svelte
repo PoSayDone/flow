@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
+	import { beforeNavigate, pushState } from '$app/navigation';
 
 	export let showModal: boolean; // boolean
 	export let centered: boolean = false;
@@ -21,6 +22,14 @@
 		dialog.classList.remove('close');
 		dialog.removeEventListener('animationend', closeDialog);
 	}
+
+	beforeNavigate(({ cancel, type }) => {
+		console.log(type);
+		if (showModal && type != 'leave') {
+			$closeCurrentDialog();
+			cancel();
+		}
+	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
