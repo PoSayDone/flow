@@ -78,6 +78,7 @@
 		{#each messages as message}
 			<div class={`message ${message.sender_id === otherUser.id ? 'to' : 'from'}`}>
 				{message.body}
+				<div class="time_sent">{new Date(message.created_at)}</div>
 			</div>
 		{/each}
 	</div>

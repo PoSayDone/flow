@@ -3,6 +3,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from app.pusher import pusher_client
 from app.models import Conversation, Users
+import datetime
 
 
 async def create_conversation_db(
@@ -23,7 +24,7 @@ async def create_conversation_db(
         if existing_conversation:
             conversation = existing_conversation
         else:
-            conversation = Conversation()
+            conversation = Conversation(created_at=datetime.datetime.utcnow(), updated_at=datetime.datetime.utcnow())
             conversation.users.append(user)
             conversation.users.append(recepient)
             db.add(conversation)

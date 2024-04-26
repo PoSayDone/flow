@@ -25,6 +25,10 @@
 	--primary: #2461ff;
 }
 
+input {
+	-webkit-user-select: text;
+}
+
 a {
 	text-decoration: none;
 }

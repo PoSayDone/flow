@@ -107,6 +107,7 @@ async def create_user(db: db_dependency, user_create_request: UserCreateRequest)
         birthdate=user_create_request.birthdate,
         sex=user_create_request.sex,
         password_hash=bcrypt_context.hash(user_create_request.password),
+        registration_date = datetime.utcnow()
     )
     db.add(user_create_model)
     db.commit()

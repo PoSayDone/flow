@@ -15,15 +15,6 @@ from app.routes import (
 from app import models
 from app.database import engine
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.logger import logger
-import logging
-
-gunicorn_logger = logging.getLogger("gunicorn.error")
-logger.handlers = gunicorn_logger.handlers
-if __name__ != "main":
-    logger.setLevel(gunicorn_logger.level)
-else:
-    logger.setLevel(logging.DEBUG)
 
 app = FastAPI(root_path="/api")
 
@@ -34,18 +25,13 @@ app.include_router(interests.router)
 app.include_router(trip_purposes.router)
 app.include_router(departures.router)
 app.include_router(arrivals.router)
-# app.include_router(roles.router)
 
 models.Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5000",
         "http://localhost",
-        "http://127.0.0.1",
-        "http://0.0.0.0",
-        "http://192.168.1.129",
     ],
     allow_credentials=True,
     allow_methods=["*"],

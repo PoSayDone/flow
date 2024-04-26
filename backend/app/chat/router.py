@@ -1,3 +1,4 @@
+import datetime
 from operator import and_
 
 from sqlalchemy import select
@@ -88,7 +89,7 @@ async def send_message(
     ).get(conversation_id)
     if existing_conversation:
         message_obj = models.Message(
-            conversation_id=conversation_id, sender_id=user.id, body=new_message.content
+            conversation_id=conversation_id, sender_id=user.id, body=new_message.content, created_at=datetime.datetime.utcnow()
         )
         db.add(message_obj)
 

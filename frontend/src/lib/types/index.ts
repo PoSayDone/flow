@@ -65,7 +65,7 @@ export type Message = {
 	id: number;
 	body: string;
 	image: string;
-	created_at: Date;
+	created_at: string;
 	conversation_id: number;
 	conversation: Conversation;
 	sender_id: string;
@@ -74,8 +74,8 @@ export type Message = {
 
 export type Conversation = {
 	id: number;
-	created_at: Date;
-	updated_at: Date;
+	created_at: string;
+	updated_at: string;
 	messages: Message[];
 	users: User[];
 	is_deleted: boolean;

@@ -65,7 +65,7 @@ class Users(Base):
     password_hash = Column(String)
     sex = Column(Boolean)
     birthdate = Column(Date)
-    registration_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    registration_date = Column(DateTime, index=True)
     conversations: Mapped[List["Conversation"]] = relationship(
         secondary=conversation_participant, back_populates="users"
     )
@@ -166,8 +166,8 @@ class Conversation(Base):
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow())
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow())
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
     is_deleted = Column(Boolean, default=False)
 
     users: Mapped[List["Users"]] = relationship(
@@ -182,7 +182,7 @@ class Message(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     body = Column(String)
     image = Column(String)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow())
+    created_at = Column(DateTime)
 
     conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"))
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")
