@@ -345,6 +345,7 @@
 		border-radius: 20px;
 		padding: 15px 20px;
 		display: flex;
+		color: #000;
 		justify-content: space-between;
 		align-items: center;
 		transition:

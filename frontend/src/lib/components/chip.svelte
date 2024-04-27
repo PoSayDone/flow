@@ -50,6 +50,7 @@
 		transition: all 0.1s ease-in-out;
 
 		span {
+			white-space: nowrap;
 			text-wrap: nowrap;
 		}
 	}
