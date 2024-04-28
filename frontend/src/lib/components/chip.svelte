@@ -76,6 +76,10 @@
 		transition: all 0.1s ease-in-out;
 
 		span {
+			color: #000;
+			height: 14px;
+			white-space: nowrap;
+			text-wrap: nowrap;
 			margin-right: 10px;
 		}
 
