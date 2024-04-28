@@ -48,7 +48,7 @@
 	});
 
 	let departuresActive: boolean = false;
-	let arrivalActive: boolean = false;
+	let arrivalsActive: boolean = false;
 
 	function toggleOption(id: number) {
 		if ($form.user_trip_purposes.includes(id)) {
@@ -82,7 +82,7 @@
 			<div
 				class="active-content"
 				class:hidden={!$form.user_status}
-				class:expand={departuresActive || arrivalActive}
+				class:expand={departuresActive || arrivalsActive}
 			>
 				<button
 					type="button"
@@ -90,7 +90,7 @@
 					class:activebutton={departuresActive}
 					on:click={() => {
 						departuresActive = !departuresActive;
-						arrivalActive = false;
+						arrivalsActive = false;
 					}}
 					>Откуда <Icon
 						d={backIcon.d}
@@ -121,8 +121,9 @@
 				</div>
 				<button
 					class="to"
+					class:activebutton={arrivalsActive}
 					on:click={() => {
-						arrivalActive = !arrivalActive;
+						arrivalsActive = !arrivalsActive;
 						departuresActive = false;
 					}}
 					type="button"
@@ -133,7 +134,7 @@
 						size="24px"
 					/></button
 				>
-				<div class="location-form" class:shown={arrivalActive}>
+				<div class="location-form" class:shown={arrivalsActive}>
 					<input class="search" type="text" bind:value={arrivalSearch} />
 					<div>
 						{#each filteredArrivals as { arrival_name, id }}
@@ -153,7 +154,7 @@
 					</div>
 				</div>
 
-				<div class="tags" class:shown={departuresActive == false && arrivalActive == false}>
+				<div class="tags" class:shown={departuresActive == false && arrivalsActive == false}>
 					{#each $page.data.trip_purposes as trip_purpose}
 						<Chip
 							clickable={true}

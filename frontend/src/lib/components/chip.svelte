@@ -51,6 +51,7 @@
 
 		span {
 			color: #000;
+			height: 14px;
 			white-space: nowrap;
 			text-wrap: nowrap;
 		}
@@ -71,12 +72,10 @@
 		background: none;
 		border: 1.5px solid var(--bg-gray);
 		outline: none;
-		border: none;
 		cursor: pointer;
 		transition: all 0.1s ease-in-out;
+
 		span {
-			white-space: nowrap;
-			text-wrap: nowrap;
 			margin-right: 10px;
 		}
 
@@ -93,7 +92,8 @@
 	input[type='checkbox']:checked + label {
 		background: #d3dfff;
 		color: #2461ff;
-		outline: none;
+		border: 1px solid transparent;
+
 		:global(path) {
 			stroke: #2461ff;
 		}
