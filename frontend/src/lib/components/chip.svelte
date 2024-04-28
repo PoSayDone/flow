@@ -69,11 +69,13 @@
 		padding: 0 18px;
 		border-radius: 100px;
 		background: none;
-		outline: 1.5px solid var(--bg-gray);
+		border: 1.5px solid var(--bg-gray);
+		outline: none;
 		border: none;
 		cursor: pointer;
 		transition: all 0.1s ease-in-out;
 		span {
+			white-space: nowrap;
 			text-wrap: nowrap;
 			margin-right: 10px;
 		}

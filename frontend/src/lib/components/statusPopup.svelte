@@ -345,12 +345,12 @@
 		border-radius: 20px;
 		padding: 15px 20px;
 		display: flex;
-		color: #000;
 		justify-content: space-between;
 		align-items: center;
 		transition:
 			background-color 0.2s ease-in-out,
 			color 0.2s ease-in-out;
+		color: #000;
 
 		&.active {
 			background-color: #d3dfff;
