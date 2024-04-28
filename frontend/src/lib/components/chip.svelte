@@ -44,12 +44,13 @@
 		padding: 0 18px;
 		border-radius: 100px;
 		background: none;
-		outline: 1.5px solid var(--bg-gray);
-		border: none;
+		border: 1.5px solid var(--bg-gray);
+		outline: none;
 		cursor: pointer;
 		transition: all 0.1s ease-in-out;
 
 		span {
+			color: #000;
 			white-space: nowrap;
 			text-wrap: nowrap;
 		}
