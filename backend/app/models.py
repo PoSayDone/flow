@@ -10,7 +10,6 @@ from sqlalchemy import (
     Table,
 )
 from sqlalchemy.dialects.postgresql import UUID, array
-import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -84,22 +83,7 @@ class Users(Base):
     messages: Mapped[List["Message"]] = relationship(back_populates="sender")
     status = Column(Boolean, default=True)
     user_image: Mapped[str] = mapped_column(String(1048), nullable=True)
-    # matches = relationship(
-    #     "Users",
-    #     secondary="matches",
-    #     primaryjoin="Users.id == Matches.user_id",
-    #     secondaryjoin="Matches.liked_user_id == Users.id",
-    #     backref="user_id"
-    # )
 
-    # # Users who liked this user (users who liked them)
-    # matches_by_others = relationship(
-    #     "Users",
-    #     secondary="matches",
-    #     primaryjoin="Users.id == Matches.liked_user_id",
-    #     secondaryjoin="Matches.user_id == Users.id",
-    #     backref="liked_user_id"
-    # )
 
 class Matches(Base):
     __tablename__ = "matches"
@@ -108,11 +92,12 @@ class Matches(Base):
     liked_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
     mutual = Column(Boolean, default=False)
 
+
 class RefreshTokens(Base):
     __tablename__ = "refresh_tokens"
     user_id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     refresh_token = Column(String)
-    expires_at = Column(DateTime)
+
 
 class Roles(Base):
     __tablename__ = "roles"

@@ -25,7 +25,7 @@ export const actions = {
 	signin: async ({ fetch, request }) => {
 		const signinForm = await superValidate(request, zod(signinSchema));
 		if (!signinForm.valid) return fail(400, { signinForm });
-		const response = await fetch(`${api_url}/auth/signin`, {
+		const response = await fetch(`${api_url}/auth/signup`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

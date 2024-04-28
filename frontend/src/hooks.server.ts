@@ -1,80 +1,90 @@
-import { accessTokenMaxAge, api_url, refreshTokenMaxAge } from '$lib/utils';
-import { type HandleFetch } from '@sveltejs/kit';
-import { redirect } from '@sveltejs/kit';
+import { api_url } from '$lib/utils';
+import { redirect, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
+import * as scp from 'set-cookie-parser';
 
-let refreshingPromise: Promise<void> | undefined = undefined;
+let isRefreshing = false;
+let requestsWhileRefreshing: Request[] = [];
 
-export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
-	if (refreshingPromise) {
-		await refreshingPromise;
+const isAllowedHost = (host: string) => {
+	return (
+		host === 'localhost' || host === 'nginx' || host === 'flowtrip.ru' || host === '192.168.1.137'
+	);
+};
+
+function setCookies(
+	res: Response,
+	event: RequestEvent<Partial<Record<string, string>>, string | null>
+) {
+	const setCookie = res.headers.getSetCookie();
+
+	if (setCookie && isAllowedHost(event.url.hostname)) {
+		const parsed = scp.parse(res);
+
+		parsed.forEach((cookie) => {
+			event.cookies.set(cookie.name, cookie.value, {
+				...cookie
+			});
+		});
+
+		if (res.status == 200) {
+			if (event.url.pathname == '/api/auth/signin' || event.url.pathname == '/api/auth/refresh') {
+				event.locals.isAuthenticated = true;
+			}
+		}
 	}
+}
+
+export const handleFetch: HandleFetch = async ({ request, fetch: nodeFetch, event }) => {
 	const { cookies } = event;
-	const accessToken = cookies.get('access_token')?.toString();
-	const refreshToken = cookies.get('refresh_token')?.toString();
+	const accessToken = cookies.get('access_token');
+	const refreshToken = cookies.get('refresh_token');
 
 	if (refreshToken) {
 		event.locals.isAuthenticated = true;
+	} else if (!accessToken && !refreshToken) {
+		event.locals.isAuthenticated = false;
 	}
 
 	if (!event.url.pathname.includes('/auth')) {
 		if (!event.locals.isAuthenticated) {
-			throw redirect(303, '/auth');
+			throw redirect(303, '/auth/signin');
 		}
+	}
 
-		const needsRefresh = !accessToken && refreshToken;
+	const requestURL = new URL(request.url);
+	if (isAllowedHost(requestURL.host)) {
+		request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
+	}
 
-		if (needsRefresh) {
-			refreshingPromise = new Promise<void>((resolve, reject) => {
-				const requestOptions = {
-					method: 'POST',
-					headers: {
-						cookie: `refresh_token=${refreshToken}`
-					}
-				};
+	const res = await nodeFetch(request);
 
-				fetch(`${api_url}/auth/refresh`, requestOptions).then(async (response) => {
-					if (response.status == 200) {
-						const data = await response.json();
-						cookies.set('access_token', decodeURIComponent(`Bearer ${data.access_token}`), {
-							path: '/',
-							maxAge: accessTokenMaxAge
-						});
-						cookies.set('refresh_token', decodeURIComponent(`Bearer ${data.refresh_token}`), {
-							path: '/',
-							maxAge: refreshTokenMaxAge
-						});
-						event.locals.isAuthenticated = true;
-						resolve();
-					} else {
-						reject();
-					}
-				});
-			}).then(
-				//result
-				() => {},
-				//error
-				() => {
-					event.locals.isAuthenticated = false;
-					cookies.delete('access_token', { path: '/' });
-					cookies.delete('refresh_token', { path: '/' });
-					throw redirect(303, '/auth');
+	if (res.status === 401 && !event.url.pathname.includes('/auth')) {
+		if (!isRefreshing) {
+			isRefreshing = true;
+			const refresh_res = await nodeFetch(`${api_url}/auth/refresh`, {
+				method: 'POST',
+				headers: {
+					cookie: `refresh_token=${refreshToken?.toString()}`
 				}
-			);
-			await refreshingPromise;
-			refreshingPromise = undefined;
+			});
+			if (refresh_res.status !== 200) {
+				cookies.delete('access_token', { path: '/' });
+				cookies.delete('refresh_token', { path: '/' });
+			} else {
+				setCookies(refresh_res, event);
+			}
+			isRefreshing = false;
+			requestsWhileRefreshing.unshift(request);
+			requestsWhileRefreshing.forEach((request) => {
+				request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
+				nodeFetch(request);
+			});
+			requestsWhileRefreshing = [];
+		} else {
+			requestsWhileRefreshing.push(request);
 		}
 	}
-	request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
-	const response = await fetch(request);
 
-	if (!event.url.pathname.includes('/auth') || event.url.pathname.includes('/auth/refresh')) {
-		if (response.status == 401) {
-			event.locals.isAuthenticated = false;
-			cookies.delete('access_token', { path: '/' });
-			cookies.delete('refresh_token', { path: '/' });
-			// throw redirect(303, '/auth');
-		}
-	}
-
-	return response;
+	setCookies(res, event);
+	return res;
 };

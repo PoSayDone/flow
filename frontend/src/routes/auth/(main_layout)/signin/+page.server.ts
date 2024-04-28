@@ -11,7 +11,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	default: async ({ request, cookies, fetch }) => {
 		const loginForm = await superValidate(request, zod(loginSchema));
 		if (!loginForm.valid) return fail(400, { loginForm });
 
@@ -27,18 +27,9 @@ export const actions = {
 			body: urlParams
 		};
 
-		const response = await fetch(`${api_url}/auth/login`, requestOptions);
+		const response = await fetch(`${api_url}/auth/signin`, requestOptions);
 
 		if (response.status == 200) {
-			const data = await response.json();
-			cookies.set('access_token', decodeURIComponent(`Bearer ${data.access_token}`), {
-				path: '/',
-				maxAge: accessTokenMaxAge
-			});
-			cookies.set('refresh_token', decodeURIComponent(`Bearer ${data.refresh_token}`), {
-				path: '/',
-				maxAge: refreshTokenMaxAge
-			});
 			throw redirect(302, '/');
 		} else {
 			return setError(loginForm, 'Invalid email or password');

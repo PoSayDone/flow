@@ -3,12 +3,11 @@ import uuid
 from app.user.services import calculate_soulmate_score
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from sqlalchemy import and_, insert, or_
-from sqlalchemy.sql import func
 
 
 from app import models, schema
 from app.chat.services import create_conversation_db
-from app.auth.router import get_current_user, user_dependency
+from app.auth.services import user_dependency
 from app.dependencies import db_dependency
 
 
@@ -60,47 +59,49 @@ async def update_user_image(
 
 @user_router.get("/soulmates/{count}")
 async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
-	if not user:
-		raise HTTPException(status_code=404, detail="User not found")
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-	count = min(3, count)
+    count = min(3, count)
 
-	trace = get_or_set_feed_trace(user)
+    trace = get_or_set_feed_trace(user)
 
-	# Filter users
-	filtered_users = (
+    # Filter users
+    filtered_users = (
         db.query(models.Users)
-        .outerjoin(models.Matches, or_(and_(
-            models.Matches.user_id == user.id,
-            models.Matches.liked_user_id == models.Users.id
-        ),and_(
-            models.Matches.liked_user_id == user.id,
-            models.Matches.mutual
-        )))
+        .outerjoin(
+            models.Matches,
+            or_(
+                and_(
+                    models.Matches.user_id == user.id,
+                    models.Matches.liked_user_id == models.Users.id,
+                ),
+                and_(models.Matches.liked_user_id == user.id, models.Matches.mutual),
+            ),
+        )
         .filter(models.Users.id != user.id)
         .filter(models.Matches.id == None)  # Check if there is no match for the user
         .all()
     )
 
-	# FIXME это типо костыль, но я хз как по другому, потому что фильтр
-	# не переваривает trace.contains_user
-	filtered_users = filter(lambda u: not trace.contains_user(u), filtered_users)
+    # FIXME это типо костыль, но я хз как по другому, потому что фильтр
+    # не переваривает trace.contains_user
+    filtered_users = filter(lambda u: not trace.contains_user(u), filtered_users)
 
-	# Define matching criteria and calculate scores for each user
-	soulmate_scores = {}
-	for scoring_user in filtered_users:
-		score = calculate_soulmate_score(db, user, scoring_user)
-		soulmate_scores[scoring_user] = score
+    # Define matching criteria and calculate scores for each user
+    soulmate_scores = {}
+    for scoring_user in filtered_users:
+        score = calculate_soulmate_score(db, user, scoring_user)
+        soulmate_scores[scoring_user] = score
 
-	# Sort users by score and return top 'count' soulmates
-	sorted_users = sorted(soulmate_scores.items(), key=lambda x: x[1], reverse=True)
-	top_soulmates = [u for u, _ in sorted_users[:count]]
+    # Sort users by score and return top 'count' soulmates
+    sorted_users = sorted(soulmate_scores.items(), key=lambda x: x[1], reverse=True)
+    top_soulmates = [u for u, _ in sorted_users[:count]]
 
-	result = schema.SoulmatesResponse.model_validate(
-			{"soulmates": top_soulmates}
-		)
+    result = schema.SoulmatesResponse.model_validate({"soulmates": top_soulmates})
 
-	return result
+    return result
+
 
 ### status_data
 
@@ -203,32 +204,35 @@ async def get_profile_w_id(user_id: UUID, db: db_dependency):
 
 ### matches
 
-class UserTrace():
-	def __init__(self, user_id) -> None:
-		self.user_id = user_id
-		self.traced_users = set()
 
-	def add_traced_user(self, user: models.Users):
-		self.traced_users.add(user.id)
+class UserTrace:
+    def __init__(self, user_id) -> None:
+        self.user_id = user_id
+        self.traced_users = set()
 
-	def contains_user(self, user: models.Users) -> bool:
-		contains = user.id in self.traced_users
-		return contains
+    def add_traced_user(self, user: models.Users):
+        self.traced_users.add(user.id)
 
-	def __str__(self):
-	 return f"FeedTrace(userId={self.user_id}, tracedUsers={self.traced_users})";
+    def contains_user(self, user: models.Users) -> bool:
+        contains = user.id in self.traced_users
+        return contains
 
+    def __str__(self):
+        return f"FeedTrace(userId={self.user_id}, tracedUsers={self.traced_users})"
 
 
 in_memory_feed_trace = {}
+
+
 def get_or_set_feed_trace(user: models.Users) -> UserTrace:
-	user_trace = in_memory_feed_trace.get(user.id)
+    user_trace = in_memory_feed_trace.get(user.id)
 
-	if not user_trace:
-		user_trace = UserTrace(user_id=user.id)
-		in_memory_feed_trace[user.id] = user_trace
+    if not user_trace:
+        user_trace = UserTrace(user_id=user.id)
+        in_memory_feed_trace[user.id] = user_trace
 
-	return user_trace
+    return user_trace
+
 
 @user_router.post("/dislike/{liked_user_id}", tags=["matches"])
 async def add_dislike(liked_user_id: UUID, user: user_dependency, db: db_dependency):
@@ -244,6 +248,7 @@ async def add_dislike(liked_user_id: UUID, user: user_dependency, db: db_depende
     user_trace.add_traced_user(recepient)
 
     return {"ok": True}
+
 
 @user_router.post("/like/{liked_user_id}", tags=["matches"])
 async def add_match(liked_user_id: UUID, user: user_dependency, db: db_dependency):

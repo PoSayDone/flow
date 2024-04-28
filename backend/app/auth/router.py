@@ -1,100 +1,44 @@
-from datetime import datetime, timedelta
-from typing import Annotated
-from urllib import parse
+from datetime import UTC, datetime
 from uuid import UUID
 import uuid
-from fastapi.security.utils import get_authorization_scheme_param
-from jose import jwt, JWTError
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from passlib.context import CryptContext
-from pydantic import EmailStr
 from app import models
 
-from app.utils import OAuth2PasswordBearerWithCookie
-
+from app.auth.helpers import (
+    create_access_token,
+    create_refresh_token,
+    decode_refresh_token,
+)
+from app.auth.services import (
+    authneticate_user,
+    bcrypt_context,
+    get_user_by_id,
+    get_user_by_mail,
+)
 from app.models import Users
 from app.schema import TokenBase, UserCreateRequest
 from app.dependencies import db_dependency
 
 
-SECRET_KEY = "4bad42439cea6743a225bc13fcaacf0bbf637edbb197d96611f2b40c36ce724c"
-REFRESH_SECRET_KEY = "ee4073ce6711053c8006cf225ff9af00a0ae3350340d29cb580356cddec3097fa0645c0ff6cd12724e2fc544551c47598d39638df38abf045e3ebeae97b853e0"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 10
-REFRESH_TOKEN_EXPIRE_DAYS = 90
-
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
-
-bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/login")
-
-
-@auth_router.post("/refresh", response_model=TokenBase)
-async def refresh_token_regenerate(
-    db: db_dependency,
-    refresh_token_cookie: str = Cookie(alias="refresh_token"),
-):
-    refresh_token: str = parse.unquote(refresh_token_cookie)
-    _, refresh_token = get_authorization_scheme_param(refresh_token)
-    payload = jwt.decode(refresh_token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
-    user_id = UUID(payload.get("id"))
-    mail = str(payload.get("sub"))
-
-    refresh_token = (
-        db.query(models.RefreshTokens)
-        .filter_by(user_id=user_id, refresh_token=refresh_token)
-        .first()
-    )
-    if not refresh_token:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
-
-    # Revoke previous refresh tokens for this user (optional security measure)
-    db.query(models.RefreshTokens).filter_by(user_id=user_id).delete()
-
-    # Create new access token and refresh token
-    new_access_token = create_access_token(
-        mail, user_id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    new_refresh_token = create_refresh_token(
-        mail, user_id, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    )
-
-    # Store new refresh token in database
-    refresh_token_db = models.RefreshTokens(
-        refresh_token=new_refresh_token,
-        user_id=user_id,
-        expires_at=datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
-    )
-    db.add(refresh_token_db)
-    db.commit()
-
-    return {
-        "access_token": new_access_token,
-        "refresh_token": new_refresh_token,
-        "token_type": ALGORITHM,
-    }
 
 
 @auth_router.get("/check_email/{mail}")
 async def check_email(db: db_dependency, mail: str):
-	exists = db.query(models.Users).filter(models.Users.mail == mail).first()
-	if exists:
-		raise HTTPException(
+    exists = db.query(models.Users).filter(models.Users.mail == mail).first()
+    if exists:
+        raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already exists",
         )
-	return {"ok"}
+    return {"ok"}
 
 
-@auth_router.post("/signin", status_code=status.HTTP_201_CREATED)
+@auth_router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, user_create_request: UserCreateRequest):
 
-    exists = (
-        db.query(models.Users)
-        .filter(models.Users.mail == user_create_request.mail)
-        .first()
-    )
+    exists = get_user_by_mail(user_create_request.mail, db)
     if exists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -107,46 +51,32 @@ async def create_user(db: db_dependency, user_create_request: UserCreateRequest)
         birthdate=user_create_request.birthdate,
         sex=user_create_request.sex,
         password_hash=bcrypt_context.hash(user_create_request.password),
-        registration_date = datetime.utcnow()
+        registration_date=datetime.now(UTC),
     )
     db.add(user_create_model)
     db.commit()
     return {"ok"}
 
 
-@auth_router.post("/login", response_model=TokenBase)
+@auth_router.post("/signin")
 async def login_for_access_token(
     response: Response,
     db: db_dependency,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    authenticated_user = authneticate_user(form_data.username, form_data.password, db)
-    if not authenticated_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user"
-        )
+    user = authneticate_user(form_data.username, form_data.password, db)
 
-    access_token = create_access_token(
-        authenticated_user.mail,
-        authenticated_user.id,
-        timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-    )
-    refresh_token = create_refresh_token(
-        authenticated_user.mail,
-        authenticated_user.id,
-        timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
-    )
+    access_token_expires, access_token = create_access_token(user)
+    refresh_token_expires, refresh_token = create_refresh_token(user)
 
-    existing_refresh = db.query(models.RefreshTokens).get(authenticated_user.id)
+    existing_refresh = db.query(models.RefreshTokens).get(user.id)
 
     if existing_refresh:
         db.delete(existing_refresh)
 
-
     new_refresh_token = models.RefreshTokens(
         refresh_token=refresh_token,
-        user_id=authenticated_user.id,
-        expires_at=datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+        user_id=user.id,
     )
     db.add(new_refresh_token)
     db.commit()
@@ -156,63 +86,61 @@ async def login_for_access_token(
         value=f"Bearer {access_token}",
         httponly=True,
         path="/",
+        expires=access_token_expires,
     )
     response.set_cookie(
-        key="refresh_token", value=f"Bearer {refresh_token}", httponly=True, path="/"
+        key="refresh_token",
+        value=f"{refresh_token}",
+        httponly=True,
+        path="/",
+        expires=refresh_token_expires,
     )
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
+    return {"ok"}
 
 
-def authneticate_user(mail: EmailStr, password: str, db: db_dependency):
-    user = db.query(Users).filter(Users.mail == mail).first()
-    if not user:
-        return False
-    if not bcrypt_context.verify(password, user.password_hash):
-        return False
-    return user
+@auth_router.post("/refresh")
+async def refresh_token_regenerate(
+    response: Response,
+    db: db_dependency,
+    old_refresh_token: str = Cookie(alias="refresh_token"),
+):
+    refresh_token_payload = decode_refresh_token(old_refresh_token)
+    user_id = UUID(refresh_token_payload.get("id"))
 
+    refresh_token_db = (
+        db.query(models.RefreshTokens)
+        .filter_by(user_id=user_id, refresh_token=old_refresh_token)
+        .first()
+    )
 
-def create_access_token(mail: EmailStr, user_id: UUID, expires_date: timedelta):
-    encode: dict = {"sub": mail, "id": user_id.__str__()}
-    expires = datetime.utcnow() + expires_date
-    encode.update({"exp": expires})
-    return jwt.encode(encode, key=SECRET_KEY, algorithm=ALGORITHM)
+    if not refresh_token_db:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
 
+    db.query(models.RefreshTokens).filter_by(user_id=user_id).delete()
 
-def create_refresh_token(mail: EmailStr, user_id: UUID, expires_date: timedelta):
-    encode: dict = {"sub": mail, "id": user_id.__str__()}
-    expires = datetime.utcnow() + expires_date
-    encode.update({"exp": expires})
-    return jwt.encode(encode, key=REFRESH_SECRET_KEY, algorithm=ALGORITHM)
+    user = get_user_by_id(user_id, db)
+    access_token_expires, new_access_token = create_access_token(user)
+    refresh_token_expires, new_refresh_token = create_refresh_token(user)
 
+    refresh_token_db = models.RefreshTokens(
+        refresh_token=new_refresh_token,
+        user_id=user_id,
+    )
+    db.add(refresh_token_db)
+    db.commit()
 
-async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)], db: db_dependency
-) -> models.Users | None:
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        mail: str = str(payload.get("sub"))
-        id: UUID = UUID(payload.get("id"))
-        if mail is None or id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user",
-            )
-        user: Users = db.get(models.Users, id)
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user",
-            )
-        return user
-    except (AttributeError, JWTError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user"
-        )
-
-
-user_dependency = Annotated[models.Users, Depends(get_current_user)]
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {new_access_token}",
+        httponly=True,
+        path="/",
+        expires=access_token_expires,
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=f"{new_refresh_token}",
+        httponly=True,
+        path="/",
+        expires=refresh_token_expires,
+    )
+    return {"ok"}

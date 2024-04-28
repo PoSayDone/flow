@@ -13,6 +13,7 @@
 	import { backIcon, editIcon } from '$lib/assets/Appicons';
 	import type { PageData } from './$types';
 	import Avatar from '$lib/components/avatar.svelte';
+	import { beforeNavigate } from '$app/navigation';
 
 	let showStatusModal = false;
 	let showInterestsModal = false;
@@ -29,6 +30,9 @@
 	const { form, enhance, submit } = superForm($page.data.profileForm, {
 		resetForm: false,
 		clearOnSubmit: 'none'
+	});
+	beforeNavigate(() => {
+		submit();
 	});
 </script>
 
@@ -66,19 +70,19 @@
 <form class="information" method="POST" action="?/update_profile" use:enhance>
 	<div class="info-block">
 		<label for="name">Имя</label>
-		<input name="name" type="text" bind:value={$form.name} on:blur={() => submit()} />
+		<input name="name" type="text" bind:value={$form.name} />
 	</div>
 	<div class="info-block">
 		<label for="birthdate">День рождения</label>
-		<input name="birthdate" type="date" bind:value={$form.birthdate} on:blur={() => submit()} />
+		<input name="birthdate" type="date" bind:value={$form.birthdate} />
 	</div>
 	<div class="info-block">
 		<label for="occupation">Профессия</label>
-		<input name="occupation" type="text" bind:value={$form.occupation} on:blur={() => submit()} />
+		<input name="occupation" type="text" bind:value={$form.occupation} />
 	</div>
 	<div class="info-block">
 		<label for="about">О себе</label>
-		<input name="about" type="text" bind:value={$form.about} on:blur={() => submit()} />
+		<input name="about" type="text" bind:value={$form.about} />
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>

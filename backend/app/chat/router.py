@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 from app import schema, models
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.auth.router import get_current_user, user_dependency
+from app.auth.services import user_dependency
 from app.dependencies import db_dependency
 
 
@@ -62,7 +62,7 @@ async def get_chat_messages(
 async def create_conversation(
     db: db_dependency,
     create_conversation_schema: schema.CreateConversation,
-    user: models.Users = Depends(get_current_user),
+    user: user_dependency,
 ):
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
@@ -89,7 +89,10 @@ async def send_message(
     ).get(conversation_id)
     if existing_conversation:
         message_obj = models.Message(
-            conversation_id=conversation_id, sender_id=user.id, body=new_message.content, created_at=datetime.datetime.utcnow()
+            conversation_id=conversation_id,
+            sender_id=user.id,
+            body=new_message.content,
+            created_at=datetime.datetime.utcnow(),
         )
         db.add(message_obj)
 
@@ -99,11 +102,6 @@ async def send_message(
                 "message:new",
                 jsonable_encoder(message_obj),
             )
-            # pusher_client.trigger(
-            #     f"{user.mail}",
-            #     "conversation:update",
-            #     jsonable_encoder(existing_conversation),
-            # )
     else:
         raise HTTPException(status_code=400, detail="Invalid id")
 

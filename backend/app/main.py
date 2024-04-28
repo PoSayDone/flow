@@ -1,7 +1,4 @@
-import logging
-from fastapi import FastAPI, Request, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 
 from app.chat.router import chat_router
 from app.user.router import user_router
@@ -37,15 +34,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-
-    exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
-    # or logger.error(f'{exc}')
-    logger.error(request, exc_str)
-    content = {"status_code": 10422, "message": exc_str, "data": None}
-    return JSONResponse(
-        content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
-    )
