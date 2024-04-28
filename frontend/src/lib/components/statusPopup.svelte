@@ -316,6 +316,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		color: #000;
 
 		:global(svg) {
 			transform: rotate(180deg);
