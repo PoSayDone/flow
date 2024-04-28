@@ -74,14 +74,14 @@ export const handleFetch: HandleFetch = async ({ request, fetch: nodeFetch, even
 				setCookies(refresh_res, event);
 			}
 			isRefreshing = false;
-			requestsWhileRefreshing.unshift(request);
+			requestsWhileRefreshing.unshift(request.clone());
 			requestsWhileRefreshing.forEach((request) => {
 				request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
 				nodeFetch(request);
 			});
 			requestsWhileRefreshing = [];
 		} else {
-			requestsWhileRefreshing.push(request);
+			requestsWhileRefreshing.push(request.clone());
 		}
 	}
 
