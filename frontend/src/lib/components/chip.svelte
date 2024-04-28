@@ -95,8 +95,11 @@
 
 	input[type='checkbox']:checked + label {
 		background: #d3dfff;
-		color: #2461ff;
-		border: 1px solid transparent;
+		border: 1px solid #d3dfff;
+
+		span {
+			color: #2461ff;
+		}
 
 		:global(path) {
 			stroke: #2461ff;
