@@ -154,6 +154,7 @@
 	.info-block {
 		display: flex;
 		flex-direction: column;
+		color: #000;
 		input {
 			border: none;
 			border-bottom: 1px solid var(--fg-gray);
