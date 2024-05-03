@@ -2,22 +2,20 @@
 	import Chip from './chip.svelte';
 	import { closeCurrentDialog, status, submitCurrentDialog } from '$lib/stores';
 	import Icon from '$lib/components/icon.svelte';
+	import { departures, arrivals, tripPurposes } from '$lib/constants';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { page } from '$app/stores';
 	import Button from './button.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { tripPurposesRu, type Arrival, type Departure } from '$lib/types';
+	import { tripPurposesRu } from '$lib/types';
 
 	export let showModal;
 
 	let departureSearch = '';
 	let arrivalSearch = '';
 
-	let departures: Departure[] = $page.data.departures;
-	let arrivals: Arrival[] = $page.data.arrivals;
-
-	$: filteredDepartures = departures.filter((d) => d.departure_name.includes(departureSearch));
-	$: filteredArrivals = arrivals.filter((a) => a.arrival_name.includes(arrivalSearch));
+	$: filteredDepartures = departures.filter((d) => d.name.includes(departureSearch));
+	$: filteredArrivals = arrivals.filter((a) => a.name.includes(arrivalSearch));
 
 	const { form, enhance, submit } = superForm($page.data.statusForm, {
 		dataType: 'json',
@@ -102,7 +100,7 @@
 				<div class="location-form" class:shown={departuresActive}>
 					<input class="search" type="text" bind:value={departureSearch} />
 					<div>
-						{#each filteredDepartures as { departure_name, id }}
+						{#each filteredDepartures as { name, id }}
 							<input
 								type="checkbox"
 								class="location-checkbox"
@@ -114,7 +112,7 @@
 									($form.user_departures.includes(1) && id != 1)}
 							/>
 							<label for={`departure_${id}`}>
-								{departure_name}
+								{name}
 							</label>
 						{/each}
 					</div>
@@ -137,7 +135,7 @@
 				<div class="location-form" class:shown={arrivalsActive}>
 					<input class="search" type="text" bind:value={arrivalSearch} />
 					<div>
-						{#each filteredArrivals as { arrival_name, id }}
+						{#each filteredArrivals as { name, id }}
 							<input
 								type="checkbox"
 								class="location-checkbox"
@@ -148,20 +146,20 @@
 									($form.user_arrivals.includes(1) && id != 1)}
 							/>
 							<label for={`arrival_${id}`}>
-								{arrival_name}
+								{name}
 							</label>
 						{/each}
 					</div>
 				</div>
 
 				<div class="tags" class:shown={departuresActive == false && arrivalsActive == false}>
-					{#each $page.data.trip_purposes as trip_purpose}
+					{#each tripPurposes as trip_purpose}
 						<Chip
 							clickable={true}
 							checked={$form.user_trip_purposes.includes(trip_purpose.id)}
 							id={`trip_purpose_${trip_purpose.id}`}
 							onClick={() => toggleOption(trip_purpose.id)}
-							text={tripPurposesRu[trip_purpose.purpose_name]}
+							text={tripPurposesRu[trip_purpose.name]}
 							disabled={$form.user_trip_purposes.length >= 3 &&
 								!$form.user_trip_purposes.includes(trip_purpose.id)}
 						/>

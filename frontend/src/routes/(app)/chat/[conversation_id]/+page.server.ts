@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	).json();
 
 	const parentData = await parent();
+
 	return { messageForm, conversation_id, messages, users, parentData };
 };
 

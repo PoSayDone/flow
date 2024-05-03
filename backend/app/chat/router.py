@@ -1,4 +1,4 @@
-import datetime
+from datetime import UTC, datetime
 from operator import and_
 
 from sqlalchemy import select
@@ -92,7 +92,7 @@ async def send_message(
             conversation_id=conversation_id,
             sender_id=user.id,
             body=new_message.content,
-            created_at=datetime.datetime.utcnow(),
+            created_at=datetime.now(UTC).timestamp(),
         )
         db.add(message_obj)
 

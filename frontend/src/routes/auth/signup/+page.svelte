@@ -56,6 +56,7 @@
 		resetForm: false,
 
 		async onSubmit({ cancel, action }) {
+			console.log(action);
 			if (step == 2) {
 				action.search = '?/check_email';
 				return;
@@ -80,7 +81,7 @@
 			} else {
 				if (result.status == 200) {
 					setTimeout(() => {
-						goto('/auth/login');
+						goto('/auth/signin');
 					}, 5000);
 				} else {
 					setTimeout(() => {
@@ -131,7 +132,7 @@
 		<Logo />
 	</div>
 </header>
-<form method="POST" action="/auth/signin?/signin" use:enhance class="content">
+<form method="POST" action="?/signup" use:enhance class="content">
 	{#if step === 1}
 		<div class="input-block">
 			<label for="name">Введите ваше имя. С этим именем вас будут видеть другие пользователи</label>
@@ -304,8 +305,7 @@
 		padding: 0 18px;
 		border-radius: 100px;
 		background: none;
-		outline: 1.5px solid var(--bg-gray);
-		border: none;
+		border: 1.5px solid var(--bg-gray);
 		cursor: pointer;
 		transition: all 0.1s ease-in-out;
 
@@ -322,7 +322,7 @@
 	input[type='radio']:checked + label {
 		background: #d3dfff;
 		color: #2461ff;
-		outline: none;
+		border: 1.5px solid #d3dfff;
 	}
 
 	input[type='radio']:disabled + label {

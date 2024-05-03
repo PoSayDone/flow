@@ -5,6 +5,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { closeCurrentDialog, selectedInterests, submitCurrentDialog } from '$lib/stores';
 	import { interestsRu } from '$lib/types';
+	import { interests } from '$lib/constants';
 
 	export let showModal;
 
@@ -36,13 +37,13 @@
 	<div class="container">
 		<h1>Интересы</h1>
 		<div class="interests">
-			{#each $page.data.interests as interest}
+			{#each interests as interest}
 				<Chip
 					clickable={true}
 					checked={$form.user_interests.includes(interest.id)}
-					id={interest.id}
+					id={interest.id.toString()}
 					onClick={() => toggleOption(interest.id)}
-					text={interestsRu[interest.interest_name]}
+					text={interestsRu[interest.name]}
 					disabled={$form.user_interests.length >= 5 && !$form.user_interests.includes(interest.id)}
 				/>
 			{/each}

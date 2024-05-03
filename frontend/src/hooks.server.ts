@@ -1,14 +1,9 @@
 import { api_url } from '$lib/utils';
-import { redirect, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
 import * as scp from 'set-cookie-parser';
 
-let isRefreshing = false;
-let requestsWhileRefreshing: Request[] = [];
-
 const isAllowedHost = (host: string) => {
-	return (
-		host === 'localhost' || host === 'nginx' || host === 'flowtrip.ru' || host === '192.168.1.137'
-	);
+	return host === 'localhost' || host === 'nginx';
 };
 
 function setCookies(
@@ -34,13 +29,32 @@ function setCookies(
 	}
 }
 
-export const handleFetch: HandleFetch = async ({ request, fetch: nodeFetch, event }) => {
+let needsRefresh = false;
+
+function checkTokenRequest(): Promise<void> {
+	return new Promise(function (resolve) {
+		(function waitForTokenRequest() {
+			if (!needsRefresh) return resolve();
+			setTimeout(waitForTokenRequest, 30);
+		})();
+	});
+}
+
+export const handle: Handle = async ({ event, resolve }) => {
+	if (needsRefresh) {
+		await checkTokenRequest();
+	}
+	console.log(event.cookies.get('access_token'));
+
 	const { cookies } = event;
 	const accessToken = cookies.get('access_token');
 	const refreshToken = cookies.get('refresh_token');
 
 	if (refreshToken) {
 		event.locals.isAuthenticated = true;
+		if (!accessToken) {
+			needsRefresh = true;
+		}
 	} else if (!accessToken && !refreshToken) {
 		event.locals.isAuthenticated = false;
 	}
@@ -51,6 +65,30 @@ export const handleFetch: HandleFetch = async ({ request, fetch: nodeFetch, even
 		}
 	}
 
+	if (needsRefresh && !event.url.pathname.includes('/auth')) {
+		const refresh_res = await fetch(`${api_url}/auth/refresh`, {
+			method: 'POST',
+			headers: {
+				cookie: `refresh_token=${refreshToken?.toString()}`
+			}
+		});
+		if (!refresh_res.ok) {
+			cookies.delete('access_token', { path: '/' });
+			cookies.delete('refresh_token', { path: '/' });
+		} else {
+			setCookies(refresh_res, event);
+		}
+	}
+
+	const result = await resolve(event);
+	if (needsRefresh) {
+		needsRefresh = false;
+	}
+	return result;
+};
+
+export const handleFetch: HandleFetch = async ({ request, event, fetch: nodeFetch }) => {
+	const { cookies } = event;
 	const requestURL = new URL(request.url);
 	if (isAllowedHost(requestURL.host)) {
 		request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
@@ -58,33 +96,9 @@ export const handleFetch: HandleFetch = async ({ request, fetch: nodeFetch, even
 
 	const res = await nodeFetch(request);
 
-	if (res.status === 401 && !event.url.pathname.includes('/auth')) {
-		if (!isRefreshing) {
-			isRefreshing = true;
-			const refresh_res = await nodeFetch(`${api_url}/auth/refresh`, {
-				method: 'POST',
-				headers: {
-					cookie: `refresh_token=${refreshToken?.toString()}`
-				}
-			});
-			if (refresh_res.status !== 200) {
-				cookies.delete('access_token', { path: '/' });
-				cookies.delete('refresh_token', { path: '/' });
-			} else {
-				setCookies(refresh_res, event);
-			}
-			isRefreshing = false;
-			requestsWhileRefreshing.unshift(request.clone());
-			requestsWhileRefreshing.forEach((request) => {
-				request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
-				nodeFetch(request);
-			});
-			requestsWhileRefreshing = [];
-		} else {
-			requestsWhileRefreshing.push(request.clone());
-		}
+	if (event.url.pathname == '/auth/signin') {
+		setCookies(res, event);
 	}
 
-	setCookies(res, event);
 	return res;
 };

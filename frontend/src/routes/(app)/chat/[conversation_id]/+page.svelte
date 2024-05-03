@@ -56,6 +56,12 @@
 		dataType: 'json',
 		resetForm: true
 	});
+
+	var offset: number;
+
+	onMount(() => {
+		offset = new Date().getTimezoneOffset();
+	});
 </script>
 
 <div class="container">
@@ -78,7 +84,9 @@
 		{#each messages as message}
 			<div class={`message ${message.sender_id === otherUser.id ? 'to' : 'from'}`}>
 				{message.body}
-				<div class="time_sent">{new Date(message.created_at)}</div>
+				<div class="time_sent">
+					{new Date(message.created_at + offset * 60000)}
+				</div>
 			</div>
 		{/each}
 	</div>

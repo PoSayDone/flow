@@ -22,7 +22,7 @@ export const actions = {
 		}
 		return { emailForm };
 	},
-	signin: async ({ fetch, request }) => {
+	signup: async ({ fetch, request }) => {
 		const signinForm = await superValidate(request, zod(signinSchema));
 		if (!signinForm.valid) return fail(400, { signinForm });
 		const response = await fetch(`${api_url}/auth/signup`, {

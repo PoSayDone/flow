@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 
 	export let showModal = false;
+
 	onMount(() => {
 		status.set($page.data.user.status);
 	});

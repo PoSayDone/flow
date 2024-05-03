@@ -1,15 +1,15 @@
 from typing import List
 from sqlalchemy import (
+    TIMESTAMP,
     Boolean,
     Column,
-    DateTime,
     ForeignKey,
     Integer,
     String,
     Date,
     Table,
 )
-from sqlalchemy.dialects.postgresql import UUID, array
+from sqlalchemy.dialects.postgresql import UUID
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -64,7 +64,7 @@ class Users(Base):
     password_hash = Column(String)
     sex = Column(Boolean)
     birthdate = Column(Date)
-    registration_date = Column(DateTime, index=True)
+    registration_date = Column(TIMESTAMP, index=True)
     conversations: Mapped[List["Conversation"]] = relationship(
         secondary=conversation_participant, back_populates="users"
     )
@@ -151,8 +151,8 @@ class Conversation(Base):
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    created_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP)
     is_deleted = Column(Boolean, default=False)
 
     users: Mapped[List["Users"]] = relationship(
@@ -167,7 +167,7 @@ class Message(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     body = Column(String)
     image = Column(String)
-    created_at = Column(DateTime)
+    created_at = Column(TIMESTAMP)
 
     conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"))
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")
