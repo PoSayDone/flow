@@ -23,6 +23,17 @@
 	--fg-gray: #aaa;
 	--bg-gray: #d6d6d6;
 	--primary: #2461ff;
+
+	--toastContainerLeft: 1.5rem;
+	--toastContainerRight: 1.5rem;
+
+	--toastBackground: var(--bg);
+	--toastBoxShadow: 0px 4px 14px 0px #0000001f;
+	--toastColor: var(--fg);
+	--toastWidth: 100%;
+	--toastBorderRadius: 20px;
+	--toastPadding: 10px;
+	--toastBarBackground: var(--primary);
 }
 
 input {

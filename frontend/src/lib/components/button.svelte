@@ -1,11 +1,20 @@
-<script>
+<script lang="ts">
+	export let disabled = false;
 	let buttonProps = {
-		disabled: $$restProps.disabled,
-		class: [$$restProps.class]
+		class: [$$restProps.class],
+		type: [$$restProps.type]
 	};
 </script>
 
-<button on:click on:mouseover on:mouseenter on:mouseleave {...buttonProps}>
+<button
+	on:click
+	on:mouseover
+	on:mouseenter
+	on:mouseleave
+	{...buttonProps}
+	{disabled}
+	aria-disabled={disabled}
+>
 	<slot />
 </button>
 
@@ -30,10 +39,16 @@
 		border: 1px solid #fff;
 		color: #fff;
 	}
+
+	.top-auto {
+		margin-top: auto;
+	}
+
 	.opaque {
 		background: none;
 		color: #000;
 	}
+
 	[aria-disabled='true'] {
 		opacity: 0.5;
 	}

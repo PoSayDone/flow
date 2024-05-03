@@ -13,7 +13,8 @@
 	import { backIcon, editIcon } from '$lib/assets/Appicons';
 	import type { PageData } from './$types';
 	import Avatar from '$lib/components/avatar.svelte';
-	import { beforeNavigate } from '$app/navigation';
+	import Button from '$lib/components/button.svelte';
+	import { toast } from '@zerodevx/svelte-toast';
 
 	let showStatusModal = false;
 	let showInterestsModal = false;
@@ -27,13 +28,22 @@
 		}
 	}
 
-	const { form, enhance, submit } = superForm($page.data.profileForm, {
+	const { form, enhance } = superForm($page.data.profileForm, {
 		resetForm: false,
-		clearOnSubmit: 'none'
+		clearOnSubmit: 'none',
+		onResult: ({ result }) => {
+			console.log(result.status);
+			if (result.status == 204) {
+				toast.push('Данные обновлены');
+			} else {
+				toast.push('Что-то пошло не так');
+			}
+		}
 	});
-	beforeNavigate(() => {
-		submit();
-	});
+
+	let initialForm = $form;
+
+	$: isNotEdited = initialForm == $form;
 </script>
 
 <Modal bind:showModal={showInterestsModal}>
@@ -96,6 +106,7 @@
 			{/if}
 		</button>
 	</div>
+	<Button bind:disabled={isNotEdited} class="top-auto">Подтвердить</Button>
 </form>
 
 <style lang="scss">
@@ -147,6 +158,7 @@
 	.information {
 		margin: 20px 0;
 		display: flex;
+		flex: 1;
 		flex-direction: column;
 		gap: 15px;
 	}

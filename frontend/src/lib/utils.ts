@@ -1,3 +1,6 @@
+import { type Cookies, type RequestEvent } from '@sveltejs/kit';
+import * as scp from 'set-cookie-parser';
+
 interface Binding {
 	[key: string]: string;
 }
@@ -23,6 +26,35 @@ export const placeholder = (value: boolean | null) => {
 			return 'placeholder.png';
 	}
 };
+
+export const isAllowedHost = (host: string) => {
+	return host === 'localhost' || host === 'nginx';
+};
+
+export function setCookies(res: Response, event: RequestEvent) {
+	const setCookie = res.headers.getSetCookie();
+
+	if (setCookie && isAllowedHost(event.url.hostname)) {
+		const parsed = scp.parse(res);
+
+		parsed.forEach((cookie) => {
+			event.cookies.set(cookie.name, cookie.value, {
+				...cookie
+			});
+		});
+
+		if (res.status == 200) {
+			if (event.url.pathname == '/api/auth/signin' || event.url.pathname == '/api/auth/refresh') {
+				event.locals.isAuthenticated = true;
+			}
+		}
+	}
+}
+
+export function removeAuth(cookies: Cookies): void {
+	cookies.delete('accessToken', { path: '/' });
+	cookies.delete('refreshToken', { path: '/' });
+}
 
 export const interests_binding: Binding = {
 	'1': 'it',

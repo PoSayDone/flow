@@ -1,91 +1,54 @@
-import { api_url } from '$lib/utils';
-import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
-import * as scp from 'set-cookie-parser';
+import { api_url, isAllowedHost, setCookies, removeAuth } from '$lib/utils';
+import {
+	redirect,
+	type Cookies,
+	type Handle,
+	type HandleFetch,
+	type RequestEvent
+} from '@sveltejs/kit';
 
-const isAllowedHost = (host: string) => {
-	return host === 'localhost' || host === 'nginx';
-};
+export const handle = (async ({ event, resolve }) => {
+	await isUserAuthenticated(event);
+	checkProtectedRoutes(event.url, event.cookies);
+	return await resolve(event);
+}) satisfies Handle;
 
-function setCookies(
-	res: Response,
-	event: RequestEvent<Partial<Record<string, string>>, string | null>
-) {
-	const setCookie = res.headers.getSetCookie();
-
-	if (setCookie && isAllowedHost(event.url.hostname)) {
-		const parsed = scp.parse(res);
-
-		parsed.forEach((cookie) => {
-			event.cookies.set(cookie.name, cookie.value, {
-				...cookie
-			});
-		});
-
-		if (res.status == 200) {
-			if (event.url.pathname == '/api/auth/signin' || event.url.pathname == '/api/auth/refresh') {
-				event.locals.isAuthenticated = true;
-			}
+async function isUserAuthenticated(event: RequestEvent): Promise<void> {
+	try {
+		const accessToken = event.cookies.get('access_token') ?? '';
+		if (accessToken == '') {
+			throw Error('No access token');
 		}
+	} catch (error) {
+		await tryToRefreshToken(event);
 	}
 }
 
-let needsRefresh = false;
-
-function checkTokenRequest(): Promise<void> {
-	return new Promise(function (resolve) {
-		(function waitForTokenRequest() {
-			if (!needsRefresh) return resolve();
-			setTimeout(waitForTokenRequest, 30);
-		})();
-	});
-}
-
-export const handle: Handle = async ({ event, resolve }) => {
-	if (needsRefresh) {
-		await checkTokenRequest();
-	}
-	console.log(event.cookies.get('access_token'));
-
-	const { cookies } = event;
-	const accessToken = cookies.get('access_token');
-	const refreshToken = cookies.get('refresh_token');
-
+async function tryToRefreshToken(event: RequestEvent): Promise<void> {
+	const refreshToken = event.cookies.get('refresh_token');
+	console.log(refreshToken);
 	if (refreshToken) {
-		event.locals.isAuthenticated = true;
-		if (!accessToken) {
-			needsRefresh = true;
-		}
-	} else if (!accessToken && !refreshToken) {
-		event.locals.isAuthenticated = false;
-	}
-
-	if (!event.url.pathname.includes('/auth')) {
-		if (!event.locals.isAuthenticated) {
-			throw redirect(303, '/auth/signin');
-		}
-	}
-
-	if (needsRefresh && !event.url.pathname.includes('/auth')) {
-		const refresh_res = await fetch(`${api_url}/auth/refresh`, {
+		const response = await fetch(`${api_url}/auth/refresh`, {
 			method: 'POST',
 			headers: {
 				cookie: `refresh_token=${refreshToken?.toString()}`
 			}
 		});
-		if (!refresh_res.ok) {
-			cookies.delete('access_token', { path: '/' });
-			cookies.delete('refresh_token', { path: '/' });
+
+		if (!response.ok) {
+			removeAuth(event.cookies);
 		} else {
-			setCookies(refresh_res, event);
+			setCookies(response, event);
 		}
 	}
+}
 
-	const result = await resolve(event);
-	if (needsRefresh) {
-		needsRefresh = false;
+function checkProtectedRoutes(url: URL, cookies: Cookies): void {
+	if (!url.pathname.startsWith('/auth')) {
+		const accessToken = cookies.get('access_token');
+		if (!accessToken) redirect(302, '/auth');
 	}
-	return result;
-};
+}
 
 export const handleFetch: HandleFetch = async ({ request, event, fetch: nodeFetch }) => {
 	const { cookies } = event;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onNavigate } from '$app/navigation';
+	import { SvelteToast } from '@zerodevx/svelte-toast';
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
@@ -14,9 +15,14 @@
 	});
 </script>
 
+<SvelteToast />
 <slot />
 
 <style>
+	:global(._toastContainer) {
+		view-transition-name: toast;
+	}
+
 	@keyframes fade-in {
 		from {
 			opacity: 0;
@@ -41,6 +47,12 @@
 		}
 	}
 
+	:root::view-transition-old() {
+		animation:
+			90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+			300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+	}
+
 	:root::view-transition-old(root) {
 		animation:
 			90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
@@ -51,5 +63,9 @@
 		animation:
 			210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
 			300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+	}
+
+	:root::view-transition-group(toast) {
+		z-index: 200;
 	}
 </style>
