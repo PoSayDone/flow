@@ -54,6 +54,7 @@ function checkProtectedRoutes(url: URL, cookies: Cookies): void {
 export const handleFetch: HandleFetch = async ({ request, event, fetch: nodeFetch }) => {
 	const { cookies } = event;
 	const requestURL = new URL(request.url);
+
 	if (isAllowedHost(requestURL.host)) {
 		request.headers.set('cookie', `access_token=${cookies.get('access_token')?.toString()}`);
 	}

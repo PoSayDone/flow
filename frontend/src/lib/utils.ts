@@ -28,7 +28,7 @@ export const placeholder = (value: boolean | null) => {
 };
 
 export const isAllowedHost = (host: string) => {
-	return host === 'localhost' || host === 'nginx';
+	return host === 'localhost' || host === 'nginx' || host === 'flowtrip.ru';
 };
 
 export function setCookies(res: Response, event: RequestEvent) {
