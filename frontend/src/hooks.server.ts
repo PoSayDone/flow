@@ -8,8 +8,10 @@ import {
 } from '@sveltejs/kit';
 
 export const handle = (async ({ event, resolve }) => {
-	await isUserAuthenticated(event);
-	checkProtectedRoutes(event.url, event.cookies);
+	if (!event.url.pathname.startsWith('/auth')) {
+		await isUserAuthenticated(event);
+		checkProtectedRoutes(event.url, event.cookies);
+	}
 	return await resolve(event);
 }) satisfies Handle;
 
@@ -34,7 +36,7 @@ async function tryToRefreshToken(event: RequestEvent): Promise<void> {
 			}
 		});
 
-		if (!response.ok) {
+		if (response.status == 401) {
 			removeAuth(event.cookies);
 		} else {
 			setCookies(response, event);
