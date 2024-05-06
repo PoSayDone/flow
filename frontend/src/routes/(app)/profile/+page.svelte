@@ -102,7 +102,7 @@
 	</div>
 	<div class="info-block">
 		<label for="birthdate">День рождения</label>
-		<input name="birthdate" type="date" bind:value={$form.birthdate} />
+		<input class="input-bdate" name="birthdate" type="date" bind:value={$form.birthdate} />
 	</div>
 	<div class="info-block">
 		<label for="occupation">Профессия</label>
@@ -185,8 +185,10 @@
 		display: flex;
 		flex-direction: column;
 		color: #000;
+
 		input {
 			border: none;
+			border-radius: 0;
 			border-bottom: 1px solid var(--fg-gray);
 			padding: 10px 0;
 			font-family: 'PP Pangram Sans Rounded';
@@ -195,6 +197,15 @@
 			font-weight: 600;
 			line-height: 100%; /* 18px */
 			letter-spacing: -0.27px;
+		}
+		input[type='date'] {
+			width: 100%;
+			text-align: left;
+			color: #000;
+			background: transparent;
+		}
+		input::-webkit-date-and-time-value {
+			text-align: left;
 		}
 	}
 

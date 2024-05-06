@@ -7,12 +7,21 @@
 	import { fileProxy, superForm } from 'sveltekit-superforms';
 
 	export let showModal;
+
 	let image: HTMLImageElement;
 	let fileInput: HTMLInputElement;
 	let showPreview = false;
 	const user = $page.data.user;
 
-	const { form, enhance, submit, errors } = superForm($page.data.avatarForm, {
+	const submitAvatarDialog = () => {
+		if (!showPreview) {
+			$closeCurrentDialog();
+		} else {
+			submit();
+		}
+	};
+
+	const { form, enhance, submit } = superForm($page.data.avatarForm, {
 		dataType: 'json',
 		resetForm: false,
 		clearOnSubmit: 'none',
@@ -46,7 +55,7 @@
 	}
 
 	$: if (showModal) {
-		submitCurrentDialog.set(submit);
+		submitCurrentDialog.set(submitAvatarDialog);
 	}
 </script>
 
@@ -55,7 +64,7 @@
 		<div class="avatar-container">
 			{#if showPreview}
 				<img alt="Preview" bind:this={image} class={`avatar`} />
-			{:else if user}
+			{:else if user.user_image}
 				<img alt="Avatar" class={`avatar`} src={`${images_url}/${user.user_image}`} />
 			{:else}
 				<img alt="Avatar" class={`avatar`} src={`${images_url}/${placeholder(user.sex)}`} />
