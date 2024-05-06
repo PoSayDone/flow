@@ -60,8 +60,7 @@
 		padding: 0;
 		border-radius: 0;
 		margin: auto;
-		min-width: 0;
-		max-width: 80%;
+		min-width: 80%;
 		background: none;
 	}
 

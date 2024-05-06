@@ -38,6 +38,7 @@ in
         ps.email_validator
         ps.python-jose
         ps.passlib
+        ps.pillow
         ps.python-multipart
       ]))
     ];

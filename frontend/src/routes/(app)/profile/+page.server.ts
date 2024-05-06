@@ -1,7 +1,7 @@
 import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import { api_url } from '$lib/utils';
 import type { Actions } from './$types';
-import { fail, superValidate } from 'sveltekit-superforms';
+import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions = {
@@ -43,15 +43,18 @@ export const actions = {
 	update_avatar: async ({ request, fetch }) => {
 		const formData = await request.formData();
 		const avatarForm = await superValidate(
-			{ file: formData.get('file') as File },
+			{ image: formData.get('image') as File },
 			zod(avatarSchema)
 		);
 		if (!avatarForm.valid) {
-			return fail(400, { avatarForm });
+			return setError(avatarForm, 'C этим изображением что-то не так, попробуйте другое');
 		}
-		await fetch(`${api_url}/user/image`, {
+		const response = await fetch(`${api_url}/user/image`, {
 			method: 'PATCH',
 			body: formData
 		});
+		if (response.status == 413) {
+			return setError(avatarForm, 'Файл должен быть меньше 5 мб');
+		}
 	}
 } satisfies Actions;

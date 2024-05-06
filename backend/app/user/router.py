@@ -1,8 +1,10 @@
+import io
 from uuid import UUID
 import uuid
 from app.user.services import calculate_soulmate_score
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from sqlalchemy import and_, insert, or_
+from PIL import Image
 
 
 from app import models, schema
@@ -12,7 +14,6 @@ from app.dependencies import db_dependency
 
 
 user_router = APIRouter(prefix="/user", tags=["user"])
-IMAGEDIR = "profile_pictures/"
 
 
 # @user_router.delete("/{user_id}")
@@ -39,18 +40,19 @@ async def update_user(
 
 @user_router.patch("/image")
 async def update_user_image(
-    user: user_dependency, db: db_dependency, file: UploadFile = File(...)
+    user: user_dependency, db: db_dependency, image: UploadFile = File(...)
 ):
     if not user:
         raise HTTPException(status_code=404, detail="Not authorized")
-    extension = file.filename.split(".")[1]
-    if extension not in ["png", "jpg"]:
+    extension = image.filename.split(".")[1]
+    if extension not in ["png", "jpg", "JPG", "jpeg", "webp", "JPEG"]:
         raise HTTPException(status_code=422, detail="Wrong image format")
-    file.filename = f"{uuid.uuid4()}.{extension}"
-    contents = await file.read()
-    with open(f"images/{file.filename}", "wb") as f:
-        f.write(contents)
-    user.user_image = file.filename
+    filename = f"{uuid.uuid4()}.webp"
+    contents = await image.read()
+    result_image = Image.open(io.BytesIO(contents))
+    result_image.thumbnail((1080, 1080), Image.Resampling.LANCZOS)
+    result_image.save(f"images/{filename}", "webp", optimize=True, quality=80)
+    user.user_image = filename
     db.add(user)
     db.commit()
 

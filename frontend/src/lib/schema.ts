@@ -58,8 +58,7 @@ export const likeSchema = z.object({
 });
 
 export const avatarSchema = z.object({
-	file: z
-		.instanceof(File)
-		.refine((f) => f.size < 1_000_000, 'Max 1 Mb upload size.')
-		.optional()
+	image: z
+		.instanceof(File, { message: 'Пожалуйста загрузите файл' })
+		.refine((f) => f.size < 5_000_000, 'Файл должен быть меньше 5 мб')
 });

@@ -5,82 +5,101 @@
 	import { trashIcon, editIcon, approveIcon, addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { avatarSchema } from '$lib/schema';
+	import { slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	export let showModal;
 
-	let image: HTMLImageElement;
+	let newImage: string | ArrayBuffer | null;
+	let tempImage: string | ArrayBuffer | null;
 	let fileInput: HTMLInputElement;
-	let showPreview = false;
+	let previewShown = false;
 	const user = $page.data.user;
 
-	const submitAvatarDialog = () => {
-		if (!showPreview) {
-			$closeCurrentDialog();
-		} else {
-			submit();
-		}
+	const closeAvatarDialog = () => {
+		$closeCurrentDialog();
+		resetForm();
 	};
 
-	const { form, enhance, submit } = superForm($page.data.avatarForm, {
+	const { form, errors, enhance, submit, reset } = superForm($page.data.avatarForm, {
 		dataType: 'json',
-		resetForm: false,
-		clearOnSubmit: 'none',
+		resetForm: true,
+		clearOnSubmit: 'errors-and-message',
 		invalidateAll: true,
-
-		onSubmit: ({ cancel }) => {
-			if (showPreview == false) cancel();
-		},
+		validators: zodClient(avatarSchema),
+		validationMethod: 'auto',
 
 		onResult: ({ result }) => {
 			if (result.status == 204) {
-				$closeCurrentDialog();
+				newImage = tempImage;
+				closeAvatarDialog();
 			}
 		}
 	});
 
 	const file = fileProxy(form, 'image');
 
-	function onChange() {
-		if ($file[0]) {
-			showPreview = true;
-			const reader = new FileReader();
-			reader.addEventListener('load', function () {
-				image.setAttribute('src', reader.result);
-			});
-			reader.readAsDataURL($file[0]);
-
-			return;
+	const onFileSelected = (event: Event) => {
+		if (
+			(event.target as HTMLInputElement).files &&
+			(event.target as HTMLInputElement).files.length
+		) {
+			let imageFile = event.target.files[0];
+			let reader = new FileReader();
+			reader.readAsDataURL(imageFile);
+			reader.onload = (event: ProgressEvent<FileReader>) => {
+				if (event.target) {
+					tempImage = event.target.result;
+					previewShown = true;
+				}
+			};
 		}
-		showPreview = false;
-	}
+	};
+
+	const resetForm = () => {
+		tempImage = null;
+		fileInput.value = '';
+		previewShown = false;
+		reset();
+	};
 
 	$: if (showModal) {
-		submitCurrentDialog.set(submitAvatarDialog);
+		submitCurrentDialog.set(closeAvatarDialog);
 	}
 </script>
 
 <form method="POST" action="?/update_avatar" enctype="multipart/form-data" use:enhance>
-	<div class="container">
-		<div class="avatar-container">
-			{#if showPreview}
-				<img alt="Preview" bind:this={image} class={`avatar`} />
-			{:else if user.user_image}
-				<img alt="Avatar" class={`avatar`} src={`${images_url}/${user.user_image}`} />
-			{:else}
-				<img alt="Avatar" class={`avatar`} src={`${images_url}/${placeholder(user.sex)}`} />
-			{/if}
+	{#if $errors.image}
+		<div
+			transition:slide={{ delay: 250, duration: 300, easing: quintOut, axis: 'y' }}
+			class="errors"
+		>
+			{$errors.image}
 		</div>
-	</div>
+	{/if}
+	<button type="button" class="avatar-container" on:click={() => fileInput.click()}>
+		{#if tempImage}
+			<img alt="Preview" src={tempImage} class={`avatar`} />
+		{:else if newImage}
+			<img alt="Preview" src={newImage} class={`avatar`} />
+		{:else if user.user_image}
+			<img alt="Avatar" class={`avatar`} src={`${images_url}/${user.user_image}`} />
+		{:else}
+			<img alt="Avatar" class={`avatar`} src={`${images_url}/${placeholder(user.sex)}`} />
+		{/if}
+	</button>
 
 	<input
-		name="file"
+		name="image"
 		type="file"
-		accept=".jpg, .jpeg, .png, .webp"
+		accept="image/png, image/jpeg, image/webp"
 		bind:this={fileInput}
 		bind:files={$file}
-		on:change={onChange}
+		on:change={onFileSelected}
 	/>
-	{#if !showPreview}
+	{#if !previewShown}
 		<div class="buttons">
 			<button type="button">
 				<Icon
@@ -103,13 +122,7 @@
 		</div>
 	{:else}
 		<div class="buttons">
-			<button
-				type="button"
-				class="cancel"
-				on:click={() => {
-					showPreview = false;
-				}}
-			>
+			<button type="button" class="cancel" on:click={resetForm}>
 				<Icon
 					viewBox={addIcon.viewBox}
 					d={addIcon.d}
@@ -118,7 +131,12 @@
 					color={'#F14444'}
 				/>
 			</button>
-			<button on:click={submit} type="button">
+			<button
+				disabled={$errors.image?.length > 0}
+				aria-disabled={$errors.image?.length > 0}
+				on:click={submit}
+				type="button"
+			>
 				<Icon
 					viewBox={approveIcon.viewBox}
 					d={approveIcon.d}
@@ -132,8 +150,23 @@
 </form>
 
 <style lang="scss">
+	.errors {
+		height: 60px;
+		display: flex;
+		align-items: center;
+		padding: 0 20px;
+		margin-bottom: 10px;
+		border-radius: 20px;
+
+		color: #f14444;
+		background: #ffffff;
+		font-weight: 600;
+	}
+
 	.avatar-container {
 		display: flex;
+		height: 50svh;
+		width: 100%;
 		border-radius: 40px;
 		background: #d6d6d6;
 	}
@@ -171,5 +204,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	button[aria-disabled='true'] {
+		opacity: 50%;
 	}
 </style>
