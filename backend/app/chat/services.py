@@ -24,8 +24,8 @@ async def create_conversation_db(
         conversation = existing_conversation
     else:
         conversation = Conversation(
-            created_at=datetime.now(UTC).timestamp(),
-            updated_at=datetime.now(UTC).timestamp(),
+            # created_at=datetime.now(UTC),
+            # updated_at=datetime.now(UTC),
         )
         conversation.users.append(user)
         conversation.users.append(recepient)

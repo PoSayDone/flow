@@ -8,6 +8,7 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
+	let sending = false;
 
 	$: if (data.soulmates.length === 2 && data.shouldRefreshSoulmates) {
 		invalidateAll();
@@ -20,26 +21,30 @@
 	const { form, enhance, submit } = superForm(data.likeForm, {
 		resetForm: false,
 		clearOnSubmit: 'none',
+		invalidateAll: false,
 		onSubmit: ({ formData }) => {
 			formData.set('user_id', $form.user_id);
 			formData.set('like', String($form.like));
+			sending = true;
 		},
-		onResult: ({ result, cancel }) => {
-			// Фиксит странный баг с рероутингом на профиль, не убирать
-			cancel();
+		onResult: () => {
+			sending = false;
 		}
 	});
 
 	const handleTouchStart = (event: TouchEvent) => {
+		if (sending) return;
 		startX = event.touches[0].clientX;
 	};
 
 	function handleTouchMove(event: TouchEvent) {
+		if (sending) return;
 		const deltaX = event.touches[0].clientX - startX;
 		currentCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX / 10}deg)`;
 	}
 
 	function handleTouchEnd(event: TouchEvent) {
+		if (sending) return;
 		if (startX - event.changedTouches[0].clientX > 70) {
 			handleDislike();
 		} else if (startX - event.changedTouches[0].clientX < -70) {
@@ -119,9 +124,14 @@
 			{/each}
 		</div>
 		<div class="actions">
-			<ActionButton type="button" action="dislike" on:click={() => handleDislike()} />
-			<ActionButton type="button" action="chat" />
-			<ActionButton type="button" action="like" on:click={() => handleLike()} />
+			<ActionButton
+				disabled={sending}
+				type="button"
+				action="dislike"
+				on:click={() => handleDislike()}
+			/>
+			<ActionButton disabled={sending} type="button" action="chat" />
+			<ActionButton disabled={sending} type="button" action="like" on:click={() => handleLike()} />
 		</div>
 	</form>
 {/if}

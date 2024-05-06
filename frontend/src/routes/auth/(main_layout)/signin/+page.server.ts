@@ -3,7 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { loginSchema } from '$lib/schema';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { accessTokenMaxAge, api_url, refreshTokenMaxAge } from '$lib/utils';
+import { api_url } from '$lib/utils';
 
 export const load: PageServerLoad = async () => {
 	const loginForm = await superValidate(zod(loginSchema));
@@ -11,7 +11,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions = {
-	default: async ({ request, cookies, fetch }) => {
+	default: async ({ request, fetch }) => {
 		const loginForm = await superValidate(request, zod(loginSchema));
 		if (!loginForm.valid) return fail(400, { loginForm });
 
@@ -30,7 +30,7 @@ export const actions = {
 		const response = await fetch(`${api_url}/auth/signin`, requestOptions);
 
 		if (response.status == 200) {
-			throw redirect(302, '/');
+			return redirect(302, '/');
 		} else {
 			return setError(loginForm, 'Invalid email or password');
 		}

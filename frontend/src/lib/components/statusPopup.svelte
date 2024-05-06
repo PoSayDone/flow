@@ -13,14 +13,19 @@
 
 	let departureSearch = '';
 	let arrivalSearch = '';
+	let loading = false;
 
 	$: filteredDepartures = departures.filter((d) => d.name.includes(departureSearch));
 	$: filteredArrivals = arrivals.filter((a) => a.name.includes(arrivalSearch));
 
 	const { form, enhance, submit } = superForm($page.data.statusForm, {
+		invalidateAll: false,
 		dataType: 'json',
 		resetForm: false,
 		clearOnSubmit: 'none',
+		onSubmit: () => {
+			loading = true;
+		},
 		onChange: () => {
 			if ($form.user_departures.includes(1)) {
 				form.update((form) => {
@@ -35,13 +40,12 @@
 				});
 			}
 		},
-		onResult: ({ result, cancel }) => {
+		onResult: ({ result }) => {
+			loading = false;
 			if (result.status == 204) {
 				$closeCurrentDialog();
 				status.set($form.user_status);
 			}
-			// Фиксит странный баг с рероутингом на профиль, не убирать
-			cancel();
 		}
 	});
 
@@ -177,7 +181,7 @@
 		</div>
 	</div>
 
-	<Button type="submit" class="close-button" autofocus>
+	<Button {loading} type="submit" class="close-button sticky" autofocus>
 		<h2>Готово</h2>
 	</Button>
 </form>

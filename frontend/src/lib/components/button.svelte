@@ -1,5 +1,8 @@
 <script lang="ts">
+	import SyncLoader from '$lib/components/syncLoader.svelte';
+
 	export let disabled = false;
+	export let loading = false;
 	let buttonProps = {
 		class: [$$restProps.class],
 		type: [$$restProps.type]
@@ -12,15 +15,22 @@
 	on:mouseenter
 	on:mouseleave
 	{...buttonProps}
-	{disabled}
+	disabled={loading || disabled}
 	aria-disabled={disabled}
 >
-	<slot />
+	{#if loading}
+		<SyncLoader size={30} color="#efeff4"></SyncLoader>
+	{:else}
+		<slot />
+	{/if}
 </button>
 
 <style>
 	button {
-		padding: 17px 0;
+		height: 56px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 		width: 100%;
 		border-radius: 20px;
 		border: none;
@@ -28,12 +38,14 @@
 		color: #efeff4;
 		cursor: pointer;
 		font-size: 18px;
+		transition: 0.3s all ease-in-out;
 	}
 
 	.white {
 		background: #fff;
 		color: var(--primary);
 	}
+
 	.border {
 		background: none;
 		border: 1px solid #fff;
@@ -51,5 +63,14 @@
 
 	[aria-disabled='true'] {
 		opacity: 0.5;
+	}
+
+	.sticky {
+		bottom: 0;
+		position: sticky;
+		position: -webkit-sticky;
+		-webkit-box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
+		-moz-box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
+		box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
 	}
 </style>

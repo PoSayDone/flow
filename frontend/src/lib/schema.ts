@@ -46,10 +46,10 @@ export const statusSchema = z.object({
 });
 
 export const profileSchema = z.object({
-	name: z.string().optional(),
-	birthdate: z.string().optional(),
-	occupation: z.string().optional(),
-	about: z.string().optional()
+	name: z.string(),
+	birthdate: z.string(),
+	occupation: z.string(),
+	about: z.string()
 });
 
 export const likeSchema = z.object({

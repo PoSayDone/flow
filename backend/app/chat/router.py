@@ -92,7 +92,6 @@ async def send_message(
             conversation_id=conversation_id,
             sender_id=user.id,
             body=new_message.content,
-            created_at=datetime.now(UTC).timestamp(),
         )
         db.add(message_obj)
 

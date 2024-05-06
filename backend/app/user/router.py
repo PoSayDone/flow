@@ -86,6 +86,7 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
 
     # FIXME это типо костыль, но я хз как по другому, потому что фильтр
     # не переваривает trace.contains_user
+
     filtered_users = filter(lambda u: not trace.contains_user(u), filtered_users)
 
     # Define matching criteria and calculate scores for each user
@@ -96,6 +97,10 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
 
     # Sort users by score and return top 'count' soulmates
     sorted_users = sorted(soulmate_scores.items(), key=lambda x: x[1], reverse=True)
+
+    for user, _ in sorted_users:
+        print(user.name)
+
     top_soulmates = [u for u, _ in sorted_users[:count]]
 
     result = schema.SoulmatesResponse.model_validate({"soulmates": top_soulmates})

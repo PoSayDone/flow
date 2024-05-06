@@ -43,7 +43,7 @@
 	{:else}
 		{#each data.chats as chat}
 			{@const otherUser = chat.users.filter((user) => user.id !== $page.data.user.id)[0]}
-			<a href={`/chat/${chat.id}`} class="chat">
+			<a href={`/chats/${chat.id}`} class="chat">
 				<Avatar user={otherUser} size="64px" />
 				<div class="rows">
 					<div class="row">

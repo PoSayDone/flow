@@ -56,7 +56,6 @@
 		resetForm: false,
 
 		async onSubmit({ cancel, action }) {
-			console.log(action);
 			if (step == 2) {
 				action.search = '?/check_email';
 				return;

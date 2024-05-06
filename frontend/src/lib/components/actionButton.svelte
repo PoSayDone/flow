@@ -17,9 +17,10 @@
 	let buttonProps = {
 		type: $$restProps.type
 	};
+	export let disabled;
 </script>
 
-<button on:click class={action} {...buttonProps}>
+<button on:click class={action} {...buttonProps} {disabled} aria-disabled={disabled}>
 	<Icon d={types[action].d} viewBox={types[action].viewBox} size={sizes[action]} />
 </button>
 
@@ -33,6 +34,7 @@
 		border-radius: 100%;
 		border: none;
 		background: #f2f1f6;
+		transform: 0.3s all ease-in-out;
 	}
 
 	.like {
@@ -67,5 +69,9 @@
 
 	.chat {
 		background: var(--primary);
+	}
+
+	[aria-disabled='true'] {
+		opacity: 0.5;
 	}
 </style>

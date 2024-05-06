@@ -9,11 +9,18 @@
 
 	export let showModal;
 
+	let loading = false;
+
 	const { form, enhance, submit } = superForm($page.data.interestsForm, {
+		invalidateAll: false,
 		dataType: 'json',
 		resetForm: false,
 		clearOnSubmit: 'none',
+		onSubmit: () => {
+			loading = true;
+		},
 		onResult: ({ result }) => {
+			loading = false;
 			if (result.status == 204) {
 				selectedInterests.set($form.user_interests);
 				$closeCurrentDialog();
@@ -33,7 +40,7 @@
 	}
 </script>
 
-<form method="POST" action="?/update_interests" use:enhance>
+<form method="POST" action="profile?/update_interests" use:enhance>
 	<div class="container">
 		<h1>Интересы</h1>
 		<div class="interests">
@@ -50,7 +57,7 @@
 		</div>
 	</div>
 
-	<Button type="submit" class="close-button" autofocus>
+	<Button {loading} type="submit" class="close-button" autofocus>
 		<h2>Готово</h2>
 	</Button>
 </form>

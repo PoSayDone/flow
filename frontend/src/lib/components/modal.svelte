@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
-	import { beforeNavigate, pushState } from '$app/navigation';
+	import { beforeNavigate } from '$app/navigation';
 
 	export let showModal: boolean; // boolean
 	export let centered: boolean = false;
@@ -12,7 +12,6 @@
 	}
 
 	const closeAnimation = () => {
-		$submitCurrentDialog();
 		dialog.addEventListener('animationend', closeDialog);
 		dialog.classList.add('close');
 	};
@@ -24,11 +23,9 @@
 	}
 
 	beforeNavigate(({ cancel, type }) => {
-		console.log(type);
 		if (showModal && type != 'leave') {
-			showModal = false;
-			$closeCurrentDialog();
 			cancel();
+			$submitCurrentDialog();
 		}
 	});
 </script>
@@ -40,7 +37,7 @@
 	on:close={() => {
 		showModal = false;
 	}}
-	on:click|self={closeAnimation}
+	on:click|self={$submitCurrentDialog}
 >
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div on:click|stopPropagation>

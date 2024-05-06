@@ -19,6 +19,7 @@
 	let showStatusModal = false;
 	let showInterestsModal = false;
 	let showAvatarModal = false;
+	let loading = false;
 
 	export let data: PageData;
 
@@ -31,19 +32,28 @@
 	const { form, enhance } = superForm($page.data.profileForm, {
 		resetForm: false,
 		clearOnSubmit: 'none',
+		onSubmit: () => {
+			loading = true;
+		},
 		onResult: ({ result }) => {
-			console.log(result.status);
+			loading = false;
 			if (result.status == 204) {
 				toast.push('Данные обновлены');
+				initialForm = $form;
 			} else {
 				toast.push('Что-то пошло не так');
+				$form = initialForm;
 			}
 		}
 	});
 
-	let initialForm = $form;
+	let initialForm = { ...$form };
 
-	$: isNotEdited = initialForm == $form;
+	$: isNotEdited =
+		initialForm.name == $form.name &&
+		initialForm.occupation == $form.occupation &&
+		initialForm.about == $form.about &&
+		initialForm.birthdate == $form.birthdate;
 </script>
 
 <Modal bind:showModal={showInterestsModal}>
@@ -106,7 +116,7 @@
 			{/if}
 		</button>
 	</div>
-	<Button bind:disabled={isNotEdited} class="top-auto">Подтвердить</Button>
+	<Button {loading} bind:disabled={isNotEdited} class="top-auto">Подтвердить</Button>
 </form>
 
 <style lang="scss">
