@@ -29,6 +29,13 @@
 	});
 </script>
 
+<svelte:head>
+	<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no interactive-widget=resizes-content"
+	/>
+</svelte:head>
+
 <div class="tabs">
 	<h1>Отклики</h1>
 	<!-- <a href=""> -->

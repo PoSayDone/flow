@@ -4,9 +4,17 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
+	let loading = false;
 
 	const { form, enhance, constraints, errors } = superForm(data.loginForm, {
-		clearOnSubmit: 'errors'
+		clearOnSubmit: 'errors',
+		onSubmit: () => {
+			loading = true;
+		},
+
+		onResult: () => {
+			loading = false;
+		}
 	});
 </script>
 
@@ -36,7 +44,7 @@
 			{#if $errors._errors}<p>{$errors._errors}</p>{/if}
 		</div>
 		<div class="buttons">
-			<Button type="submit">Войти</Button>
+			<Button {loading} type="submit">Войти</Button>
 			<Button class="opaque">Не помню пароль</Button>
 		</div>
 	</form>

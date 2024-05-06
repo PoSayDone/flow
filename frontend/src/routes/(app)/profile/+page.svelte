@@ -19,6 +19,7 @@
 	let showStatusModal = false;
 	let showInterestsModal = false;
 	let showAvatarModal = false;
+
 	let loading = false;
 
 	export let data: PageData;
@@ -55,6 +56,13 @@
 		initialForm.about == $form.about &&
 		initialForm.birthdate == $form.birthdate;
 </script>
+
+<svelte:head>
+	<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no interactive-widget=resizes-visual"
+	/>
+</svelte:head>
 
 <Modal bind:showModal={showInterestsModal}>
 	<InterestsPopup bind:showModal={showInterestsModal} />

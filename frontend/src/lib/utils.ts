@@ -1,4 +1,5 @@
 import { type Cookies, type RequestEvent } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import * as scp from 'set-cookie-parser';
 
 interface Binding {
@@ -28,7 +29,9 @@ export const placeholder = (value: boolean | null) => {
 };
 
 export const isAllowedHost = (host: string) => {
-	return host === 'localhost' || host === 'nginx' || host === 'flowtrip.ru';
+	return (
+		host === 'localhost' || host === 'nginx' || host === 'flowtrip.ru' || host === '192.168.1.128'
+	);
 };
 
 export function setCookies(res: Response, event: RequestEvent) {
@@ -36,9 +39,10 @@ export function setCookies(res: Response, event: RequestEvent) {
 
 	if (setCookie && isAllowedHost(event.url.hostname)) {
 		const parsed = scp.parse(res);
-
+		console.log(dev);
 		parsed.forEach((cookie) => {
 			event.cookies.set(cookie.name, cookie.value, {
+				secure: dev ? false : true,
 				...cookie
 			});
 		});
