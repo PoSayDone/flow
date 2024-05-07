@@ -39,7 +39,6 @@ export function setCookies(res: Response, event: RequestEvent) {
 
 	if (setCookie && isAllowedHost(event.url.hostname)) {
 		const parsed = scp.parse(res);
-		console.log(dev);
 		parsed.forEach((cookie) => {
 			event.cookies.set(cookie.name, cookie.value, {
 				secure: dev ? false : true,

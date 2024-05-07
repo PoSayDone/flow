@@ -3,16 +3,15 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { pusherClient } from '$lib/pusher';
-	import type { Conversation, Message } from '$lib/types';
 	import { invalidateAll } from '$app/navigation';
 	import Avatar from '$lib/components/avatar.svelte';
 
 	export let data: PageData;
 
-	const newHandler = (newConversation: Conversation) => {
+	const newHandler = () => {
 		invalidateAll();
 	};
-	const updateHandler = (newMessage: Message) => {
+	const updateHandler = () => {
 		invalidateAll();
 	};
 

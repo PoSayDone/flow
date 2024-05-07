@@ -3,21 +3,9 @@
 
 	export let disabled = false;
 	export let loading = false;
-	let buttonProps = {
-		class: [$$restProps.class],
-		type: [$$restProps.type]
-	};
 </script>
 
-<button
-	on:click
-	on:mouseover
-	on:mouseenter
-	on:mouseleave
-	{...buttonProps}
-	disabled={loading || disabled}
-	aria-disabled={disabled}
->
+<button {...$$restProps} disabled={loading || disabled} aria-disabled={disabled}>
 	{#if loading}
 		<SyncLoader size={30} color="#efeff4"></SyncLoader>
 	{:else}
@@ -61,7 +49,8 @@
 		color: #000;
 	}
 
-	[aria-disabled='true'] {
+	button[aria-disabled='true'],
+	button:disabled {
 		opacity: 0.5;
 	}
 

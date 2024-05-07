@@ -70,4 +70,3 @@ export const approveIcon = {
 	viewBox: '0 0 13 10',
 	d: ['M11.8332 1.5L4.49984 8.83333L1.1665 5.5']
 };
-

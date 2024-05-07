@@ -22,8 +22,6 @@
 		on:click={onClick}
 		{disabled}
 	/>
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<label for={id}>
 		{text}
 		<Icon stroke_width={'1.5'} size={'16'} d={addIcon.d} viewBox={addIcon.viewBox} />

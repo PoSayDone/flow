@@ -16,6 +16,7 @@
 	let tempImage: string | ArrayBuffer | null;
 	let fileInput: HTMLInputElement;
 	let previewShown = false;
+	let loading = false;
 	const user = $page.data.user;
 
 	const closeAvatarDialog = () => {
@@ -31,7 +32,12 @@
 		validators: zodClient(avatarSchema),
 		validationMethod: 'auto',
 
+		onSubmit: () => {
+			loading = true;
+		},
+
 		onResult: ({ result }) => {
+			loading = false;
 			if (result.status == 204) {
 				newImage = tempImage;
 				closeAvatarDialog();
@@ -42,11 +48,9 @@
 	const file = fileProxy(form, 'image');
 
 	const onFileSelected = (event: Event) => {
-		if (
-			(event.target as HTMLInputElement).files &&
-			(event.target as HTMLInputElement).files.length
-		) {
-			let imageFile = event.target.files[0];
+		const target = event.target as HTMLInputElement;
+		if (target.files && target.files.length) {
+			let imageFile = target.files[0];
 			let reader = new FileReader();
 			reader.readAsDataURL(imageFile);
 			reader.onload = (event: ProgressEvent<FileReader>) => {
@@ -81,9 +85,9 @@
 	{/if}
 	<button type="button" class="avatar-container" on:click={() => fileInput.click()}>
 		{#if tempImage}
-			<img alt="Preview" src={tempImage} class={`avatar`} />
+			<img alt="Preview" src={tempImage.toString()} class={`avatar`} />
 		{:else if newImage}
-			<img alt="Preview" src={newImage} class={`avatar`} />
+			<img alt="Preview" src={newImage.toString()} class={`avatar`} />
 		{:else if user.user_image}
 			<img alt="Avatar" class={`avatar`} src={`${images_url}/${user.user_image}`} />
 		{:else}
@@ -122,7 +126,13 @@
 		</div>
 	{:else}
 		<div class="buttons">
-			<button type="button" class="cancel" on:click={resetForm}>
+			<button
+				type="button"
+				class="cancel"
+				on:click={resetForm}
+				disabled={loading}
+				aria-disabled={loading}
+			>
 				<Icon
 					viewBox={addIcon.viewBox}
 					d={addIcon.d}
@@ -132,8 +142,8 @@
 				/>
 			</button>
 			<button
-				disabled={$errors.image?.length > 0}
-				aria-disabled={$errors.image?.length > 0}
+				disabled={$errors.image != undefined || loading}
+				aria-disabled={$errors.image != undefined || loading}
 				on:click={submit}
 				type="button"
 			>

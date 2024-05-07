@@ -1,10 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
+@import url('./reset.css');
 
 * {
 	font-family: 'PP Pangram Sans Rounded';

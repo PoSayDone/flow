@@ -4,15 +4,15 @@
 	import { addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 
-	let showStatusModal = false;
+	export let showStatusModal = false;
 </script>
 
 <header>
 	<Logo />
-	<div class="indicator-container" on:click={() => (showStatusModal = true)}>
-		<Indicator bind:showModal={showStatusModal} />
+	<button class="indicator-container" on:click={() => (showStatusModal = true)}>
+		<Indicator />
 		<Icon viewBox={addIcon.viewBox} d={addIcon.d} stroke_width={'1.5'} size={'18'} color={'#000'} />
-	</div>
+	</button>
 </header>
 
 <style>

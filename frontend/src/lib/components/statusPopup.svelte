@@ -181,7 +181,7 @@
 		</div>
 	</div>
 
-	<Button {loading} type="submit" class="close-button sticky" autofocus>
+	<Button {loading} type="submit" class="sticky">
 		<h2>Готово</h2>
 	</Button>
 </form>

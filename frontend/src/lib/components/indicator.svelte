@@ -1,11 +1,7 @@
 <script>
 	import { status } from '$lib/stores';
-	import StatusPopup from './statusPopup.svelte';
-	import Modal from './modal.svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-
-	export let showModal = false;
 
 	onMount(() => {
 		status.set($page.data.user.status);
@@ -18,10 +14,6 @@
 		{$status ? 'Активный' : 'Перерыв'}
 	</span>
 </div>
-
-<Modal bind:showModal>
-	<StatusPopup bind:showModal />
-</Modal>
 
 <style lang="scss">
 	.indicator-container {

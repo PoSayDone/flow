@@ -15,6 +15,7 @@
 	import Avatar from '$lib/components/avatar.svelte';
 	import Button from '$lib/components/button.svelte';
 	import { toast } from '@zerodevx/svelte-toast';
+	import StatusPopup from '$lib/components/statusPopup.svelte';
 
 	let showStatusModal = false;
 	let showInterestsModal = false;
@@ -64,6 +65,10 @@
 	/>
 </svelte:head>
 
+<Modal bind:showModal={showStatusModal}>
+	<StatusPopup bind:showModal={showStatusModal} />
+</Modal>
+
 <Modal bind:showModal={showInterestsModal}>
 	<InterestsPopup bind:showModal={showInterestsModal} />
 </Modal>
@@ -87,13 +92,13 @@
 	</button>
 </div>
 
-<div class="status" on:click={() => (showStatusModal = true)}>
+<button class="status" on:click={() => (showStatusModal = true)}>
 	Статус
 	<div class="status-data">
-		<Indicator bind:showModal={showStatusModal} />
+		<Indicator />
 		<Icon viewBox={backIcon.viewBox} d={backIcon.d} stroke_width={'2'} size={'20'} color={'#000'} />
 	</div>
-</div>
+</button>
 
 <form class="information" method="POST" action="?/update_profile" use:enhance>
 	<div class="info-block">
