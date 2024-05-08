@@ -81,6 +81,7 @@ button {
 html,
 body {
 	margin: 0;
+	overflow-x: clip;
 }
 
 .content {
