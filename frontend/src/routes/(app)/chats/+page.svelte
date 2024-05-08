@@ -5,6 +5,8 @@
 	import { pusherClient } from '$lib/pusher';
 	import { invalidateAll } from '$app/navigation';
 	import Avatar from '$lib/components/avatar.svelte';
+	import { browser } from '$app/environment';
+	import Skeleton from '$lib/components/skeleton.svelte';
 
 	export let data: PageData;
 
@@ -42,7 +44,29 @@
 	<!-- </a> -->
 </div>
 <div class="chats">
-	{#if data.chats.length == 0}
+	{#if !browser}
+		<div class="chat">
+			<Skeleton height="64px" width="64px" borderRadius="100%" />
+			<div class="rows" style="flex: 1;">
+				<Skeleton height="18px" width="10rem" />
+				<Skeleton height="14px" width="15rem" />
+			</div>
+		</div>
+		<div class="chat">
+			<Skeleton height="64px" width="64px" borderRadius="100%" />
+			<div class="rows" style="flex: 1;">
+				<Skeleton height="18px" width="10rem" />
+				<Skeleton height="14px" width="15rem" />
+			</div>
+		</div>
+		<div class="chat">
+			<Skeleton height="64px" width="64px" borderRadius="100%" />
+			<div class="rows" style="flex: 1;">
+				<Skeleton height="18px" width="10rem" />
+				<Skeleton height="14px" width="15rem" />
+			</div>
+		</div>
+	{:else if data.chats.length == 0}
 		<div class="placeholder">
 			Здесь пока ничего нет.<br /> Самое время исправить это!<br /><span>😉</span>
 		</div>
@@ -76,6 +100,7 @@
 		flex-direction: column;
 		gap: 12px;
 	}
+
 	.placeholder {
 		height: 100%;
 		flex: 1;

@@ -16,6 +16,8 @@
 	import Button from '$lib/components/button.svelte';
 	import { toast } from '@zerodevx/svelte-toast';
 	import StatusPopup from '$lib/components/statusPopup.svelte';
+	import { browser } from '$app/environment';
+	import Skeleton from '$lib/components/skeleton.svelte';
 
 	let showStatusModal = false;
 	let showInterestsModal = false;
@@ -94,10 +96,20 @@
 
 <button class="status" on:click={() => (showStatusModal = true)}>
 	Статус
-	<div class="status-data">
-		<Indicator />
-		<Icon viewBox={backIcon.viewBox} d={backIcon.d} stroke_width={'2'} size={'20'} color={'#000'} />
-	</div>
+	{#if browser}
+		<div class="status-data">
+			<Indicator />
+			<Icon
+				viewBox={backIcon.viewBox}
+				d={backIcon.d}
+				stroke_width={'2'}
+				size={'20'}
+				color={'#000'}
+			/>
+		</div>
+	{:else}
+		<Skeleton width="120px" height="20px" />
+	{/if}
 </button>
 
 <form class="information" method="POST" action="?/update_profile" use:enhance>
@@ -120,12 +132,18 @@
 	<div class="info-block">
 		<label for="interests">Интересы</label>
 		<button type="button" class="interests" on:click={() => (showInterestsModal = true)}>
-			{#if $selectedInterests.length == 0 || $selectedInterests == undefined}
-				<Chip text={'Добавить интересы'} />
+			{#if browser}
+				{#if $selectedInterests.length == 0 || $selectedInterests == undefined}
+					<Chip text={'Добавить интересы'} />
+				{:else}
+					{#each $selectedInterests as id}
+						<Chip id={`interest_${id}`} text={interestsRu[interests_binding[id]]} />
+					{/each}
+				{/if}
 			{:else}
-				{#each $selectedInterests as id}
-					<Chip id={`interest_${id}`} text={interestsRu[interests_binding[id]]} />
-				{/each}
+				<Skeleton height="36px" width="160px" />
+				<Skeleton height="36px" width="80px" />
+				<Skeleton height="36px" width="120px" />
 			{/if}
 		</button>
 	</div>
@@ -164,6 +182,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 16px 13px;
+		color: #000;
 		background: #f2f1f6;
 		border-radius: 20px;
 		margin-top: 20px;

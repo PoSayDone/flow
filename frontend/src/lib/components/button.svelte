@@ -5,7 +5,7 @@
 	export let loading = false;
 </script>
 
-<button {...$$restProps} disabled={loading || disabled} aria-disabled={disabled}>
+<button {...$$restProps} on:click disabled={loading || disabled} aria-disabled={disabled}>
 	{#if loading}
 		<SyncLoader size={30} color="#efeff4"></SyncLoader>
 	{:else}

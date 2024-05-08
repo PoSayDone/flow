@@ -6,6 +6,8 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
+	import { browser } from '$app/environment';
+	import Skeleton from '$lib/components/skeleton.svelte';
 
 	export let data: PageData;
 	let sending = false;
@@ -94,7 +96,9 @@
 	}
 </script>
 
-{#if data.soulmates.length == 0}
+{#if !browser}
+	<Skeleton height="100%" width="100%" borderRadius="40px" margin="0 0 20px 0" />
+{:else if data.soulmates.length == 0}
 	<div class="placeholder" transition:fade>
 		<p class="emoji">🥺</p>
 		<p class="placeholder-text">Для вас пока нет сопутешественников</p>
