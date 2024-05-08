@@ -49,8 +49,7 @@
 		color: #000;
 	}
 
-	button[aria-disabled='true'],
-	button:disabled {
+	button[aria-disabled='true'] {
 		opacity: 0.5;
 	}
 
@@ -61,5 +60,13 @@
 		-webkit-box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
 		-moz-box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
 		box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
+	}
+
+	.logout {
+		font-size: 16px;
+		background: none;
+		color: var(--red);
+		border: 1px solid var(--red);
+		text-align: start;
 	}
 </style>

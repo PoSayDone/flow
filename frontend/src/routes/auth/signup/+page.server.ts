@@ -2,7 +2,7 @@ import { fail, message, setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
 import { signinSchema, signinSchema2 } from '$lib/schema';
-import type { Actions } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import { api_url } from '$lib/utils';
 
 export const load: PageServerLoad = async () => {
@@ -33,10 +33,26 @@ export const actions = {
 			body: JSON.stringify(signinForm.data)
 		});
 		if (response.status == 201) {
-			return message(
-				signinForm,
-				'Успешная регистрация, через 5 секунд вы будете перенаправлены на страницу входа'
-			);
+			const urlParams = new URLSearchParams();
+			urlParams.append('username', signinForm.data.mail);
+			urlParams.append('password', signinForm.data.password);
+
+			const requestOptions = {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				body: urlParams
+			};
+
+			const response = await fetch(`${api_url}/auth/signin`, requestOptions);
+			if (response.status == 200) {
+				return redirect(302, '/auth/success_signup');
+			} else {
+				return setError(signinForm, 'Что-то пошло не так');
+			}
+		} else {
+			return setError(signinForm, 'Что-то пошло не так');
 		}
 	}
 } satisfies Actions;

@@ -40,6 +40,8 @@ in
         ps.passlib
         ps.pillow
         ps.python-multipart
+        ps.pydantic
+        ps.pydantic-settings
       ]))
     ];
   }

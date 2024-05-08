@@ -10,13 +10,13 @@
 	}
 </script>
 
-<div class="hero">
+<div class="container">
 	{#if $page.url.pathname == '/auth/login'}
-		<div class="header">
+		<header>
 			<button on:click={nav_back}>
 				<Icon viewBox={backIcon.viewBox} d={backIcon.d} size={'50'} stroke_width={'2'} />
 			</button>
-		</div>
+		</header>
 	{/if}
 	<div class="image">
 		<Logo_big />
@@ -26,18 +26,21 @@
 	</div>
 </div>
 
-<style>
-	.header {
-		margin: 10px;
+<style lang="scss">
+	header {
+		height: 86px;
+		padding: 0 20px;
 	}
 
-	.hero {
+	.container {
 		view-transition-name: hero;
-		height: 100%;
+		height: 100dvh;
 		flex: 1;
-		background: linear-gradient(168.51deg, #2461ff 1.38%, rgba(154, 91, 255, 0.87) 53.99%);
 		display: flex;
 		flex-direction: column;
+		background: var(--gradient);
+		background-size: var(--gradient-size);
+		animation: var(--gradient-animation);
 	}
 
 	.image {
@@ -48,11 +51,13 @@
 		flex: 1;
 	}
 
-	.image :global(svg) {
-		view-transition-name: logo;
-		width: 70%;
-		height: fit-content;
-		z-index: 1;
+	.image {
+		:global(svg) {
+			view-transition-name: logo;
+			width: 70%;
+			height: fit-content;
+			z-index: 1;
+		}
 	}
 
 	button {

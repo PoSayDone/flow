@@ -10,7 +10,9 @@
 </script>
 
 <header>
-	<Logo />
+	<div class="logo">
+		<Logo />
+	</div>
 	{#if browser}
 		<button class="indicator-container" on:click={() => (showStatusModal = true)}>
 			<Indicator />
@@ -27,7 +29,14 @@
 	{/if}
 </header>
 
-<style>
+<style lang="scss">
+	.logo {
+		:global(svg) {
+			view-transition-name: logo;
+			color: var(--primary);
+		}
+	}
+
 	.indicator-container {
 		background: #f2f1f6;
 		border-radius: 100px;

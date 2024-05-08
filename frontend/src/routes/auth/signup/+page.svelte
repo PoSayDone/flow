@@ -2,11 +2,12 @@
 	import Logo from '$lib/assets/images/logo.svelte';
 	import Icon from '$lib/components/icon.svelte';
 	import { addIcon, backIcon } from '$lib/assets/Appicons';
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import Button from '$lib/components/button.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { approveIcon } from '$lib/assets/Appicons';
 	import type { PageData } from './$types';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import {
 		signinSchema1,
@@ -18,7 +19,7 @@
 	import { page } from '$app/stores';
 
 	export let data: PageData;
-	$: showButton = true;
+	let loading = false;
 
 	function nav_back() {
 		if (step > 1) {
@@ -27,6 +28,13 @@
 			goto('/auth');
 		}
 	}
+
+	beforeNavigate(({ cancel, to }) => {
+		if (step > 1 && to?.route.id !== '/auth/success_[type]') {
+			cancel();
+			step -= 1;
+		}
+	});
 
 	function handlePasswordInput(event) {
 		form.update(
@@ -57,12 +65,13 @@
 
 		async onSubmit({ cancel, action }) {
 			if (step == 2) {
+				loading = true;
 				action.search = '?/check_email';
 				return;
 			}
 
 			if (step == steps.length) {
-				showButton = false;
+				loading = true;
 				return;
 			} else cancel();
 
@@ -70,22 +79,16 @@
 			if (result.valid) step = step + 1;
 		},
 
-		// async onUpdated({ form }) {
-		// 	if (form.valid) step = 1;
-		// },
-
 		onResult: ({ result }) => {
+			loading = false;
 			if (step == 2) {
 				if (result.status == 200) step = step + 1;
 			} else {
-				if (result.status == 200) {
-					setTimeout(() => {
-						goto('/auth/signin');
-					}, 5000);
+				if (result.type == 'redirect') {
+					console.log(result);
+					goto(result.location);
 				} else {
-					setTimeout(() => {
-						goto('/auth/');
-					}, 4000);
+					toast.push('Что-то пошло не так');
 				}
 			}
 		}
@@ -210,16 +213,15 @@
 			{#if $errors.password}<span class="invalid">{$errors.password}</span>{/if}
 		</div>
 	{/if}
-	{#if showButton}
-		<Button>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button>
-	{/if}
+	<Button {loading}>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button>
 </form>
 
 <style lang="scss">
 	header {
 		display: flex;
 		align-items: center;
-		padding: 20px;
+		padding: 0 20px;
+		height: 86px;
 	}
 
 	.nav-back {
@@ -234,9 +236,12 @@
 		flex: 1;
 	}
 
-	.logo :global(svg) {
-		view-transition-name: logo;
-		z-index: 1;
+	.logo {
+		:global(svg) {
+			color: var(--primary);
+			view-transition-name: logo;
+			z-index: 1;
+		}
 	}
 
 	.content {

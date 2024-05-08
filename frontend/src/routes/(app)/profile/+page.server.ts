@@ -1,5 +1,6 @@
 import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import { api_url } from '$lib/utils';
+import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -56,5 +57,10 @@ export const actions = {
 		if (response.status == 413) {
 			return setError(avatarForm, 'Файл должен быть меньше 5 мб');
 		}
+	},
+	logout: async ({ cookies }) => {
+		cookies.delete('access_token', { path: '/' });
+		cookies.delete('refresh_token', { path: '/' });
+		return redirect(302, '/auth');
 	}
 } satisfies Actions;

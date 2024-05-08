@@ -18,6 +18,7 @@
 	import StatusPopup from '$lib/components/statusPopup.svelte';
 	import { browser } from '$app/environment';
 	import Skeleton from '$lib/components/skeleton.svelte';
+	import { enhance as svelteEnhance } from '$app/forms';
 
 	let showStatusModal = false;
 	let showInterestsModal = false;
@@ -112,6 +113,8 @@
 	{/if}
 </button>
 
+<form id="logout_form" action="?/logout" method="POST" use:svelteEnhance></form>
+
 <form class="information" method="POST" action="?/update_profile" use:enhance>
 	<div class="info-block">
 		<label for="name">Имя</label>
@@ -147,7 +150,10 @@
 			{/if}
 		</button>
 	</div>
-	<Button {loading} bind:disabled={isNotEdited} class="top-auto">Подтвердить</Button>
+	<Button form="logout_form" class="logout top-auto" type="submit" on:click={() => {}}
+		>Выйти из аккаунта</Button
+	>
+	<Button {loading} bind:disabled={isNotEdited}>Подтвердить</Button>
 </form>
 
 <style lang="scss">

@@ -107,7 +107,7 @@
 		font-size: 14px;
 		font-style: normal;
 		font-weight: 500;
-		line-height: 120%; /* 16.8px */
+		line-height: 1.2; /* 16.8px */
 		letter-spacing: -0.56px;
 	}
 

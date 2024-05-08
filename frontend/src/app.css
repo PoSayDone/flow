@@ -18,6 +18,10 @@
 	--fg-gray: #bbb;
 	--bg-gray: #e3e3e3;
 	--primary: #2461ff;
+	--red: #f14444;
+	--gradient: radial-gradient(circle at center, var(--primary), rgba(154, 91, 255, 0.87) 60%);
+	--gradient-size: 400% 400%;
+	--gradient-animation: gradient 8s ease-in-out infinite;
 
 	--toastContainerLeft: 1.5rem;
 	--toastContainerRight: 1.5rem;
@@ -49,7 +53,7 @@ button {
 	font-size: 14px;
 	font-style: normal;
 	font-weight: 600;
-	line-height: 120%; /* 16.8px */
+	line-height: 1.2;
 	letter-spacing: -0.21px;
 }
 
@@ -128,6 +132,24 @@ div {
 	font-size: 14px;
 	font-style: normal;
 	font-weight: 500;
-	line-height: 120%; /* 16.8px */
+	line-height: 1.2; /* 16.8px */
 	letter-spacing: -0.56px;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 25% 25%;
+	}
+	25% {
+		background-position: 75% 25%;
+	}
+	50% {
+		background-position: 75% 75%;
+	}
+	75% {
+		background-position: 25% 75%;
+	}
+	100% {
+		background-position: 25% 25%;
+	}
 }

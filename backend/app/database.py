@@ -1,10 +1,19 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import os
 
-SQLALCHEMY_DATABASE_URL = "postgresql://username:password@db:5432/nudges"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+def get_url():
+    user = os.getenv("POSTGRES_USER", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD", "")
+    server = os.getenv("POSTGRES_SERVER", "db")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    db = os.getenv("POSTGRES_DB", "app")
+    return f"postgresql://{user}:{password}@{server}:{port}/{db}"
+
+
+engine = create_engine(get_url())
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

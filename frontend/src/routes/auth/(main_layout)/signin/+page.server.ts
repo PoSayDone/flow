@@ -30,9 +30,9 @@ export const actions = {
 		const response = await fetch(`${api_url}/auth/signin`, requestOptions);
 
 		if (response.status == 200) {
-			return redirect(302, '/');
+			return redirect(302, '/auth/success_signin');
 		} else {
-			return setError(loginForm, 'Invalid email or password');
+			return setError(loginForm, 'Неправильная почта или пароль');
 		}
 	}
 } satisfies Actions;
