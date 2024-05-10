@@ -11,6 +11,8 @@ services:
     depends_on:
       - db
     restart: on-failure
+    env_file:
+      - .env
 
   frontend:
     build:
