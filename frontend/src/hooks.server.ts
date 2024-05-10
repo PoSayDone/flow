@@ -61,7 +61,7 @@ export const handleFetch: HandleFetch = async ({ request, event, fetch: nodeFetc
 
 	const res = await nodeFetch(request);
 
-	if (event.url.pathname == '/auth/signin') {
+	if (event.url.pathname == '/auth/signin' || event.url.pathname == '/auth/signup') {
 		setCookies(res, event);
 	}
 

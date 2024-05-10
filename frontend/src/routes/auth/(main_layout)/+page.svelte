@@ -15,15 +15,18 @@
 </div>
 
 <style>
+	.auth_buttons {
+		padding: 20px;
+	}
 	.info {
 		color: #fff;
 		text-align: center;
+		margin-bottom: 20px;
 	}
 
 	.buttons {
 		gap: 5px;
 		display: flex;
 		flex-direction: column;
-		padding: 20px;
 	}
 </style>

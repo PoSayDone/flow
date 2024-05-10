@@ -11,7 +11,7 @@
 </script>
 
 <div class="container">
-	{#if $page.url.pathname == '/auth/login'}
+	{#if $page.url.pathname == '/auth/signin'}
 		<header>
 			<button on:click={nav_back}>
 				<Icon viewBox={backIcon.viewBox} d={backIcon.d} size={'50'} stroke_width={'2'} />
@@ -28,6 +28,8 @@
 
 <style lang="scss">
 	header {
+		display: flex;
+		align-items: center;
 		height: 86px;
 		padding: 0 20px;
 	}

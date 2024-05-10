@@ -56,9 +56,9 @@ user_arrival_table = Table(
 class Users(Base):
     __tablename__ = "users"
     id = Column(UUID(as_uuid=True), primary_key=True, index=True)
-    name = Column(String, index=True)
-    occupation = Column(String, index=True)
-    about = Column(String, index=True)
+    name = Column(String)
+    occupation = Column(String)
+    about = Column(String)
     mail = Column(String, index=True)
     password_hash = Column(String)
     sex = Column(Boolean)
@@ -115,8 +115,8 @@ class Interests(Base):
 
 class TripPurposes(Base):
     __tablename__ = "trip_purposes"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    purpose_name = Column(String, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    purpose_name = Column(String)
     users = relationship(
         "Users", secondary=user_trip_purpose_table, back_populates="trip_purposes"
     )
@@ -124,8 +124,8 @@ class TripPurposes(Base):
 
 class Departures(Base):
     __tablename__ = "departures"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    departure_name = Column(String, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    departure_name = Column(String)
     users = relationship(
         "Users", secondary=user_departure_table, back_populates="departures"
     )
@@ -133,8 +133,8 @@ class Departures(Base):
 
 class Arrivals(Base):
     __tablename__ = "arrivals"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    arrival_name = Column(String, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    arrival_name = Column(String)
     users = relationship(
         "Users", secondary=user_arrival_table, back_populates="arrivals"
     )
@@ -142,14 +142,16 @@ class Arrivals(Base):
 
 class UsersRoles(Base):
     __tablename__ = "users_roles"
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True, index=True
+    )
+    role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True, index=True)
 
 
 class Conversation(Base):
     __tablename__ = "conversations"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     created_at = Column(DateTime(timezone=False), server_default=func.now())
     updated_at = Column(DateTime(timezone=False), onupdate=func.now())
     is_deleted = Column(Boolean, default=False)
@@ -163,7 +165,7 @@ class Conversation(Base):
 class Message(Base):
     __tablename__ = "messages"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     body = Column(String)
     image = Column(String)
     created_at = Column(DateTime(timezone=False), server_default=func.now())
