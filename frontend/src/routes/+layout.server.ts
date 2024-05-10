@@ -5,7 +5,9 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { UserWStatus } from '$lib/types';
 import { api_url } from '$lib/utils';
 
-export const load: LayoutServerLoad = async ({ fetch }) => {
+export const load: LayoutServerLoad = async ({ fetch, url }) => {
+	if (url.pathname.startsWith('/auth')) return;
+
 	const profile: UserWStatus = await (await fetch(`${api_url}/user/profile`)).json();
 
 	const statusForm = await superValidate(
