@@ -2,6 +2,9 @@ services:
   backend:
     build:
       context: ./backend
+      args:
+        - VITE_API_URL=${VITE_API_URL_DEV}
+        - VITE_IMAGES_URL=${VITE_IMAGES_URL_DEV}
     volumes:
       - ./backend:/usr/src/app
       - ./static/images/:/usr/src/app/images
