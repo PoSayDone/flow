@@ -1,22 +1,10 @@
 <script lang="ts">
 	import '../app.css';
-	import { onNavigate } from '$app/navigation';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-
-	onNavigate((navigation) => {
-		if (!document.startViewTransition) return;
-		if (navigation.from?.route.id == navigation.to?.route.id) return;
-
-		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
-				resolve();
-				await navigation.complete;
-			});
-		});
-	});
 </script>
 
 <SvelteToast />
+
 <slot />
 
 <style>

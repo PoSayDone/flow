@@ -71,21 +71,21 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
     # Filter users
     filtered_users = (
         db.query(models.Users)
-        .outerjoin(
-            models.Matches,
-            or_(
-                and_(
-                    models.Matches.user_id == user.id,
-                    models.Matches.liked_user_id == models.Users.id,
-                ),
-                and_(
-                    models.Matches.liked_user_id == user.id,
-                    models.Matches.mutual == True,
-                ),
-            ),
-        )
-        .filter(models.Users.id != user.id)
-        .filter(models.Matches.id == None)
+        # .outerjoin(
+        #     models.Matches,
+        #     or_(
+        #         and_(
+        #             models.Matches.user_id == user.id,
+        #             models.Matches.liked_user_id == models.Users.id,
+        #         ),
+        #         and_(
+        #             models.Matches.liked_user_id == user.id,
+        #             models.Matches.mutual == True,
+        #         ),
+        #     ),
+        # )
+        # .filter(models.Users.id != user.id)
+        # .filter(models.Matches.id == None)
         .all()
     )
 

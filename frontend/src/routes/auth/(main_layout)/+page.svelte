@@ -1,9 +1,15 @@
 <script>
 	import Button from '$lib/components/button.svelte';
+	import { animationDuration } from '$lib/utils';
 	import { goto } from '$app/navigation';
+	import { slide } from 'svelte/transition';
 </script>
 
-<div class="auth_buttons">
+<div
+	class="auth_buttons"
+	in:slide={{ axis: 'y', duration: animationDuration }}
+	out:slide={{ axis: 'y', duration: animationDuration, delay: animationDuration }}
+>
 	<p class="info">
 		Переходя дальше, ты соглашаешься на обработку персональных данных в соответсвии
 		спользовательским соглашением

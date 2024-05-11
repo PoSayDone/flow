@@ -18,6 +18,8 @@
 	--fg-gray: #bbb;
 	--bg-gray: #e3e3e3;
 	--primary: #2461ff;
+	--disabled-bg: #f2f1f6;
+	--disabled-fg: #919191;
 	--red: #f14444;
 	--gradient: radial-gradient(circle at center, var(--primary), rgba(154, 91, 255, 0.87) 60%);
 	--gradient-size: 400% 400%;
@@ -90,16 +92,23 @@ body {
 
 .content {
 	height: 100dvh;
-	display: flex;
-	flex-direction: column;
+	max-height: 100dvh;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto 1fr auto;
+	grid-template-areas:
+		'header'
+		'main'
+		'nav';
 }
 
 main {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	margin: 0 20px;
-	padding-bottom: 70px;
+	overflow-x: clip;
+	overflow-y: scroll;
+	grid-area: main;
+	display: grid;
+	grid-template-rows: 1;
+	grid-template-columns: 1;
 }
 
 h1 {

@@ -17,6 +17,7 @@
 		signinSchema
 	} from '$lib/schema';
 	import { page } from '$app/stores';
+	import SignupStep from '$lib/components/signupStep.svelte';
 
 	export let data: PageData;
 	let loading = false;
@@ -134,85 +135,89 @@
 		<Logo />
 	</div>
 </header>
-<form method="POST" action="?/signup" use:enhance class="content">
-	{#if step === 1}
-		<div class="input-block">
-			<label for="name">Введите ваше имя. С этим именем вас будут видеть другие пользователи</label>
-			<input placeholder="Ваше имя" name="name" type="text" bind:value={$form.name} />
-			{#if $errors.name}<span class="invalid">Введите имя</span>{/if}
-		</div>
-	{:else if step === 2}
-		<div class="input-block">
-			<label for="email">Введите ваш email</label>
-			<input placeholder="Ваш email" name="email" type="email" bind:value={$form.mail} />
-			{#if $errors.mail}
-				<span class="invalid">
-					{$errors.mail || 'Неправильно указана почта'}
-				</span>
-			{/if}
-		</div>
-	{:else if step === 3}
-		<div class="input-block">
-			<label for="birthdate">Введите вашу дату рождения</label>
-			<input name="birthdate" type="date" bind:value={$form.birthdate} />
-			{#if $errors.birthdate}<span class="invalid">{$errors.birthdate}</span>{/if}
-		</div>
-	{:else if step === 4}
-		<div class="input-block">
-			<label for="sex">Вы</label>
-			<fieldset class="radios">
-				<div>
-					<input
-						class="chip"
-						id="men"
-						type="radio"
-						name="sex"
-						value={true}
-						bind:group={$form.sex}
-					/>
-					<label for="men">Мужчина</label>
+<form method="POST" action="?/signup" use:enhance>
+	<div class="steps-container">
+		{#if step === 1}
+			<SignupStep>
+				<label for="name"
+					>Введите ваше имя. С этим именем вас будут видеть другие пользователи</label
+				>
+				<input placeholder="Ваше имя" name="name" type="text" bind:value={$form.name} />
+				{#if $errors.name}<span class="invalid">Введите имя</span>{/if}
+			</SignupStep>
+		{:else if step === 2}
+			<SignupStep>
+				<label for="email">Введите ваш email</label>
+				<input placeholder="Ваш email" name="email" type="email" bind:value={$form.mail} />
+				{#if $errors.mail}
+					<span class="invalid">
+						{$errors.mail || 'Неправильно указана почта'}
+					</span>
+				{/if}
+			</SignupStep>
+		{:else if step === 3}
+			<SignupStep>
+				<label for="birthdate">Введите вашу дату рождения</label>
+				<input name="birthdate" type="date" bind:value={$form.birthdate} />
+				{#if $errors.birthdate}<span class="invalid">{$errors.birthdate}</span>{/if}
+			</SignupStep>
+		{:else if step === 4}
+			<SignupStep>
+				<label for="sex">Вы</label>
+				<fieldset class="radios">
+					<div>
+						<input
+							class="chip"
+							id="men"
+							type="radio"
+							name="sex"
+							value={true}
+							bind:group={$form.sex}
+						/>
+						<label for="men">Мужчина</label>
+					</div>
+					<div>
+						<input
+							class="chip"
+							id="women"
+							type="radio"
+							name="sex"
+							value={false}
+							bind:group={$form.sex}
+						/>
+						<label for="women">Женщина</label>
+					</div>
+					<div>
+						<input
+							class="chip"
+							id="unknown"
+							type="radio"
+							name="sex"
+							value={undefined}
+							bind:group={$form.sex}
+						/>
+						<label for="unknown">Не указывать</label>
+					</div>
+				</fieldset>
+				<!-- <input name="birthdate" type="text" /> -->
+			</SignupStep>
+		{:else}
+			<SignupStep>
+				<label for="password">Придумайте пароль</label>
+				<input
+					placeholder="Пароль"
+					name="password"
+					type={passwordInputType}
+					on:input={handlePasswordInput}
+				/>
+				<div class="show-password">
+					<label for="show-password">Показать пароль</label>
+					<input name="show-password" type="checkbox" bind:checked={showPassword} />
 				</div>
-				<div>
-					<input
-						class="chip"
-						id="women"
-						type="radio"
-						name="sex"
-						value={false}
-						bind:group={$form.sex}
-					/>
-					<label for="women">Женщина</label>
-				</div>
-				<div>
-					<input
-						class="chip"
-						id="unknown"
-						type="radio"
-						name="sex"
-						value={undefined}
-						bind:group={$form.sex}
-					/>
-					<label for="unknown">Не указывать</label>
-				</div>
-			</fieldset>
-			<!-- <input name="birthdate" type="text" /> -->
-		</div>
-	{:else}
-		<div class="input-block">
-			<label for="password">Придумайте пароль</label>
-			<input
-				placeholder="Пароль"
-				name="password"
-				type={passwordInputType}
-				on:input={handlePasswordInput}
-			/>
-			<div class="show-password">
-				<label for="show-password">Показать пароль</label>
-				<input name="show-password" type="checkbox" bind:checked={showPassword} />
-			</div>
-			{#if $errors.password}<span class="invalid">{$errors.password}</span>{/if}
-		</div>
-	{/if}
+				{#if $errors.password}<span class="invalid">{$errors.password}</span>{/if}
+			</SignupStep>
+		{/if}
+	</div>
 	<Button {loading}>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button>
 </form>
 
@@ -244,12 +249,18 @@
 		}
 	}
 
-	.content {
+	form {
 		display: flex;
-		flex-direction: column;
 		justify-content: space-between;
+		flex-direction: column;
 		align-items: center;
 		margin: 0 20px 20px 20px;
+	}
+
+	.steps-container {
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr;
 	}
 
 	input {
@@ -257,7 +268,7 @@
 		font-size: 32px;
 		font-weight: 700;
 		text-align: center;
-		width: 80%;
+		width: 80dvw;
 		&:focus {
 			outline: none;
 			border-bottom: 2px solid #000;
@@ -274,17 +285,6 @@
 			height: 24px;
 			width: 24px;
 		}
-	}
-
-	.input-block {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-		align-items: center;
-		text-align: center;
-		font-size: 14px;
-		font-weight: 600;
 	}
 
 	fieldset {

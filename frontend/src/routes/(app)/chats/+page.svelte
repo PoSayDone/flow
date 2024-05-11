@@ -37,12 +37,6 @@
 	/>
 </svelte:head>
 
-<div class="tabs">
-	<h1>Отклики</h1>
-	<!-- <a href=""> -->
-	<!-- 	<h1>Общие</h1> -->
-	<!-- </a> -->
-</div>
 <div class="chats">
 	{#if !browser}
 		<div class="chat">
@@ -91,11 +85,7 @@
 </div>
 
 <style lang="scss">
-	.tabs {
-		margin-bottom: 20px;
-	}
 	.chats {
-		height: 100%;
 		display: flex;
 		flex-direction: column;
 		gap: 12px;

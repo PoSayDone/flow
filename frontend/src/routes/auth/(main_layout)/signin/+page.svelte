@@ -2,6 +2,9 @@
 	import Button from '$lib/components/button.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
+	import { fly, slide } from 'svelte/transition';
+	import { animationDuration } from '$lib/utils';
+	import { cubicIn, cubicInOut, cubicOut } from 'svelte/easing';
 
 	export let data: PageData;
 	let loading = false;
@@ -18,7 +21,11 @@
 	});
 </script>
 
-<div class="popover">
+<div
+	class="popover"
+	in:slide={{ easing: cubicOut, axis: 'y', duration: animationDuration }}
+	out:slide={{ easing: cubicIn, axis: 'y', duration: animationDuration }}
+>
 	<h1>Вход</h1>
 	<form method="POST" use:enhance>
 		<div class="inputs">
@@ -56,12 +63,17 @@
 	}
 
 	.popover {
+		z-index: 1;
+		position: absolute;
+		bottom: 0;
+		width: 100%;
 		view-transition-name: popover;
 		border-radius: 20px 20px 0 0;
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
 		background: #fff;
+		box-shadow: var(--toastBoxShadow);
 
 		input {
 			border-radius: 16px;

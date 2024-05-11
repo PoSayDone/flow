@@ -3,12 +3,15 @@ import type { LayoutServerLoad } from './$types';
 import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { UserWStatus } from '$lib/types';
-import { api_url } from '$lib/utils';
+import { apiUrl } from '$lib/utils';
 
 export const load: LayoutServerLoad = async ({ fetch, url }) => {
-	if (url.pathname.startsWith('/auth')) return;
+	if (url.pathname.startsWith('/auth')) {
+		const data = { pathname: url.pathname };
+		return data;
+	}
 
-	const profile: UserWStatus = await (await fetch(`${api_url}/user/profile`)).json();
+	const profile: UserWStatus = await (await fetch(`${apiUrl}/user/profile`)).json();
 
 	const statusForm = await superValidate(
 		{
@@ -27,6 +30,7 @@ export const load: LayoutServerLoad = async ({ fetch, url }) => {
 	);
 
 	const data = {
+		pathname: url.pathname,
 		user: profile,
 		statusForm,
 		profileForm,

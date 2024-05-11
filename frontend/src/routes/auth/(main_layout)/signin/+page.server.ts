@@ -3,7 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { loginSchema } from '$lib/schema';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { api_url } from '$lib/utils';
+import { apiUrl } from '$lib/utils';
 
 export const load: PageServerLoad = async () => {
 	const loginForm = await superValidate(zod(loginSchema));
@@ -27,7 +27,7 @@ export const actions = {
 			body: urlParams
 		};
 
-		const response = await fetch(`${api_url}/auth/signin`, requestOptions);
+		const response = await fetch(`${apiUrl}/auth/signin`, requestOptions);
 
 		if (response.status == 200) {
 			return redirect(302, '/auth/success_signin');

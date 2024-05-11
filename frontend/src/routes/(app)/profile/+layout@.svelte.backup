@@ -1,0 +1,15 @@
+<script lang="ts">
+	import Navbar from '$lib/components/navbar.svelte';
+	import Transition from '$lib/components/transition.svelte';
+	import type { LayoutData } from './$types';
+
+	export let data: LayoutData;
+	console.log(data);
+</script>
+
+<main>
+	<Transition key={data.pathname}>
+		<slot />
+	</Transition>
+</main>
+<Navbar />

@@ -13,8 +13,9 @@
 	{/if}
 </button>
 
-<style>
+<style lang="scss">
 	button {
+		flex-shrink: 0;
 		height: 56px;
 		display: flex;
 		justify-content: center;
@@ -27,6 +28,10 @@
 		cursor: pointer;
 		font-size: 18px;
 		transition: 0.3s all ease-in-out;
+		&[aria-disabled='true'] {
+			background: var(--disabled-bg);
+			color: var(--disabled-fg);
+		}
 	}
 
 	.white {
@@ -49,17 +54,10 @@
 		color: #000;
 	}
 
-	button[aria-disabled='true'] {
-		opacity: 0.5;
-	}
-
 	.sticky {
 		bottom: 0;
 		position: sticky;
 		position: -webkit-sticky;
-		-webkit-box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
-		-moz-box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
-		box-shadow: 0px 0px 43px 23px rgba(255, 255, 255, 1);
 	}
 
 	.logout {

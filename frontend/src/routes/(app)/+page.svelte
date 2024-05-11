@@ -144,18 +144,20 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		flex: 1;
+		height: 100%;
+		gap: 15px;
+		margin-bottom: 20px;
 	}
 	.placeholder {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		flex: 1;
+		height: 100%;
 		background: #f2f1f6;
 		border-radius: 40px;
-		margin-bottom: 20px;
 		gap: 12px;
+		margin-bottom: 20px;
 		.emoji {
 			font-size: 80px;
 		}
@@ -181,7 +183,6 @@
 		justify-content: center;
 		align-items: center;
 		gap: 15px;
-		margin: 10px 0 20px 0;
 	}
 
 	:root::view-transition-group(cards) {

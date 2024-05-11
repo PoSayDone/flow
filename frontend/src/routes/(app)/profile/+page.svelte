@@ -115,7 +115,7 @@
 
 <form id="logout_form" action="?/logout" method="POST" use:svelteEnhance></form>
 
-<form class="information" method="POST" action="?/update_profile" use:enhance>
+<form id="profile_form" class="information" method="POST" action="?/update_profile" use:enhance>
 	<div class="info-block">
 		<label for="name">Имя</label>
 		<input name="name" type="text" bind:value={$form.name} />
@@ -153,13 +153,19 @@
 	<Button form="logout_form" class="logout top-auto" type="submit" on:click={() => {}}
 		>Выйти из аккаунта</Button
 	>
-	<Button {loading} bind:disabled={isNotEdited}>Подтвердить</Button>
+	<Button
+		form="profile_form"
+		class="sticky"
+		style="bottom: 20px;"
+		{loading}
+		bind:disabled={isNotEdited}>Подтвердить</Button
+	>
 </form>
 
 <style lang="scss">
 	.header {
+		margin-top: 20px;
 		width: 100%;
-		margin-top: 10px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -185,6 +191,7 @@
 
 	.status {
 		display: flex;
+		width: 100%;
 		align-items: center;
 		justify-content: space-between;
 		padding: 16px 13px;
@@ -255,5 +262,12 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 5px;
+	}
+
+	.buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin-bottom: 20px;
 	}
 </style>

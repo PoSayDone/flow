@@ -6,11 +6,11 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	onMount(() => {
-		setTimeout(() => {
-			goto('/');
-		}, 3000);
-	});
+	// onMount(() => {
+	// 	setTimeout(() => {
+	// 		goto('/');
+	// 	}, 3000);
+	// });
 </script>
 
 <div class="container">
@@ -46,7 +46,6 @@
 	.container {
 		display: flex;
 		flex-direction: column;
-		view-transition-name: hero;
 		height: 100dvh;
 		background: var(--gradient);
 		background-size: var(--gradient-size);

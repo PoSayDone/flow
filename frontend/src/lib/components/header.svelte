@@ -4,12 +4,16 @@
 	import { addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 	import { browser } from '$app/environment';
+	import { animationDuration } from '$lib/utils';
 	import Skeleton from './skeleton.svelte';
 
 	export let showStatusModal = false;
+
+	import { cubicInOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
 </script>
 
-<header>
+<header transition:slide={{ easing: cubicInOut, duration: animationDuration, axis: 'y' }}>
 	<div class="logo">
 		<Logo />
 	</div>
@@ -49,10 +53,11 @@
 	}
 
 	header {
-		view-transition-name: header;
+		grid-area: header;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 25px 20px;
+		padding: 0px 20px;
+		margin: 20px 0;
 	}
 </style>

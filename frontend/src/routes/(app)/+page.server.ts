@@ -1,5 +1,5 @@
 import type { Soulmate } from '$lib/types';
-import { api_url } from '$lib/utils';
+import { apiUrl } from '$lib/utils';
 import { fail, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { likeSchema } from '$lib/schema';
@@ -8,7 +8,7 @@ import type { Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const { soulmates }: { soulmates: Soulmate[] } =
-		(await (await fetch(`${api_url}/user/soulmates/3`)).json()) || [];
+		(await (await fetch(`${apiUrl}/user/soulmates/3`)).json()) || [];
 	const likeForm = await superValidate(zod(likeSchema));
 	const shouldRefreshSoulmates = soulmates.length > 2;
 	const result = { soulmates, shouldRefreshSoulmates, likeForm };
@@ -21,11 +21,11 @@ export const actions = {
 		if (!likeForm.valid) return fail(400, { likeForm });
 		console.log(likeForm.data.like);
 		if (likeForm.data.like) {
-			await fetch(`${api_url}/user/like/${likeForm.data.user_id}`, {
+			await fetch(`${apiUrl}/user/like/${likeForm.data.user_id}`, {
 				method: 'POST'
 			});
 		} else {
-			await fetch(`${api_url}/user/dislike/${likeForm.data.user_id}`, {
+			await fetch(`${apiUrl}/user/dislike/${likeForm.data.user_id}`, {
 				method: 'POST'
 			});
 		}

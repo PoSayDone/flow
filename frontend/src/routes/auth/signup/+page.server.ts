@@ -1,9 +1,9 @@
-import { fail, message, setError, superValidate } from 'sveltekit-superforms';
+import { fail, setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
 import { signinSchema, signinSchema2 } from '$lib/schema';
 import { redirect, type Actions } from '@sveltejs/kit';
-import { api_url } from '$lib/utils';
+import { apiUrl } from '$lib/utils';
 
 export const load: PageServerLoad = async () => {
 	const signinForm = await superValidate(zod(signinSchema));
@@ -14,7 +14,7 @@ export const actions = {
 	check_email: async ({ fetch, request }) => {
 		const emailForm = await superValidate(request, zod(signinSchema2));
 		if (!emailForm.valid) return fail(400, { signinForm: emailForm });
-		const response = await fetch(`${api_url}/auth/check_email/${emailForm.data.mail}`, {
+		const response = await fetch(`${apiUrl}/auth/check_email/${emailForm.data.mail}`, {
 			method: 'GET'
 		});
 		if (response.status == 409) {
@@ -25,7 +25,7 @@ export const actions = {
 	signup: async ({ fetch, request }) => {
 		const signinForm = await superValidate(request, zod(signinSchema));
 		if (!signinForm.valid) return fail(400, { signinForm });
-		const response = await fetch(`${api_url}/auth/signup`, {
+		const response = await fetch(`${apiUrl}/auth/signup`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ export const actions = {
 				body: urlParams
 			};
 
-			const response = await fetch(`${api_url}/auth/signin`, requestOptions);
+			const response = await fetch(`${apiUrl}/auth/signin`, requestOptions);
 			if (response.status == 200) {
 				return redirect(302, '/auth/success_signup');
 			} else {

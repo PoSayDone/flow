@@ -2,9 +2,13 @@
 	import { mainIcon, profileIcon, chatIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 	import { page } from '$app/stores';
+	import { cubicInOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
+
+	export let duration = 300;
 </script>
 
-<nav class="navbar">
+<nav class="navbar" transition:slide={{ easing: cubicInOut, duration, axis: 'y' }}>
 	<a href="/chats" class:active={$page.url.pathname == '/chats'}
 		><Icon d={chatIcon.d} viewBox={chatIcon.viewBox} /></a
 	>
@@ -18,8 +22,9 @@
 
 <style lang="scss">
 	nav {
+		grid-area: nav;
 		view-transition-name: nav;
-		border-radius: 50px 50px 0px 0px;
+		border-radius: 40px 40px 0px 0px;
 		background-color: var(--fg-secondary);
 		width: 100%;
 		display: flex;
@@ -27,8 +32,6 @@
 		justify-content: center;
 		gap: 67.5px;
 		height: 70px;
-		position: fixed;
-		bottom: 0;
 		:global(path) {
 			stroke: #d2d2d2;
 		}

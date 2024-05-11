@@ -103,7 +103,7 @@
 
 <style lang="scss">
 	.container {
-		max-height: 100svh;
+		height: 100dvh;
 		flex: 1;
 		display: flex;
 		flex-direction: column;

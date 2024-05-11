@@ -1,4 +1,4 @@
-import { api_url, isAllowedHost, setCookies, removeAuth } from '$lib/utils';
+import { apiUrl, isAllowedHost, setCookies, removeAuth } from '$lib/utils';
 import {
 	redirect,
 	type Cookies,
@@ -29,7 +29,7 @@ async function isUserAuthenticated(event: RequestEvent): Promise<void> {
 async function tryToRefreshToken(event: RequestEvent): Promise<void> {
 	const refreshToken = event.cookies.get('refresh_token');
 	if (refreshToken) {
-		const response = await fetch(`${api_url}/auth/refresh`, {
+		const response = await fetch(`${apiUrl}/auth/refresh`, {
 			method: 'POST',
 			headers: {
 				cookie: `refresh_token=${refreshToken?.toString()}`
