@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { interests_binding } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
-	import InterestsPopup from '$lib/components/interestsPopup.svelte';
-	import AvatarPopup from '$lib/components/avatarPopup.svelte';
-	import Modal from '$lib/components/modal.svelte';
 	import { page } from '$app/stores';
 	import { selectedInterests } from '$lib/stores';
 	import { superForm } from 'sveltekit-superforms';
@@ -15,14 +12,10 @@
 	import Avatar from '$lib/components/avatar.svelte';
 	import Button from '$lib/components/button.svelte';
 	import { toast } from '@zerodevx/svelte-toast';
-	import StatusPopup from '$lib/components/statusPopup.svelte';
 	import { browser } from '$app/environment';
 	import Skeleton from '$lib/components/skeleton.svelte';
 	import { enhance as svelteEnhance } from '$app/forms';
-
-	let showStatusModal = false;
-	let showInterestsModal = false;
-	let showAvatarModal = false;
+	import { showStatusModal, showInterestsModal, showAvatarModal } from '$lib/stores';
 
 	let loading = false;
 
@@ -68,20 +61,8 @@
 	/>
 </svelte:head>
 
-<Modal bind:showModal={showStatusModal}>
-	<StatusPopup bind:showModal={showStatusModal} />
-</Modal>
-
-<Modal bind:showModal={showInterestsModal}>
-	<InterestsPopup bind:showModal={showInterestsModal} />
-</Modal>
-
-<Modal centered={true} bind:showModal={showAvatarModal}>
-	<AvatarPopup bind:showModal={showAvatarModal} />
-</Modal>
-
 <div class="header">
-	<button class="avatar-container" on:click={() => (showAvatarModal = true)}>
+	<button class="avatar-container" on:click={() => ($showAvatarModal = true)}>
 		<Avatar size="128px" user={data.user} />
 		<div class="avatar-icon">
 			<Icon
@@ -95,7 +76,7 @@
 	</button>
 </div>
 
-<button class="status" on:click={() => (showStatusModal = true)}>
+<button class="status" on:click={() => ($showStatusModal = true)}>
 	Статус
 	{#if browser}
 		<div class="status-data">
@@ -134,7 +115,7 @@
 	</div>
 	<div class="info-block">
 		<label for="interests">Интересы</label>
-		<button type="button" class="interests" on:click={() => (showInterestsModal = true)}>
+		<button type="button" class="interests" on:click={() => ($showInterestsModal = true)}>
 			{#if browser}
 				{#if $selectedInterests.length == 0 || $selectedInterests == undefined}
 					<Chip text={'Добавить интересы'} />

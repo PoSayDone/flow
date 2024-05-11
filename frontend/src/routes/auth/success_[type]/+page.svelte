@@ -6,11 +6,11 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	// onMount(() => {
-	// 	setTimeout(() => {
-	// 		goto('/');
-	// 	}, 3000);
-	// });
+	onMount(() => {
+		setTimeout(() => {
+			goto('/');
+		}, 3000);
+	});
 </script>
 
 <div class="container">

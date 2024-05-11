@@ -86,7 +86,6 @@
 				if (result.status == 200) step = step + 1;
 			} else {
 				if (result.type == 'redirect') {
-					console.log(result);
 					goto(result.location);
 				} else {
 					toast.push('Что-то пошло не так');

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { images_url, placeholder, trip_purposes_binding } from '$lib/utils';
+	import { imagesUrl, placeholder, trip_purposes_binding } from '$lib/utils';
 	import { tripPurposesRu } from '$lib/types';
 
 	export let index: number = 0;
@@ -33,7 +33,7 @@
 	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
 	style:z-index={soulmates.length - index}
-	style="--user-image: url({images_url}/{image_name || placeholder(sex)});"
+	style="--user-image: url({imagesUrl}/{image_name || placeholder(sex)});"
 >
 	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
 		{#if trip_purposes}

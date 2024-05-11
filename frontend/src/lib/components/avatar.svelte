@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { User } from '$lib/types';
-	import { images_url, placeholder } from '$lib/utils';
+	import { imagesUrl, placeholder } from '$lib/utils';
 
 	export const getInitials = (name: string) => {
 		let initials = name.split(' ');
@@ -31,10 +31,10 @@
 >
 	{#if user.user_image}
 		<div>
-			<img alt="" class={`innerImage`} src={`${images_url}/${user.user_image}`} />
+			<img alt="" class={`innerImage`} src={`${imagesUrl}/${user.user_image}`} />
 		</div>
 	{:else}
-		<img alt="" class={`innerImage`} src={`${images_url}/${placeholder(user.sex)}`} />
+		<img alt="" class={`innerImage`} src={`${imagesUrl}/${placeholder(user.sex)}`} />
 	{/if}
 </div>
 

@@ -19,7 +19,6 @@ export const actions = {
 	default: async ({ request, fetch }) => {
 		const likeForm = await superValidate(request, zod(likeSchema));
 		if (!likeForm.valid) return fail(400, { likeForm });
-		console.log(likeForm.data.like);
 		if (likeForm.data.like) {
 			await fetch(`${apiUrl}/user/like/${likeForm.data.user_id}`, {
 				method: 'POST'

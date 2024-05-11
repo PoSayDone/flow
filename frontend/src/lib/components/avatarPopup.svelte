@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { closeCurrentDialog, submitCurrentDialog } from '$lib/stores';
-	import { images_url, placeholder } from '$lib/utils';
+	import { imagesUrl, placeholder } from '$lib/utils';
 	import { trashIcon, editIcon, approveIcon, addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
@@ -89,9 +89,9 @@
 		{:else if newImage}
 			<img alt="Preview" src={newImage.toString()} class={`avatar`} />
 		{:else if user.user_image}
-			<img alt="Avatar" class={`avatar`} src={`${images_url}/${user.user_image}`} />
+			<img alt="Avatar" class={`avatar`} src={`${imagesUrl}/${user.user_image}`} />
 		{:else}
-			<img alt="Avatar" class={`avatar`} src={`${images_url}/${placeholder(user.sex)}`} />
+			<img alt="Avatar" class={`avatar`} src={`${imagesUrl}/${placeholder(user.sex)}`} />
 		{/if}
 	</button>
 

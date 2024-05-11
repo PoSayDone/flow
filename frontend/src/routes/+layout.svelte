@@ -12,18 +12,6 @@
 		view-transition-name: toast;
 	}
 
-	@keyframes fade-in {
-		from {
-			opacity: 0;
-		}
-	}
-
-	@keyframes fade-out {
-		to {
-			opacity: 0;
-		}
-	}
-
 	@keyframes slide-from-right {
 		from {
 			transform: translateX(30px);

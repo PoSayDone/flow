@@ -30,7 +30,11 @@ export const placeholder = (value: boolean | null) => {
 
 export const isAllowedHost = (host: string) => {
 	return (
-		host === 'localhost' || host === 'nginx' || host === 'flowtrip.ru' || host === '192.168.1.128'
+		host === 'localhost' ||
+		host === 'nginx' ||
+		host === 'flowtrip.ru' ||
+		host === '192.168.1.128' ||
+		host === '192.168.1.140'
 	);
 };
 
@@ -89,5 +93,5 @@ export const trip_purposes_binding: Binding = {
 
 export const apiUrl = import.meta.env.VITE_API_URL;
 export const imagesUrl = import.meta.env.VITE_IMAGES_URL;
-export const animationDuration = 300;
+export const animationDuration = 320;
 export const fasterAnimationDuration = animationDuration * 0.75;

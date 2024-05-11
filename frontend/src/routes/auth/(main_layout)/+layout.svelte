@@ -47,6 +47,7 @@
 	.container {
 		view-transition-name: hero;
 		height: 100dvh;
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 		background: var(--gradient);
@@ -62,7 +63,7 @@
 		align-items: center;
 		flex: 1;
 		width: 100%;
-		z-index: -1;
+		z-index: 0;
 	}
 
 	.image {

@@ -1,16 +1,36 @@
 <script lang="ts">
-	import { cubicOut } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
+	import { animationDuration } from '$lib/utils';
+	import { circInOut } from 'svelte/easing';
+
+	import { type EasingFunction, type TransitionConfig } from 'svelte/transition';
 
 	export let key: string | undefined;
-	export let duration = 400;
+	type Params = {
+		delay?: number;
+		duration?: number;
+		easing?: EasingFunction;
+	};
+
+	function slideFade(
+		_node: Element,
+		{ delay = 0, duration = animationDuration, easing = circInOut }: Params = {}
+	): TransitionConfig {
+		return {
+			delay,
+			duration,
+			easing,
+			css: (t, u) => `
+                transform: translateX(${300 * u}px);
+                opacity: ${t};
+            `
+		};
+	}
 </script>
 
 {#key key}
 	<div
-		class:chats={key?.startsWith('/chats/')}
-		in:fly={{ easing: cubicOut, duration: duration, x: -400 }}
-		out:fly={{ easing: cubicOut, duration, x: 400 }}
+		transition:slideFade
+		class:no-padding={key?.startsWith('/chats/') || key?.startsWith('/user_')}
 	>
 		<slot />
 	</div>
@@ -25,7 +45,7 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.chats {
+	.no-padding {
 		padding: 0;
 	}
 </style>

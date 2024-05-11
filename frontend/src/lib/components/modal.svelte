@@ -77,14 +77,15 @@
 	}
 
 	dialog[open]::backdrop {
-		animation: fade 0.3s ease-out;
+		animation: fade-in 0.3s ease-out;
 	}
 
 	:global(dialog.close[open]) {
 		animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) modal-close;
 	}
-	:global(dialog.close::backdrop) {
-		animation: fade-out 0.2s ease-out;
+
+	:global(dialog.close[open]::backdrop) {
+		animation: fade-out 0.3s ease-out;
 	}
 
 	@keyframes modal-open {
@@ -97,6 +98,18 @@
 	@keyframes modal-close {
 		to {
 			transform: translateY(50%);
+			opacity: 0;
+		}
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@keyframes fade-out {
+		to {
 			opacity: 0;
 		}
 	}

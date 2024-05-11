@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { interests_binding, trip_purposes_binding, images_url } from '$lib/utils';
+	import {
+		interests_binding,
+		trip_purposes_binding,
+		imagesUrl,
+		animationDuration
+	} from '$lib/utils';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { getAge, placeholder } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
@@ -7,6 +12,7 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { interestsRu, tripPurposesRu } from '$lib/types';
+	import { fly } from 'svelte/transition';
 
 	let popover: HTMLDivElement;
 	let startY: number;
@@ -51,78 +57,85 @@
 	}
 </script>
 
-<div class="actions">
-	<button class="action" on:click={nav_back}>
-		<Icon d={backIcon.d} viewBox={backIcon.viewBox} color={'#2461FF'} />
-	</button>
-</div>
-<div
-	class="backdrop"
-	style:view-transition-name={`profile-image`}
-	style="--user-image: url({images_url}/{data.pageUser.user_image ||
-		placeholder(data.pageUser.sex)});"
->
-	<div class="profile-picture">
-		<div class="tags" style:view-transition-name={`trip-purposes`}>
-			{#each data.pageUser.trip_purposes as id}
-				<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
-			{/each}
+<div class="container">
+	<div class="actions">
+		<button class="action" on:click={nav_back}>
+			<Icon d={backIcon.d} viewBox={backIcon.viewBox} color={'#2461FF'} />
+		</button>
+	</div>
+	<div
+		class="backdrop"
+		style:view-transition-name={`profile-image`}
+		style="--user-image: url({imagesUrl}/{data.pageUser.user_image ||
+			placeholder(data.pageUser.sex)});"
+	>
+		<div class="profile-picture">
+			<div class="tags" style:view-transition-name={`trip-purposes`}>
+				{#each data.pageUser.trip_purposes as id}
+					<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
+				{/each}
+			</div>
 		</div>
 	</div>
-</div>
-<div
-	class="popover"
-	style="top: {popoverStart}px"
-	bind:this={popover}
-	on:touchstart={handleTouchStart}
-	on:touchmove={handleTouchMove}
-	on:touchend={handleTouchEnd}
-	on:touchcancel={handleTouchEnd}
->
-	<span class="line" />
-	<div class="heading">
-		<h1>{data.pageUser.name}, {getAge(data.pageUser.birthdate.toString())}</h1>
-		{#if data.pageUser.occupation}
-			<h2>{data.pageUser.occupation}</h2>
-		{/if}
-	</div>
-	{#if data.pageUser.about}
-		<p class="about">{data.pageUser.about}</p>
-	{/if}
-	<hr />
-	<div class="directions">
-		<ul class="from">
-			<span class="direction-title">Откуда</span>
-			<span class="dot" />
-			<li>Пермь</li>
-			<li>Москва</li>
-		</ul>
-		<ul class="to">
-			<span class="direction-title">Куда</span>
-			<span class="dot" />
-			<li>Австрия</li>
-			<li>Турция</li>
-			<li>Италия</li>
-			<li>Германия</li>
-			<li>Россия</li>
-		</ul>
-	</div>
-	<hr />
-	<div class="interests">
-		<h2>Интересы</h2>
-		<div class="chips">
-			{#if data.pageUser.interests.length > 0}
-				{#each data.pageUser.interests as id}
-					<Chip text={interestsRu[interests_binding[id]]} />
-				{/each}
-			{:else}
-				<p>Здесь пока ничего нет</p>
+	<div
+		class="popover"
+		style="top: {popoverStart}px"
+		bind:this={popover}
+		on:touchstart={handleTouchStart}
+		on:touchmove|preventDefault|nonpassive={handleTouchMove}
+		on:touchend={handleTouchEnd}
+		on:touchcancel={handleTouchEnd}
+	>
+		<span class="line" />
+		<div class="heading">
+			<h1>{data.pageUser.name}, {getAge(data.pageUser.birthdate.toString())}</h1>
+			{#if data.pageUser.occupation}
+				<h2>{data.pageUser.occupation}</h2>
 			{/if}
+		</div>
+		{#if data.pageUser.about}
+			<p class="about">{data.pageUser.about}</p>
+		{/if}
+		<hr />
+		<div class="directions">
+			<ul class="from">
+				<span class="direction-title">Откуда</span>
+				<span class="dot" />
+				<li>Пермь</li>
+				<li>Москва</li>
+			</ul>
+			<ul class="to">
+				<span class="direction-title">Куда</span>
+				<span class="dot" />
+				<li>Австрия</li>
+				<li>Турция</li>
+				<li>Италия</li>
+				<li>Германия</li>
+				<li>Россия</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="interests">
+			<h2>Интересы</h2>
+			<div class="chips">
+				{#if data.pageUser.interests.length > 0}
+					{#each data.pageUser.interests as id}
+						<Chip text={interestsRu[interests_binding[id]]} />
+					{/each}
+				{:else}
+					<p>Здесь пока ничего нет</p>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>
 
 <style lang="scss">
+	.container {
+		overflow-y: clip;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch; /* nice webkit native scroll */
+	}
 	.backdrop {
 		position: sticky;
 		z-index: -10;
@@ -162,7 +175,6 @@
 	}
 
 	.popover {
-		z-index: 1000;
 		view-transition-name: popover;
 		height: 100%;
 		width: 100%;
