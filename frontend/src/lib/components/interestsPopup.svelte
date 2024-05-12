@@ -22,7 +22,7 @@
 		onResult: ({ result }) => {
 			loading = false;
 			if (result.status == 204) {
-				selectedInterests.set($form.user_interests);
+				$selectedInterests = $form.user_interests;
 				$closeCurrentDialog();
 			}
 		}

@@ -71,21 +71,21 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
     # Filter users
     filtered_users = (
         db.query(models.Users)
-        # .outerjoin(
-        #     models.Matches,
-        #     or_(
-        #         and_(
-        #             models.Matches.user_id == user.id,
-        #             models.Matches.liked_user_id == models.Users.id,
-        #         ),
-        #         and_(
-        #             models.Matches.liked_user_id == user.id,
-        #             models.Matches.mutual == True,
-        #         ),
-        #     ),
-        # )
-        # .filter(models.Users.id != user.id)
-        # .filter(models.Matches.id == None)
+        .outerjoin(
+            models.Matches,
+            or_(
+                and_(
+                    models.Matches.user_id == user.id,
+                    models.Matches.liked_user_id == models.Users.id,
+                ),
+                and_(
+                    models.Matches.liked_user_id == user.id,
+                    models.Matches.mutual == True,
+                ),
+            ),
+        )
+        .filter(models.Users.id != user.id)
+        .filter(models.Matches.id == None)
         .all()
     )
 
@@ -251,14 +251,11 @@ async def add_dislike(liked_user_id: UUID, user: user_dependency, db: db_depende
     if not recepient:
         raise HTTPException(status_code=404, detail="Recepient not found")
 
-    user_trace = get_or_set_feed_trace(user)
-    user_trace.add_traced_user(recepient)
-
     return {"ok": True}
 
 
 @user_router.post("/like/{liked_user_id}", tags=["matches"])
-async def add_match(liked_user_id: UUID, user: user_dependency, db: db_dependency):
+async def add_like(liked_user_id: UUID, user: user_dependency, db: db_dependency):
     if not user:
         raise HTTPException(status_code=401, detail="Not authorized")
 
@@ -287,10 +284,9 @@ async def add_match(liked_user_id: UUID, user: user_dependency, db: db_dependenc
         .first()
     )
 
-    if existing_match:
-        if existing_match.user_id != user.id:
-            existing_match.mutual = True
-            await create_conversation_db(db, user, recepient)
+    if existing_match and existing_match.user_id != user.id:
+        existing_match.mutual = True
+        await create_conversation_db(db, user, recepient)
     else:
         match = models.Matches(user_id=user.id, liked_user_id=liked_user_id)
         db.add(match)

@@ -8,6 +8,8 @@
 	import { showStatusModal, showInterestsModal, showAvatarModal } from '$lib/stores';
 	import InterestsPopup from '$lib/components/interestsPopup.svelte';
 	import AvatarPopup from '$lib/components/avatarPopup.svelte';
+	import { fade } from 'svelte/transition';
+	import { animationDuration } from '$lib/utils';
 
 	export let data: LayoutData;
 
@@ -28,26 +30,50 @@
 	};
 </script>
 
-<Modal bind:showModal={$showInterestsModal}>
-	<InterestsPopup bind:showModal={$showInterestsModal} />
-</Modal>
+<div class="container">
+	<Modal bind:showModal={$showInterestsModal}>
+		<InterestsPopup bind:showModal={$showInterestsModal} />
+	</Modal>
 
-<Modal centered={true} bind:showModal={$showAvatarModal}>
-	<AvatarPopup bind:showModal={$showAvatarModal} />
-</Modal>
+	<Modal centered={true} bind:showModal={$showAvatarModal}>
+		<AvatarPopup bind:showModal={$showAvatarModal} />
+	</Modal>
 
-<Modal bind:showModal={$showStatusModal}>
-	<StatusPopup bind:showModal={$showStatusModal} />
-</Modal>
+	<Modal bind:showModal={$showStatusModal}>
+		<StatusPopup bind:showModal={$showStatusModal} />
+	</Modal>
 
-{#if showHeader(data.pathname)}
-	<Header bind:showStatusModal={$showStatusModal}></Header>
-{/if}
-<main>
-	<Transition key={data.pathname}>
-		<slot />
-	</Transition>
-</main>
-{#if showNavbar(data.pathname)}
-	<Navbar />
-{/if}
+	{#if showHeader(data.pathname)}
+		<Header bind:showStatusModal={$showStatusModal}></Header>
+	{/if}
+	<main transition:fade={{ duration: animationDuration }}>
+		<Transition key={data.pathname}>
+			<slot />
+		</Transition>
+	</main>
+	{#if showNavbar(data.pathname)}
+		<Navbar />
+	{/if}
+</div>
+
+<style>
+	.container {
+		overflow: hidden;
+		grid-area: main;
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: auto 1fr auto;
+		grid-template-areas:
+			'header'
+			'main'
+			'nav';
+	}
+	main {
+		min-height: 0;
+		height: 100%;
+		grid-area: main;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: minmax(0, 1fr);
+	}
+</style>

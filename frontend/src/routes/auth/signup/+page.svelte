@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Logo from '$lib/assets/images/logo.svelte';
+	import Logo from '$lib/components/logo.svelte';
 	import Icon from '$lib/components/icon.svelte';
 	import { addIcon, backIcon } from '$lib/assets/Appicons';
 	import { beforeNavigate, goto } from '$app/navigation';
@@ -18,6 +18,8 @@
 	} from '$lib/schema';
 	import { page } from '$app/stores';
 	import SignupStep from '$lib/components/signupStep.svelte';
+	import { fade } from 'svelte/transition';
+	import { animationDuration } from '$lib/utils';
 
 	export let data: PageData;
 	let loading = false;
@@ -31,7 +33,7 @@
 	}
 
 	beforeNavigate(({ cancel, to }) => {
-		if (step > 1 && to?.route.id !== '/auth/success_[type]') {
+		if (step > 1 && to?.route.id !== '/auth/(gradient_bg)/success_[type]') {
 			cancel();
 			step -= 1;
 		}
@@ -95,133 +97,153 @@
 	});
 </script>
 
-{#if $message}
-	<!-- eslint-disable-next-line svelte/valid-compile -->
-	<div class="status" class:success={$page.status == 200} class:error={$page.status == 409}>
-		{$message}
-		{#if $page.status == 200}
-			<Icon
-				viewBox={approveIcon.viewBox}
-				d={approveIcon.d}
-				stroke_width={'1.3'}
-				size={'40'}
-				color={'#2461FF'}
-			/>
-		{:else}
-			<Icon
-				viewBox={addIcon.viewBox}
-				d={addIcon.d}
-				stroke_width={'1.3'}
-				size={'46'}
-				color={'#F14444'}
-			/>
-		{/if}
-	</div>
-{/if}
-<header>
-	<div class="nav-back">
-		<button on:click={nav_back}>
-			<Icon
-				viewBox={backIcon.viewBox}
-				d={backIcon.d}
-				size={'40'}
-				stroke_width={'2'}
-				color={'#2461FF'}
-			/>
-		</button>
-	</div>
-	<div class="logo">
-		<Logo />
-	</div>
-</header>
-<form method="POST" action="?/signup" use:enhance>
-	<div class="steps-container">
-		{#if step === 1}
-			<SignupStep>
-				<label for="name"
-					>Введите ваше имя. С этим именем вас будут видеть другие пользователи</label
-				>
-				<input placeholder="Ваше имя" name="name" type="text" bind:value={$form.name} />
-				{#if $errors.name}<span class="invalid">Введите имя</span>{/if}
-			</SignupStep>
-		{:else if step === 2}
-			<SignupStep>
-				<label for="email">Введите ваш email</label>
-				<input placeholder="Ваш email" name="email" type="email" bind:value={$form.mail} />
-				{#if $errors.mail}
-					<span class="invalid">
-						{$errors.mail || 'Неправильно указана почта'}
-					</span>
-				{/if}
-			</SignupStep>
-		{:else if step === 3}
-			<SignupStep>
-				<label for="birthdate">Введите вашу дату рождения</label>
-				<input name="birthdate" type="date" bind:value={$form.birthdate} />
-				{#if $errors.birthdate}<span class="invalid">{$errors.birthdate}</span>{/if}
-			</SignupStep>
-		{:else if step === 4}
-			<SignupStep>
-				<label for="sex">Вы</label>
-				<fieldset class="radios">
-					<div>
-						<input
-							class="chip"
-							id="men"
-							type="radio"
-							name="sex"
-							value={true}
-							bind:group={$form.sex}
-						/>
-						<label for="men">Мужчина</label>
-					</div>
-					<div>
-						<input
-							class="chip"
-							id="women"
-							type="radio"
-							name="sex"
-							value={false}
-							bind:group={$form.sex}
-						/>
-						<label for="women">Женщина</label>
-					</div>
-					<div>
-						<input
-							class="chip"
-							id="unknown"
-							type="radio"
-							name="sex"
-							value={undefined}
-							bind:group={$form.sex}
-						/>
-						<label for="unknown">Не указывать</label>
-					</div>
-				</fieldset>
-				<!-- <input name="birthdate" type="text" /> -->
-			</SignupStep>
-		{:else}
-			<SignupStep>
-				<label for="password">Придумайте пароль</label>
-				<input
-					placeholder="Пароль"
-					name="password"
-					type={passwordInputType}
-					on:input={handlePasswordInput}
+<div class="container" transition:fade={{ duration: animationDuration }}>
+	{#if $message}
+		<!-- eslint-disable-next-line svelte/valid-compile -->
+		<div class="status" class:success={$page.status == 200} class:error={$page.status == 409}>
+			{$message}
+			{#if $page.status == 200}
+				<Icon
+					viewBox={approveIcon.viewBox}
+					d={approveIcon.d}
+					stroke_width={'1.3'}
+					size={'40'}
+					color={'#2461FF'}
 				/>
-				<div class="show-password">
-					<label for="show-password">Показать пароль</label>
-					<input name="show-password" type="checkbox" bind:checked={showPassword} />
-				</div>
-				{#if $errors.password}<span class="invalid">{$errors.password}</span>{/if}
-			</SignupStep>
-		{/if}
+			{:else}
+				<Icon
+					viewBox={addIcon.viewBox}
+					d={addIcon.d}
+					stroke_width={'1.3'}
+					size={'46'}
+					color={'#F14444'}
+				/>
+			{/if}
+		</div>
+	{/if}
+	<header>
+		<div class="nav-back">
+			<button on:click={nav_back}>
+				<Icon
+					viewBox={backIcon.viewBox}
+					d={backIcon.d}
+					size={'40'}
+					stroke_width={'2'}
+					color={'#2461FF'}
+				/>
+			</button>
+		</div>
+		<div class="logo">
+			<Logo />
+		</div>
+	</header>
+	<div class="content">
+		<form id="signup-form" method="POST" action="?/signup" use:enhance>
+			<div class="steps-container">
+				{#if step === 1}
+					<SignupStep>
+						<label for="name"
+							>Введите ваше имя. С этим именем вас будут видеть другие пользователи</label
+						>
+						<input placeholder="Ваше имя" name="name" type="text" bind:value={$form.name} />
+						{#if $errors.name}<span class="invalid">Введите имя</span>{/if}
+					</SignupStep>
+				{:else if step === 2}
+					<SignupStep>
+						<label for="email">Введите ваш email</label>
+						<input placeholder="Ваш email" name="email" type="email" bind:value={$form.mail} />
+						{#if $errors.mail}
+							<span class="invalid">
+								{$errors.mail || 'Неправильно указана почта'}
+							</span>
+						{/if}
+					</SignupStep>
+				{:else if step === 3}
+					<SignupStep>
+						<label for="birthdate">Введите вашу дату рождения</label>
+						<input name="birthdate" type="date" bind:value={$form.birthdate} />
+						{#if $errors.birthdate}<span class="invalid">{$errors.birthdate}</span>{/if}
+					</SignupStep>
+				{:else if step === 4}
+					<SignupStep>
+						<label for="sex">Вы</label>
+						<fieldset class="radios">
+							<div>
+								<input
+									class="chip"
+									id="men"
+									type="radio"
+									name="sex"
+									value={true}
+									bind:group={$form.sex}
+								/>
+								<label for="men">Мужчина</label>
+							</div>
+							<div>
+								<input
+									class="chip"
+									id="women"
+									type="radio"
+									name="sex"
+									value={false}
+									bind:group={$form.sex}
+								/>
+								<label for="women">Женщина</label>
+							</div>
+							<div>
+								<input
+									class="chip"
+									id="unknown"
+									type="radio"
+									name="sex"
+									value={undefined}
+									bind:group={$form.sex}
+								/>
+								<label for="unknown">Не указывать</label>
+							</div>
+						</fieldset>
+						<!-- <input name="birthdate" type="text" /> -->
+					</SignupStep>
+				{:else}
+					<SignupStep>
+						<label for="password">Придумайте пароль</label>
+						<input
+							placeholder="Пароль"
+							name="password"
+							type={passwordInputType}
+							on:input={handlePasswordInput}
+						/>
+						<div class="show-password">
+							<label for="show-password">Показать пароль</label>
+							<input name="show-password" type="checkbox" bind:checked={showPassword} />
+						</div>
+						{#if $errors.password}<span class="invalid">{$errors.password}</span>{/if}
+					</SignupStep>
+				{/if}
+			</div>
+		</form>
+		<Button form="signup-form" {loading} class="top-auto"
+			>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button
+		>
 	</div>
-	<Button {loading}>{step == 5 ? 'Зарегистрироваться' : 'Далее'}</Button>
-</form>
+</div>
 
 <style lang="scss">
+	.container {
+		grid-area: main;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		margin: 20px;
+	}
+
 	header {
+		flex-shrink: 0;
 		display: flex;
 		align-items: center;
 		padding: 0 20px;
@@ -253,7 +275,6 @@
 		justify-content: space-between;
 		flex-direction: column;
 		align-items: center;
-		margin: 0 20px 20px 20px;
 	}
 
 	.steps-container {
@@ -268,6 +289,7 @@
 		font-weight: 700;
 		text-align: center;
 		width: 80dvw;
+		background: transparent;
 		&:focus {
 			outline: none;
 			border-bottom: 2px solid #000;

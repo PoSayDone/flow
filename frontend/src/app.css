@@ -91,26 +91,23 @@ body {
 	transition: height 0.3s ease-in-out;
 }
 
-.content {
+#app {
 	height: 100dvh;
 	max-height: 100dvh;
 	display: grid;
 	grid-template-columns: 1fr;
-	grid-template-rows: auto 1fr auto;
-	grid-template-areas:
-		'header'
-		'main'
-		'nav';
+	grid-template-rows: 1fr;
+	grid-template-areas: 'main';
 }
 
-main {
+/* main {
 	overflow-x: clip;
 	overflow-y: scroll;
 	grid-area: main;
 	display: grid;
 	grid-template-rows: 1;
 	grid-template-columns: 1;
-}
+} */
 
 h1 {
 	font-family: 'PP Pangram Sans Rounded';

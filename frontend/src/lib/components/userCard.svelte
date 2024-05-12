@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { imagesUrl, placeholder, trip_purposes_binding } from '$lib/utils';
 	import { tripPurposesRu } from '$lib/types';
+	import { send, receive } from '$lib/utils/crossfade';
 
 	export let index: number = 0;
 	export let id: string = '';
@@ -30,10 +31,10 @@
 	on:touchcancel
 	class="card"
 	bind:this={node}
-	{href}
 	style:view-transition-name={index == 0 ? 'profile-image' : ''}
-	style:z-index={soulmates.length - index}
+	style:z-index={soulmates.length - index + 1}
 	style="--user-image: url({imagesUrl}/{image_name || placeholder(sex)});"
+	{href}
 >
 	<div class="tags" style:view-transition-name={index == 0 ? `trip-purposes` : ''}>
 		{#if trip_purposes}

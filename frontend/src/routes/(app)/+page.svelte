@@ -10,7 +10,7 @@
 	import Skeleton from '$lib/components/skeleton.svelte';
 
 	export let data: PageData;
-	let sending = false;
+	let isLoading = false;
 
 	$: if (data.soulmates.length === 2 && data.shouldRefreshSoulmates) {
 		invalidateAll();
@@ -27,26 +27,28 @@
 		onSubmit: ({ formData }) => {
 			formData.set('user_id', $form.user_id);
 			formData.set('like', String($form.like));
-			sending = true;
+			isLoading = true;
 		},
 		onResult: () => {
-			sending = false;
+			setTimeout(() => {
+				isLoading = false;
+			}, 500);
 		}
 	});
 
 	const handleTouchStart = (event: TouchEvent) => {
-		if (sending) return;
+		if (isLoading) return;
 		startX = event.touches[0].clientX;
 	};
 
 	function handleTouchMove(event: TouchEvent) {
-		if (sending) return;
+		if (isLoading) return;
 		const deltaX = event.touches[0].clientX - startX;
 		currentCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX / 10}deg)`;
 	}
 
 	function handleTouchEnd(event: TouchEvent) {
-		if (sending) return;
+		if (isLoading) return;
 		if (startX - event.changedTouches[0].clientX > 70) {
 			handleDislike();
 		} else if (startX - event.changedTouches[0].clientX < -70) {
@@ -129,13 +131,18 @@
 		</div>
 		<div class="actions">
 			<ActionButton
-				disabled={sending}
+				disabled={isLoading}
 				type="button"
 				action="dislike"
 				on:click={() => handleDislike()}
 			/>
-			<ActionButton disabled={sending} type="button" action="chat" />
-			<ActionButton disabled={sending} type="button" action="like" on:click={() => handleLike()} />
+			<ActionButton disabled={isLoading} type="button" action="chat" />
+			<ActionButton
+				disabled={isLoading}
+				type="button"
+				action="like"
+				on:click={() => handleLike()}
+			/>
 		</div>
 	</form>
 {/if}

@@ -1,14 +1,14 @@
 <script>
 	import Button from '$lib/components/button.svelte';
-	import { animationDuration } from '$lib/utils';
+	import { animationDuration, fasterAnimationDuration } from '$lib/utils';
 	import { goto } from '$app/navigation';
 	import { slide } from 'svelte/transition';
+	import { cubicInOut } from 'svelte/easing';
 </script>
 
 <div
 	class="auth_buttons"
-	in:slide={{ axis: 'y', duration: animationDuration }}
-	out:slide={{ axis: 'y', duration: animationDuration, delay: animationDuration }}
+	transition:slide={{ easing: cubicInOut, duration: fasterAnimationDuration, axis: 'y' }}
 >
 	<p class="info">
 		Переходя дальше, ты соглашаешься на обработку персональных данных в соответсвии

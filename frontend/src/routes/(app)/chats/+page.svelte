@@ -62,7 +62,8 @@
 		</div>
 	{:else if data.chats.length == 0}
 		<div class="placeholder">
-			Здесь пока ничего нет.<br /> Самое время исправить это!<br /><span>😉</span>
+			<p class="emoji">😉</p>
+			<p class="placeholder-text">Здесь пока ничего нет.<br /> Самое время исправить это!</p>
 		</div>
 	{:else}
 		{#each data.chats as chat}
@@ -87,25 +88,29 @@
 <style lang="scss">
 	.chats {
 		display: flex;
+		flex: 1;
 		flex-direction: column;
 		gap: 12px;
 	}
 
 	.placeholder {
-		height: 100%;
-		flex: 1;
 		display: flex;
 		flex-direction: column;
-		font-weight: 600;
-		gap: 20px;
 		align-items: center;
 		justify-content: center;
-		text-align: center;
-		font-size: 20px;
-		span {
-			line-height: 1;
-			font-size: 60px;
+		height: 100%;
+		background: #f2f1f6;
+		border-radius: 40px;
+		gap: 12px;
+		margin-bottom: 20px;
+		.emoji {
+			font-size: 80px;
 		}
+	}
+	.placeholder-text {
+		font-weight: 600;
+		text-align: center;
+		font-size: 24px;
 	}
 	.chat {
 		display: flex;

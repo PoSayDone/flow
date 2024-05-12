@@ -5,6 +5,7 @@
 		imagesUrl,
 		animationDuration
 	} from '$lib/utils';
+	import { send, receive } from '$lib/utils/crossfade';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { getAge, placeholder } from '$lib/utils';
 	import Chip from '$lib/components/chip.svelte';
@@ -63,13 +64,12 @@
 			<Icon d={backIcon.d} viewBox={backIcon.viewBox} color={'#2461FF'} />
 		</button>
 	</div>
-	<div
-		class="backdrop"
-		style:view-transition-name={`profile-image`}
-		style="--user-image: url({imagesUrl}/{data.pageUser.user_image ||
-			placeholder(data.pageUser.sex)});"
-	>
-		<div class="profile-picture">
+	<div class="backdrop">
+		<div
+			class="profile-picture"
+			style="--user-image: url({imagesUrl}/{data.pageUser.user_image ||
+				placeholder(data.pageUser.sex)});"
+		>
 			<div class="tags" style:view-transition-name={`trip-purposes`}>
 				{#each data.pageUser.trip_purposes as id}
 					<div class="tag">{tripPurposesRu[trip_purposes_binding[id]]}</div>
@@ -80,6 +80,8 @@
 	<div
 		class="popover"
 		style="top: {popoverStart}px"
+		in:fly={{ duration: animationDuration, y: 800 }}
+		out:fly={{ duration: animationDuration, y: 200 }}
 		bind:this={popover}
 		on:touchstart={handleTouchStart}
 		on:touchmove|preventDefault|nonpassive={handleTouchMove}
@@ -132,11 +134,14 @@
 
 <style lang="scss">
 	.container {
+		height: 100%;
 		overflow-y: clip;
 		overflow-x: hidden;
 		-webkit-overflow-scrolling: touch; /* nice webkit native scroll */
 	}
 	.backdrop {
+		overflow: clip;
+		border-radius: 30px 30px 0 0;
 		position: sticky;
 		z-index: -10;
 		height: 100%;

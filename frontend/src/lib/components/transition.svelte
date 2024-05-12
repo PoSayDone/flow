@@ -10,18 +10,31 @@
 		duration?: number;
 		easing?: EasingFunction;
 	};
-
+	type Options = {
+		direction?: 'in' | 'out' | 'both';
+	};
 	function slideFade(
 		_node: Element,
-		{ delay = 0, duration = animationDuration, easing = circInOut }: Params = {}
+		{ delay = 0, duration = animationDuration, easing = circInOut }: Params = {},
+		{ direction = 'both' }: Options = {}
 	): TransitionConfig {
+		let multiplier = 1;
+		let translateValue = 100;
+
+		if (direction === 'out') {
+			multiplier = -1;
+			translateValue = translateValue * 0.25;
+		}
+
 		return {
 			delay,
 			duration,
 			easing,
 			css: (t, u) => `
-                transform: translateX(${300 * u}px);
-                opacity: ${t};
+			background: var(--bg);
+				transform-origin: "right";
+                transform: translateX(${multiplier * translateValue * u}%);
+                opacity: ${direction === 'out' ? t : '1'}
             `
 		};
 	}
@@ -29,21 +42,28 @@
 
 {#key key}
 	<div
-		transition:slideFade
+		class="container"
+		in:slideFade={{}}
+		out:slideFade={{}}
 		class:no-padding={key?.startsWith('/chats/') || key?.startsWith('/user_')}
+		class:non-scrollable={key == '/'}
 	>
 		<slot />
 	</div>
 {/key}
 
 <style>
-	div {
+	.container {
 		padding: 0 20px;
 		grid-row: 1;
 		grid-column: 1;
+		overflow-x: hidden;
 		overflow-y: scroll;
 		display: flex;
 		flex-direction: column;
+	}
+	.non-scrollable {
+		overflow: visible !important;
 	}
 	.no-padding {
 		padding: 0;

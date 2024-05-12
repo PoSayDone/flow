@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Logo from '$lib/assets/images/logo.svelte';
+	import Logo from '$lib/components/logo.svelte';
 	import Indicator from './indicator.svelte';
 	import { addIcon } from '$lib/assets/Appicons';
 	import Icon from './icon.svelte';

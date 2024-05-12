@@ -1,11 +1,11 @@
 <script>
-	import Logo_big from '$lib/assets/images/logo_big.svelte';
+	import Logo from '$lib/components/logo.svelte';
 	import { page } from '$app/stores';
 	import Icon from '$lib/components/icon.svelte';
 	import { backIcon } from '$lib/assets/Appicons';
 	import { goto } from '$app/navigation';
-	import { slide } from 'svelte/transition';
-	import { fasterAnimationDuration } from '$lib/utils';
+	import { fade, slide } from 'svelte/transition';
+	import { animationDuration, fasterAnimationDuration } from '$lib/utils';
 	import { cubicInOut } from 'svelte/easing';
 
 	function nav_back() {
@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="container">
+<div class="container" transition:fade={{ duration: animationDuration }}>
 	{#if $page.url.pathname == '/auth/signin'}
 		<header transition:slide={{ easing: cubicInOut, duration: fasterAnimationDuration, axis: 'y' }}>
 			<button on:click={nav_back}>
@@ -21,11 +21,11 @@
 			</button>
 		</header>
 	{/if}
-	<div class="image">
-		<Logo_big />
+	<div class="logo">
+		<Logo />
 	</div>
 
-	<div class="bottom" transition:slide={{ axis: 'y', duration: 300 }}>
+	<div class="bottom">
 		<slot />
 	</div>
 </div>
@@ -45,7 +45,7 @@
 	}
 
 	.container {
-		view-transition-name: hero;
+		grid-area: main;
 		height: 100dvh;
 		flex: 1;
 		display: flex;
@@ -53,9 +53,10 @@
 		background: var(--gradient);
 		background-size: var(--gradient-size);
 		animation: var(--gradient-animation);
+		background-position: 25% 25%;
 	}
 
-	.image {
+	.logo {
 		top: 25dvh;
 		position: absolute;
 		justify-content: center;
@@ -64,11 +65,8 @@
 		flex: 1;
 		width: 100%;
 		z-index: 0;
-	}
-
-	.image {
+		color: var(--bg);
 		:global(svg) {
-			view-transition-name: logo;
 			width: 70%;
 			height: fit-content;
 		}
