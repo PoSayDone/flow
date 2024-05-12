@@ -6,8 +6,9 @@ import type { UserWStatus } from '$lib/types';
 import { apiUrl } from '$lib/utils';
 
 export const load: LayoutServerLoad = async ({ fetch, url }) => {
-	if (url.pathname.startsWith('/auth')) {
-		const data = { pathname: url.pathname };
+	const pathname = url.pathname;
+	if (pathname.startsWith('/auth')) {
+		const data = { pathname };
 		return data;
 	}
 
@@ -30,8 +31,8 @@ export const load: LayoutServerLoad = async ({ fetch, url }) => {
 	);
 
 	const data = {
-		pathname: url.pathname,
 		user: profile,
+		pathname,
 		statusForm,
 		profileForm,
 		interestsForm,

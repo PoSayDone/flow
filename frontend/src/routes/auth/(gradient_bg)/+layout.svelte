@@ -13,6 +13,10 @@
 	}
 </script>
 
+<svelte:head>
+	<meta name="theme-color" content="#2461ff" />
+</svelte:head>
+
 <div class="container" transition:fade={{ duration: animationDuration }}>
 	{#if $page.url.pathname == '/auth/signin'}
 		<header transition:slide={{ easing: cubicInOut, duration: fasterAnimationDuration, axis: 'y' }}>

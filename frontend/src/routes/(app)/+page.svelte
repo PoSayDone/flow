@@ -111,7 +111,7 @@
 			class="cards"
 			on:touchstart={handleTouchStart}
 			on:touchend={handleTouchEnd}
-			on:touchmove={handleTouchMove}
+			on:touchmove|preventDefault|nonpassive={handleTouchMove}
 		>
 			{#each data.soulmates as user, i}
 				<UserCard
