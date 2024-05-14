@@ -68,24 +68,21 @@ async def get_soulmates(count: int, db: db_dependency, user: user_dependency):
 
     trace = get_or_set_feed_trace(user)
 
-    # Filter users
+    subquery = (
+        db.query(models.Matches.liked_user_id)
+        .filter(models.Matches.user_id == user.id)
+        .union(
+            db.query(models.Matches.user_id).filter(
+                models.Matches.liked_user_id == user.id, models.Matches.mutual == True
+            )
+        )
+        .correlate(models.Users)
+        .scalar_subquery()
+    )
+
     filtered_users = (
         db.query(models.Users)
-        .outerjoin(
-            models.Matches,
-            or_(
-                and_(
-                    models.Matches.user_id == user.id,
-                    models.Matches.liked_user_id == models.Users.id,
-                ),
-                and_(
-                    models.Matches.liked_user_id == user.id,
-                    models.Matches.mutual == True,
-                ),
-            ),
-        )
-        .filter(models.Users.id != user.id)
-        .filter(models.Matches.id == None)
+        .filter(models.Users.id != user.id, ~models.Users.id.in_(subquery))
         .all()
     )
 
