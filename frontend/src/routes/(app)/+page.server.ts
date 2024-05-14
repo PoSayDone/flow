@@ -6,7 +6,7 @@ import { likeSchema } from '$lib/schema';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { Actions } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const { soulmates }: { soulmates: Soulmate[] } =
 		(await (await fetch(`${apiUrl}/user/soulmates/3`)).json()) || [];
 	const likeForm = await superValidate(zod(likeSchema));

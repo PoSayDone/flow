@@ -4,9 +4,11 @@ import { avatarSchema, interestsSchema, profileSchema, statusSchema } from '$lib
 import { zod } from 'sveltekit-superforms/adapters';
 import type { UserWStatus } from '$lib/types';
 import { apiUrl } from '$lib/utils';
+import { pusherClient } from '$lib/pusher';
 
 export const load: LayoutServerLoad = async ({ fetch, url }) => {
 	const pathname = url.pathname;
+
 	if (pathname.startsWith('/auth')) {
 		const data = { pathname };
 		return data;

@@ -3,7 +3,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { pusherClient } from '$lib/pusher';
-	import { invalidateAll } from '$app/navigation';
+	import { beforeNavigate, invalidateAll } from '$app/navigation';
 	import Avatar from '$lib/components/avatar.svelte';
 	import { browser } from '$app/environment';
 	import Skeleton from '$lib/components/skeleton.svelte';
@@ -18,15 +18,13 @@
 	};
 
 	onMount(() => {
-		pusherClient.subscribe($page.data.user.mail);
-		pusherClient.bind('conversation:new', newHandler);
-		pusherClient.bind('message:new', updateHandler);
+		var pusherChannel = pusherClient.subscribe($page.data.user.mail);
+		pusherChannel.bind('conversation:new', newHandler);
+		pusherChannel.bind('message:new', updateHandler);
 	});
 
-	onDestroy(() => {
+	beforeNavigate(() => {
 		pusherClient.unsubscribe($page.data.user.mail);
-		pusherClient.unbind('conversation:new', newHandler);
-		pusherClient.unbind('message:new', updateHandler);
 	});
 </script>
 

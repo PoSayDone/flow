@@ -94,6 +94,7 @@ async def send_message(
             body=new_message.content,
         )
         db.add(message_obj)
+        db.flush()
 
         for user in existing_conversation.users:
             pusher_client.trigger(
@@ -101,7 +102,6 @@ async def send_message(
                 "message:new",
                 jsonable_encoder(message_obj),
             )
+        db.commit()
     else:
         raise HTTPException(status_code=400, detail="Invalid id")
-
-    db.commit()

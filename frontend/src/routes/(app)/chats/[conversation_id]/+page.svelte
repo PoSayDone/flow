@@ -8,8 +8,11 @@
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
 	import type { Message, User } from '$lib/types';
-	import { getAge } from '$lib/utils';
+	import { animationDuration, fasterAnimationDuration, getAge } from '$lib/utils';
 	import Avatar from '$lib/components/avatar.svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import { fly, slide } from 'svelte/transition';
+	import { cubicInOut } from 'svelte/easing';
 
 	export let data: PageData;
 	let messages: Message[] = data.messages || [];
@@ -33,24 +36,13 @@
 		return { update: scroll };
 	};
 
-	const newHandler = (data: Message) => {
-		messages = [...messages, data];
+	const newHandler = (newMessage: Message) => {
+		console.log(newMessage);
+		messages = [...messages, newMessage];
 		setTimeout(() => {
 			scrollToBottom(messagesContainer);
 		}, 100);
 	};
-
-	onMount(() => {
-		pusherClient.subscribe($page.data.user.mail);
-		pusherClient.bind('message:new', newHandler);
-
-		scrollToBottom(messagesContainer);
-	});
-
-	onDestroy(() => {
-		pusherClient.unsubscribe($page.data.mail);
-		pusherClient.unbind('message:new', newHandler);
-	});
 
 	const { form, enhance } = superForm(data.messageForm, {
 		dataType: 'json',
@@ -60,7 +52,14 @@
 	var offset: number;
 
 	onMount(() => {
-		offset = new Date().getTimezoneOffset();
+		pusherClient.subscribe($page.data.user.mail);
+		pusherClient.bind('message:new', newHandler);
+
+		scrollToBottom(messagesContainer);
+	});
+
+	beforeNavigate(() => {
+		pusherClient.unsubscribe($page.data.user.mail);
 	});
 </script>
 
@@ -82,19 +81,24 @@
 	</div>
 	<div bind:this={messagesContainer} class="messages">
 		{#each messages as message}
+			{@const timseSent = new Date(message.created_at)}
 			<div class={`message ${message.sender_id === otherUser.id ? 'to' : 'from'}`}>
-				{message.body}
-				<div class="time_sent">
-					{new Date(message.created_at + offset * 60000)}
+				<div class="message_body">
+					{message.body}
 				</div>
+				<div class="time_sent">{timseSent.toTimeString().split(' ')[0]}</div>
 			</div>
 		{/each}
 	</div>
 
-	<form class="message-input" method="POST" action="?/send_message" use:enhance>
+	<form class="input" method="POST" action="?/send_message" use:enhance>
 		<textarea placeholder="Напишите сообщение..." bind:value={$form.message} rows="1" />
 		{#if $form.message.length > 0}
-			<button class="send" type="submit">
+			<button
+				class="send"
+				type="submit"
+				transition:fly={{ duration: fasterAnimationDuration, x: 50, easing: cubicInOut }}
+			>
 				<Icon viewBox={sendIcon.viewBox} d={sendIcon.d} size={'27'} stroke_width={'2'} />
 			</button>
 		{/if}
@@ -161,26 +165,36 @@
 
 	.messages {
 		display: flex;
+		align-items: flex-end;
 		flex-direction: column;
 		flex: 1;
 		overflow-y: scroll;
-		padding: 30px 20px;
+		padding: 10px 20px;
 		gap: 10px;
 	}
 
 	.message {
 		display: flex;
-		max-width: 245px;
-		padding: 10px 15px;
-		flex-direction: column;
 		align-items: flex-start;
-
+		max-width: 245px;
 		font-family: 'PP Pangram Sans Rounded';
 		font-size: 14px;
 		font-style: normal;
 		font-weight: 600;
 		line-height: 120%; /* 16.8px */
 		letter-spacing: -0.21px;
+	}
+
+	.message_body {
+		word-wrap: break-word;
+		word-break: break-word;
+		padding: 10px 12px 10px 12px;
+	}
+
+	.time_sent {
+		margin: 0 8px 6px 0;
+		align-self: flex-end;
+		font-size: 12px;
 	}
 
 	.message.from {
@@ -197,14 +211,16 @@
 		color: #000;
 	}
 
-	.message-input {
+	.input {
 		display: flex;
 		border-radius: 55px;
 		border: 1px solid var(--light-mode-black-60, #cecece);
 		min-height: 55px;
 		align-items: center;
-		margin: 10px 20px;
+		margin: 0px 20px 10px;
+		overflow: hidden;
 		textarea {
+			resize: none;
 			color: #000;
 			font-family: 'PP Pangram Sans Rounded';
 			font-size: 14px;

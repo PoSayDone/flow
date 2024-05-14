@@ -168,7 +168,7 @@ class Message(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     body = Column(String)
     image = Column(String)
-    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"))
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")

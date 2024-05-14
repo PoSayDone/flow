@@ -86,14 +86,14 @@ button {
 
 html,
 body {
+	height: 100%;
 	margin: 0;
 	overflow-x: clip;
 	transition: height 0.3s ease-in-out;
 }
 
 #app {
-	height: 100dvh;
-	max-height: 100dvh;
+	height: 100%;
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-template-rows: 1fr;
